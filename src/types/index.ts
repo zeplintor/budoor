@@ -10,6 +10,8 @@ export interface User {
   language: "fr" | "en" | "ar";
   notificationFrequency: "daily" | "weekly" | "alerts_only" | "none";
   subscription: "free" | "pro";
+  subscriptionId?: string;
+  subscriptionStatus?: "active" | "cancelled" | "paused" | "expired" | "refunded";
   onboardingCompleted?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;

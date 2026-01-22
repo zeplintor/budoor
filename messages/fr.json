@@ -409,5 +409,88 @@
   },
   "user": {
     "defaultName": "Utilisateur"
+  },
+  "pricing": {
+    "title": "Abonnement",
+    "successMessage": "Paiement effectué avec succès ! Votre abonnement Pro est maintenant actif.",
+    "cancelledMessage": "Paiement annulé. Vous pouvez réessayer à tout moment.",
+    "error": "Une erreur est survenue. Veuillez réessayer.",
+    "subscriptionCancelled": "Votre abonnement a été annulé.",
+    "cancelError": "Erreur lors de l'annulation. Veuillez réessayer.",
+    "popular": "Populaire",
+    "perMonth": "mois",
+    "upgrade": "Passer au Pro",
+    "downgrade": "Rétrograder",
+    "processing": "Traitement...",
+    "currentPlan": {
+      "free": "Plan Gratuit",
+      "pro": "Plan Pro",
+      "freeDescription": "Vous utilisez actuellement le plan gratuit",
+      "proDescription": "Profitez de toutes les fonctionnalités Pro",
+      "badge": "Plan actuel"
+    },
+    "cancelSubscription": "Annuler l'abonnement",
+    "plans": {
+      "free": {
+        "name": "Gratuit",
+        "description": "Pour démarrer et tester Budoor",
+        "features": {
+          "parcelles": "Jusqu'à {count} parcelles",
+          "reports": "{count} rapports IA par mois",
+          "weather": "Données météo en temps réel",
+          "soil": "Analyse du sol basique",
+          "whatsapp": "Alertes WhatsApp hebdomadaires"
+        }
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les exploitations professionnelles",
+        "features": {
+          "unlimited": "Parcelles illimitées",
+          "reports": "Rapports IA illimités",
+          "daily": "Alertes WhatsApp quotidiennes",
+          "history": "Historique 1 an",
+          "support": "Support prioritaire",
+          "export": "Export des données (PDF, CSV)",
+          "api": "Accès API (bientôt)"
+        }
+      }
+    },
+    "benefits": {
+      "title": "Pourquoi choisir Budoor Pro ?",
+      "secure": {
+        "title": "Paiement sécurisé",
+        "description": "Vos données bancaires sont protégées par DODO Payments"
+      },
+      "flexible": {
+        "title": "Sans engagement",
+        "description": "Annulez à tout moment, sans frais cachés"
+      },
+      "trial": {
+        "title": "14 jours d'essai",
+        "description": "Testez Pro gratuitement avant de vous engager"
+      }
+    },
+    "faq": {
+      "title": "Questions fréquentes",
+      "q1": {
+        "question": "Comment fonctionne l'essai gratuit ?",
+        "answer": "Vous bénéficiez de 14 jours d'accès complet à toutes les fonctionnalités Pro. Aucune carte bancaire n'est requise pour commencer."
+      },
+      "q2": {
+        "question": "Puis-je annuler à tout moment ?",
+        "answer": "Oui, vous pouvez annuler votre abonnement à tout moment. Vous garderez l'accès Pro jusqu'à la fin de la période payée."
+      },
+      "q3": {
+        "question": "Quels moyens de paiement acceptez-vous ?",
+        "answer": "Nous acceptons les cartes bancaires (Visa, Mastercard) et Apple Pay. Les paiements sont sécurisés par DODO Payments."
+      }
+    },
+    "cancelDialog": {
+      "title": "Annuler votre abonnement ?",
+      "description": "Êtes-vous sûr de vouloir annuler votre abonnement Pro ?",
+      "warning": "Vous perdrez l'accès aux fonctionnalités Pro à la fin de la période en cours. Vos données seront conservées.",
+      "confirm": "Confirmer l'annulation"
+    }
   }
 }

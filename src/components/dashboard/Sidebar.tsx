@@ -14,6 +14,7 @@ import {
   Search,
   Bell,
   HelpCircle,
+  Crown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -49,6 +50,12 @@ export function Sidebar() {
   ];
 
   const toolsNavigation = [
+    {
+      name: t("pricing.title"),
+      href: "/dashboard/pricing",
+      icon: Crown,
+      tourId: "nav-pricing",
+    },
     {
       name: t("nav.settings"),
       href: "/dashboard/settings",
