@@ -16,6 +16,7 @@ function getDodoClient(): DodoPayments {
   if (!dodoClient) {
     dodoClient = new DodoPayments({
       bearerToken: apiKey,
+      environment: isTestMode ? "test_mode" : "live_mode",
     });
   }
 
