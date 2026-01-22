@@ -16,7 +16,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui";
-import { Trash2, Loader2, Map, PenTool, Eye, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { Trash2, Loader2, Map, PenTool, Eye, CheckCircle, AlertCircle, Plus, List, MapIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -65,6 +65,7 @@ export default function ParcellesPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDrawing, setIsDrawing] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [mobileView, setMobileView] = useState<"list" | "map">("list");
 
   // Get translated cultures
   const CULTURES = CULTURES_DATA.map(c => ({
@@ -201,6 +202,13 @@ export default function ParcellesPage() {
     return t("parcelles.countPlural", { count: filteredParcelles.length });
   };
 
+  // Switch to map view when drawing starts
+  useEffect(() => {
+    if (isDrawing) {
+      setMobileView("map");
+    }
+  }, [isDrawing]);
+
   return (
     <>
       <Header
@@ -209,22 +217,34 @@ export default function ParcellesPage() {
         onSearchChange={setSearchQuery}
       />
 
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Sidebar with parcelles list */}
-        <div className="w-80 border-e border-gray-200 bg-white overflow-auto flex flex-col">
-          <div className="p-4 border-b border-gray-200">
+      <div className="flex h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+        {/* Sidebar with parcelles list - hidden on mobile when viewing map */}
+        <div className={`${mobileView === "map" ? "hidden" : "flex"} md:flex w-full md:w-80 border-e border-gray-200 bg-white overflow-auto flex-col`}>
+          <div className="p-3 md:p-4 border-b border-gray-200 space-y-3">
             <Button
-              className="w-full"
-              onClick={() => setIsDrawing(true)}
+              className="w-full h-11"
+              onClick={() => {
+                setIsDrawing(true);
+                setMobileView("map");
+              }}
               variant={isDrawing ? "secondary" : "default"}
               data-tour="draw-button"
             >
               <PenTool className="h-4 w-4" />
               {isDrawing ? t("parcelles.drawingActive") : t("parcelles.draw")}
             </Button>
-            <p className="text-xs text-gray-500 mt-2 text-center">
+            <p className="text-xs text-gray-500 text-center">
               {getParcelleCountText()}
             </p>
+            {/* Mobile: Show map button */}
+            <Button
+              variant="outline"
+              className="w-full h-11 md:hidden"
+              onClick={() => setMobileView("map")}
+            >
+              <MapIcon className="h-4 w-4" />
+              Voir la carte
+            </Button>
           </div>
 
           <div className="flex-1 overflow-auto" data-tour="parcelle-list">
@@ -234,7 +254,7 @@ export default function ParcellesPage() {
               </div>
             ) : filteredParcelles.length === 0 ? (
               <div className="p-6 text-center">
-                <Map className="h-16 w-16 text-gray-200 mx-auto mb-4" />
+                <Map className="h-12 w-12 md:h-16 md:w-16 text-gray-200 mx-auto mb-4" />
                 <p className="text-gray-500 font-medium">
                   {searchQuery ? t("parcelles.noResults") : t("parcelles.empty.title")}
                 </p>
@@ -247,10 +267,13 @@ export default function ParcellesPage() {
                 {filteredParcelles.map((parcelle) => (
                   <div
                     key={parcelle.id}
-                    className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                    className={`p-3 md:p-4 cursor-pointer hover:bg-gray-50 transition-colors active:bg-gray-100 ${
                       selectedParcelle?.id === parcelle.id ? "bg-green-50 border-s-4 border-green-500" : ""
                     }`}
-                    onClick={() => setSelectedParcelle(parcelle)}
+                    onClick={() => {
+                      setSelectedParcelle(parcelle);
+                      setMobileView("map"); // Show map on mobile when selecting
+                    }}
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1 min-w-0">
@@ -270,7 +293,7 @@ export default function ParcellesPage() {
                             e.stopPropagation();
                             router.push(`/dashboard/parcelles/${parcelle.id}`);
                           }}
-                          className="p-2 text-gray-400 hover:text-green-600 transition-colors"
+                          className="p-2.5 text-gray-400 hover:text-green-600 transition-colors touch-target"
                           title={t("parcelles.viewDetails")}
                         >
                           <Eye className="h-4 w-4" />
@@ -280,7 +303,7 @@ export default function ParcellesPage() {
                             e.stopPropagation();
                             handleDeleteParcelle(parcelle);
                           }}
-                          className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                          className="p-2.5 text-gray-300 hover:text-red-500 transition-colors touch-target"
                           title={t("common.delete")}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -294,8 +317,8 @@ export default function ParcellesPage() {
           </div>
         </div>
 
-        {/* Map container */}
-        <div className="flex-1 relative" data-tour="map-container">
+        {/* Map container - hidden on mobile when viewing list */}
+        <div className={`${mobileView === "list" ? "hidden" : "flex"} md:flex flex-1 relative`} data-tour="map-container">
           <MapContainer
             parcelles={parcelles}
             onParcelleCreated={handleParcelleCreated}
@@ -304,15 +327,28 @@ export default function ParcellesPage() {
             isDrawingMode={isDrawing}
           />
 
+          {/* Mobile: Back to list button */}
+          <div className="absolute top-3 left-3 md:hidden z-10">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setMobileView("list")}
+              className="bg-white shadow-md h-10 px-3"
+            >
+              <List className="h-4 w-4" />
+              <span className="ml-2">Liste</span>
+            </Button>
+          </div>
+
           {/* Drawing mode overlay */}
           {isDrawing && (
-            <div className="absolute top-4 start-1/2 -translate-x-1/2 pointer-events-none">
+            <div className="absolute top-3 md:top-4 left-1/2 -translate-x-1/2 pointer-events-none z-10 w-[90%] md:w-auto">
               <Card className="pointer-events-auto bg-green-600 text-white border-0">
-                <CardContent className="py-3 px-4">
-                  <p className="text-sm font-medium">
+                <CardContent className="py-2 px-3 md:py-3 md:px-4">
+                  <p className="text-xs md:text-sm font-medium">
                     {t("parcelles.drawing.instruction")}
                   </p>
-                  <p className="text-xs opacity-80 mt-1">
+                  <p className="text-xs opacity-80 mt-1 hidden md:block">
                     {t("parcelles.drawing.hint")}
                   </p>
                 </CardContent>
@@ -322,11 +358,13 @@ export default function ParcellesPage() {
 
           {/* Cancel drawing button */}
           {isDrawing && (
-            <div className="absolute bottom-6 start-1/2 -translate-x-1/2">
+            <div className="absolute bottom-6 start-1/2 -translate-x-1/2 z-10">
               <Button
                 variant="outline"
-                onClick={() => setIsDrawing(false)}
-                className="bg-white"
+                onClick={() => {
+                  setIsDrawing(false);
+                }}
+                className="bg-white shadow-md"
               >
                 {t("parcelles.drawing.cancel")}
               </Button>
@@ -378,7 +416,7 @@ export default function ParcellesPage() {
 
           <div className="space-y-3">
             <Label>{t("parcelles.dialog.culture")}</Label>
-            <div className="grid grid-cols-5 gap-2">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
               {CULTURES.map((culture) => (
                 <button
                   key={culture.id}
@@ -387,28 +425,28 @@ export default function ParcellesPage() {
                     setNewParcelleCulture(culture.id);
                     setCustomCulture("");
                   }}
-                  className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${
+                  className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
                     newParcelleCulture === culture.id
                       ? "border-green-500 bg-green-50"
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
-                  <span className="text-2xl">{culture.emoji}</span>
-                  <span className="text-xs mt-1 text-gray-600">{culture.label}</span>
+                  <span className="text-xl md:text-2xl">{culture.emoji}</span>
+                  <span className="text-[10px] md:text-xs mt-1 text-gray-600 truncate w-full text-center">{culture.label}</span>
                 </button>
               ))}
               {/* Option "Autre" */}
               <button
                 type="button"
                 onClick={() => setNewParcelleCulture("autre")}
-                className={`flex flex-col items-center p-3 rounded-lg border-2 transition-all ${
+                className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
                   newParcelleCulture === "autre"
                     ? "border-green-500 bg-green-50"
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <Plus className="h-6 w-6 text-gray-500" />
-                <span className="text-xs mt-1 text-gray-600">{t("parcelles.cultures.autre")}</span>
+                <Plus className="h-5 w-5 md:h-6 md:w-6 text-gray-500" />
+                <span className="text-[10px] md:text-xs mt-1 text-gray-600">{t("parcelles.cultures.autre")}</span>
               </button>
             </div>
             {/* Custom culture input */}

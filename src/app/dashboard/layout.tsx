@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext";
-import { Sidebar } from "@/components/dashboard";
+import { Sidebar, BottomNav, MobileHeader } from "@/components/dashboard";
 import { OnboardingWrapper } from "@/components/onboarding";
 import { Loader2 } from "lucide-react";
 
@@ -42,12 +42,25 @@ export default function DashboardLayout({
   return (
     <OnboardingProvider>
       <div className="flex h-screen bg-[var(--bg-primary)]">
-        <Sidebar />
-        <main className="flex-1 overflow-auto">
-          <div className="min-h-full p-6">
+        {/* Desktop Sidebar - hidden on mobile */}
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-auto flex flex-col min-h-screen">
+          {/* Mobile Header - visible only on mobile */}
+          <MobileHeader />
+
+          {/* Page Content with bottom padding for mobile nav */}
+          <div className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
             {children}
           </div>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <BottomNav />
+
         <OnboardingWrapper />
       </div>
     </OnboardingProvider>

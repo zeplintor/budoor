@@ -53,8 +53,6 @@ import {
 } from "@/lib/api/parcelleData";
 import {
   getWeatherFromCode,
-  getWindDirection,
-  getUVLevel,
   getAgriculturalSummary,
   getNext24hForecast,
   type ExtendedWeatherData,
@@ -300,7 +298,6 @@ export default function ParcelleDetailPage() {
   }
 
   const weatherInfo = weather ? getWeatherFromCode(weather.current.weatherCode, weather.current.isDay) : null;
-  const uvLevel = weather ? getUVLevel(weather.current.uvIndex) : null;
   const agriSummary = weather ? getAgriculturalSummary(weather) : null;
   const hourlyForecast = weather ? getNext24hForecast(weather) : [];
   const soilQuality = soil ? getSoilQuality(soil) : null;
@@ -316,41 +313,55 @@ export default function ParcelleDetailPage() {
     <>
       <Header title={parcelle.name} />
 
-      <div className="p-6 max-w-7xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         {/* Back button and header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-4">
+          {/* Top row: Back + Title */}
+          <div className="flex items-start gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push("/dashboard/parcelles")}
+              className="shrink-0 h-10 w-10 p-0 md:h-auto md:w-auto md:px-3"
             >
               <ArrowLeft className="h-4 w-4" />
-              Retour
+              <span className="hidden md:inline ml-2">Retour</span>
             </Button>
-            <div>
+            <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="text-2xl font-bold text-gray-900">{parcelle.name}</h1>
-                <span className="text-2xl">{cultureEmoji}</span>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900 truncate">{parcelle.name}</h1>
+                <span className="text-xl md:text-2xl">{cultureEmoji}</span>
               </div>
-              <p className="text-gray-500">
+              <p className="text-sm md:text-base text-gray-500">
                 {parcelle.culture.type} • {parcelle.areaHectares} ha
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+
+          {/* Action buttons - horizontal scroll on mobile */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 md:pb-0 scrollbar-hide">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditOpen(true)}
+              className="shrink-0 h-10"
+            >
               <Pencil className="h-4 w-4" />
-              Modifier
+              <span className="ml-2">Modifier</span>
             </Button>
-            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setIsDeleteOpen(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 h-10 text-red-600 hover:text-red-700"
+              onClick={() => setIsDeleteOpen(true)}
+            >
               <Trash2 className="h-4 w-4" />
-              Supprimer
+              <span className="ml-2">Supprimer</span>
             </Button>
             <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
-              <Button>
+              <Button className="shrink-0 h-10">
                 <Sparkles className="h-4 w-4" />
-                Générer rapport IA
+                <span className="ml-2 whitespace-nowrap">Rapport IA</span>
               </Button>
             </Link>
           </div>
@@ -375,20 +386,20 @@ export default function ParcelleDetailPage() {
         )}
 
         {/* Mini map and reports row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           {/* Mini Map */}
           <Card className="lg:col-span-1">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-lg">
+            <CardHeader className="pb-2 px-4 md:px-6">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <MapPin className="h-5 w-5 text-green-500" />
                 Localisation
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-48 rounded-lg overflow-hidden">
+            <CardContent className="px-4 md:px-6">
+              <div className="h-40 md:h-48 rounded-lg overflow-hidden">
                 <MiniMapNoSSR parcelle={parcelle} />
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs md:text-sm">
                 <div className="bg-gray-50 p-2 rounded">
                   <p className="text-gray-500">Latitude</p>
                   <p className="font-medium">{parcelle.centroid.lat.toFixed(5)}</p>
@@ -403,37 +414,37 @@ export default function ParcelleDetailPage() {
 
           {/* Recent Reports */}
           <Card className="lg:col-span-2">
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg">
+            <CardHeader className="pb-2 px-4 md:px-6">
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                   <FileText className="h-5 w-5 text-blue-500" />
-                  Historique des rapports
+                  <span className="truncate">Historique</span>
                 </CardTitle>
                 <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
-                  <Button variant="outline" size="sm">Voir tout</Button>
+                  <Button variant="outline" size="sm" className="shrink-0 h-9">Voir tout</Button>
                 </Link>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 md:px-6">
               {reports.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                  <p>Aucun rapport généré pour cette parcelle</p>
+                <div className="text-center py-6 md:py-8 text-gray-500">
+                  <FileText className="h-10 md:h-12 w-10 md:w-12 mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm md:text-base">Aucun rapport généré</p>
                   <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
-                    <Button variant="outline" size="sm" className="mt-3">
+                    <Button variant="outline" size="sm" className="mt-3 h-10">
                       Générer le premier rapport
                     </Button>
                   </Link>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                   {reports.map((report) => (
                     <div
                       key={report.odId}
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`p-2 rounded-full ${
+                      <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
+                        <div className={`p-1.5 md:p-2 rounded-full shrink-0 ${
                           report.status === "alerte" ? "bg-red-100" :
                           report.status === "vigilance" ? "bg-yellow-100" : "bg-green-100"
                         }`}>
@@ -445,24 +456,25 @@ export default function ParcelleDetailPage() {
                             <CheckCircle className="h-4 w-4 text-green-500" />
                           )}
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className="font-medium text-sm">
                             {report.status === "alerte" ? "Alerte" :
                              report.status === "vigilance" ? "Vigilance" : "OK"}
                           </p>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {new Date(report.generatedAt).toLocaleDateString("fr-FR", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
+                            <Calendar className="h-3 w-3 shrink-0" />
+                            <span className="truncate">
+                              {new Date(report.generatedAt).toLocaleDateString("fr-FR", {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </span>
                           </p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 max-w-md truncate hidden md:block">
+                      <p className="text-sm text-gray-600 max-w-[200px] lg:max-w-md truncate hidden md:block ml-2">
                         {report.summary}
                       </p>
                     </div>
@@ -532,76 +544,72 @@ export default function ParcelleDetailPage() {
           <>
             {/* Main Weather Card */}
             {weather && weatherInfo && (
-              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
-                <CardContent className="py-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Current conditions */}
+              <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white overflow-hidden">
+                <CardContent className="p-4 md:py-6 md:px-6">
+                  {/* Current conditions - prominent on mobile */}
+                  <div className="flex items-center justify-center gap-3 md:gap-4 mb-4">
+                    <span className="text-5xl md:text-6xl">{weatherInfo.emoji}</span>
                     <div className="text-center md:text-left">
-                      <div className="flex items-center justify-center md:justify-start gap-4">
-                        <span className="text-6xl">{weatherInfo.emoji}</span>
-                        <div>
-                          <p className="text-5xl font-bold">
-                            {Math.round(weather.current.temperature)}°C
-                          </p>
-                          <p className="text-blue-100">
-                            Ressenti {Math.round(weather.current.apparentTemperature)}°C
-                          </p>
-                        </div>
-                      </div>
-                      <p className="mt-2 text-lg">{weatherInfo.description}</p>
+                      <p className="text-4xl md:text-5xl font-bold">
+                        {Math.round(weather.current.temperature)}°C
+                      </p>
+                      <p className="text-blue-100 text-sm md:text-base">
+                        Ressenti {Math.round(weather.current.apparentTemperature)}°C
+                      </p>
                     </div>
+                  </div>
+                  <p className="text-center text-base md:text-lg mb-4">{weatherInfo.description}</p>
 
-                    {/* Weather details */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Droplets className="h-5 w-5 text-blue-200" />
-                        <div>
-                          <p className="text-blue-100">Humidité</p>
-                          <p className="font-semibold">{weather.current.humidity}%</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Wind className="h-5 w-5 text-blue-200" />
-                        <div>
-                          <p className="text-blue-100">Vent</p>
-                          <p className="font-semibold">
-                            {Math.round(weather.current.windSpeed)} km/h {getWindDirection(weather.current.windDirection)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Cloud className="h-5 w-5 text-blue-200" />
-                        <div>
-                          <p className="text-blue-100">Nuages</p>
-                          <p className="font-semibold">{weather.current.cloudCover}%</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Sun className="h-5 w-5 text-blue-200" />
-                        <div>
-                          <p className="text-blue-100">UV</p>
-                          <p className="font-semibold">{weather.current.uvIndex} ({uvLevel?.level})</p>
-                        </div>
+                  {/* Weather details grid - 2x2 on mobile, inline on desktop */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
+                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                      <Droplets className="h-5 w-5 text-blue-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-blue-100 text-xs">Humidité</p>
+                        <p className="font-semibold">{weather.current.humidity}%</p>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                      <Wind className="h-5 w-5 text-blue-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-blue-100 text-xs">Vent</p>
+                        <p className="font-semibold truncate">
+                          {Math.round(weather.current.windSpeed)} km/h
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                      <Cloud className="h-5 w-5 text-blue-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-blue-100 text-xs">Nuages</p>
+                        <p className="font-semibold">{weather.current.cloudCover}%</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                      <Sun className="h-5 w-5 text-blue-200 shrink-0" />
+                      <div className="min-w-0">
+                        <p className="text-blue-100 text-xs">UV</p>
+                        <p className="font-semibold">{weather.current.uvIndex}</p>
+                      </div>
+                    </div>
+                  </div>
 
-                    {/* Sunrise/Sunset */}
-                    <div className="flex flex-col justify-center gap-3">
-                      <div className="flex items-center gap-3">
-                        <Sunrise className="h-5 w-5 text-yellow-300" />
-                        <span>Lever: {new Date(weather.daily.sunrise[0]).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <Sunset className="h-5 w-5 text-orange-300" />
-                        <span>Coucher: {new Date(weather.daily.sunset[0]).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
-                      </div>
-                      {weather.current.precipitation > 0 && (
-                        <div className="flex items-center gap-3">
-                          <CloudRain className="h-5 w-5 text-blue-200" />
-                          <span>Pluie: {weather.current.precipitation} mm</span>
-                        </div>
-                      )}
+                  {/* Sunrise/Sunset - compact on mobile */}
+                  <div className="flex items-center justify-center gap-4 md:gap-6 mt-4 pt-4 border-t border-white/20 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Sunrise className="h-4 w-4 md:h-5 md:w-5 text-yellow-300" />
+                      <span>{new Date(weather.daily.sunrise[0]).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Sunset className="h-4 w-4 md:h-5 md:w-5 text-orange-300" />
+                      <span>{new Date(weather.daily.sunset[0]).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })}</span>
+                    </div>
+                    {weather.current.precipitation > 0 && (
+                      <div className="flex items-center gap-2">
+                        <CloudRain className="h-4 w-4 md:h-5 md:w-5 text-blue-200" />
+                        <span>{weather.current.precipitation} mm</span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -634,7 +642,7 @@ export default function ParcelleDetailPage() {
             )}
 
             {/* Agricultural Summary + 14-day forecast */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
               {/* Agricultural Summary */}
               {agriSummary && (
                 <Card>
@@ -771,7 +779,7 @@ export default function ParcelleDetailPage() {
             </div>
 
             {/* Soil & Elevation Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* Soil Card */}
               <Card>
                 <CardHeader className="pb-2">
@@ -925,12 +933,12 @@ export default function ParcelleDetailPage() {
             </div>
             <div className="space-y-2">
               <Label>Culture</Label>
-              <div className="grid grid-cols-5 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                 {CULTURES.map((culture) => (
                   <button
                     key={culture.type}
                     type="button"
-                    className={`p-3 rounded-lg border-2 transition-all ${
+                    className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${
                       editCulture === culture.type
                         ? "border-green-500 bg-green-50"
                         : "border-gray-200 hover:border-gray-300"
@@ -938,12 +946,12 @@ export default function ParcelleDetailPage() {
                     onClick={() => setEditCulture(culture.type)}
                     title={culture.label}
                   >
-                    <span className="text-2xl">{culture.emoji}</span>
+                    <span className="text-xl md:text-2xl">{culture.emoji}</span>
                   </button>
                 ))}
                 <button
                   type="button"
-                  className={`p-3 rounded-lg border-2 transition-all ${
+                  className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${
                     editCulture === "autre"
                       ? "border-green-500 bg-green-50"
                       : "border-gray-200 hover:border-gray-300"
@@ -951,7 +959,7 @@ export default function ParcelleDetailPage() {
                   onClick={() => setEditCulture("autre")}
                   title="Autre"
                 >
-                  <span className="text-2xl">+</span>
+                  <span className="text-xl md:text-2xl">+</span>
                 </button>
               </div>
               {editCulture === "autre" && (
