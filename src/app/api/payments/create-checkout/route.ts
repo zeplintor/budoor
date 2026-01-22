@@ -6,6 +6,15 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
+    // Debug: Log environment variable status (not values!)
+    console.log("ENV CHECK:", {
+      NEXT_PUBLIC_DODO_MODE: process.env.NEXT_PUBLIC_DODO_MODE || "NOT SET",
+      DODO_API_KEY_TEST: process.env.DODO_API_KEY_TEST ? "SET" : "NOT SET",
+      DODO_API_KEY_LIVE: process.env.DODO_API_KEY_LIVE ? "SET" : "NOT SET",
+      DODO_PRO_PRODUCT_ID: process.env.DODO_PRO_PRODUCT_ID || "NOT SET",
+      NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || "NOT SET",
+    });
+
     const { userId, email, plan } = await request.json();
 
     // Validate required fields
