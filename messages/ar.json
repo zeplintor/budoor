@@ -307,7 +307,72 @@
       "prairie": "مرعى",
       "autre": "أخرى"
     },
-    "noResults": "لا توجد حقول مطابقة"
+    "noResults": "لا توجد حقول مطابقة",
+    "location": "الموقع",
+    "latitude": "خط العرض",
+    "longitude": "خط الطول",
+    "reportsHistory": "سجل التقارير",
+    "noReportsGenerated": "لم يتم إنشاء أي تقارير",
+    "generateFirstReport": "إنشاء التقرير الأول",
+    "statusSummary": {
+      "alertActionRequired": "تنبيه - يتطلب إجراء",
+      "attentionMonitor": "انتباه - للمراقبة",
+      "optimalConditions": "ظروف مثالية"
+    },
+    "weather": {
+      "feelsLike": "الشعور",
+      "humidity": "الرطوبة",
+      "wind": "الرياح",
+      "cloudCover": "تغطية السحب",
+      "uvIndex": "مؤشر الأشعة فوق البنفسجية"
+    },
+    "hourlyForecast": "توقعات ساعة بساعة",
+    "agriculturalAdvice": "نصائح زراعية",
+    "spraying": "الرش",
+    "irrigation": "الري",
+    "gddAccumulated": "درجات الحرارة المتراكمة (14 يومًا)",
+    "frostRisk": "خطر الصقيع",
+    "heatStress": "الإجهاد الحراري",
+    "daysConcerned": "الأيام المعنية",
+    "fourteenDayForecast": "توقعات 14 يومًا",
+    "soilAnalysis": {
+      "title": "تحليل التربة",
+      "estimatedSource": "⚠️ مصدر تقديري",
+      "verifiedSource": "✓ مصدر موثوق",
+      "clay": "الطين",
+      "sand": "الرمل",
+      "silt": "الغرين",
+      "organicCarbon": "الكربون العضوي"
+    },
+    "topography": {
+      "title": "التضاريس",
+      "altitude": "الارتفاع",
+      "slope": "الميل",
+      "aspect": "الاتجاه"
+    },
+    "dialog": {
+      "editTitle": "تعديل الحقل",
+      "name": "اسم الحقل",
+      "namePlaceholder": "مثال: الحقل الشمالي",
+      "culture": "الزراعة",
+      "customCulturePlaceholder": "أدخل نوع الزراعة",
+      "nameAndCultureRequired": "الاسم والزراعة مطلوبان"
+    },
+    "deleteDialog": {
+      "title": "حذف الحقل",
+      "confirm": "هل أنت متأكد أنك تريد حذف الحقل {name}؟",
+      "warning": "هذا الإجراء لا رجعة فيه. سيتم حذف جميع التقارير المرتبطة أيضًا."
+    },
+    "toast": {
+      "updated": "تم تحديث الحقل",
+      "updateError": "تعذر تحديث الحقل",
+      "deleteError": "تعذر حذف الحقل"
+    },
+    "error": {
+      "notFound": "الحقل غير موجود",
+      "loading": "خطأ أثناء التحميل"
+    },
+    "backToParcelles": "العودة إلى الحقول"
   },
   "reports": {
     "title": "تقارير الذكاء الاصطناعي",
