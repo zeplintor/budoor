@@ -1,0 +1,412 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "close": "Fermer",
+    "or": "Ou",
+    "verify": "Vérifier",
+    "hectares": "hectares",
+    "allRightsReserved": "Tous droits réservés",
+    "searchPlaceholder": "Rechercher une parcelle...",
+    "search": "Rechercher..."
+  },
+  "nav": {
+    "home": "Accueil",
+    "parcelles": "Mes Parcelles",
+    "reports": "Rapports",
+    "settings": "Configuration",
+    "logout": "Déconnexion",
+    "login": "Connexion",
+    "register": "Commencer gratuitement",
+    "general": "General",
+    "tools": "Outils"
+  },
+  "auth": {
+    "login": {
+      "title": "Connexion",
+      "description": "Connectez-vous à votre compte Budoor",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Votre mot de passe",
+      "forgotPassword": "Mot de passe oublié ?",
+      "submit": "Se connecter",
+      "withGoogle": "Continuer avec Google",
+      "noAccount": "Pas encore de compte ?",
+      "createAccount": "Créer un compte",
+      "errorInvalid": "Email ou mot de passe incorrect",
+      "errorGoogle": "Erreur de connexion avec Google"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "description": "Rejoignez Budoor et optimisez vos cultures",
+      "displayName": "Nom complet",
+      "displayNamePlaceholder": "Votre nom",
+      "email": "Email",
+      "emailPlaceholder": "votre@email.com",
+      "password": "Mot de passe",
+      "passwordPlaceholder": "Minimum 6 caractères",
+      "confirmPassword": "Confirmer le mot de passe",
+      "confirmPasswordPlaceholder": "Confirmez votre mot de passe",
+      "submit": "Créer mon compte",
+      "withGoogle": "Continuer avec Google",
+      "hasAccount": "Déjà un compte ?",
+      "signIn": "Se connecter",
+      "errorEmailInUse": "Cet email est déjà utilisé",
+      "errorGeneric": "Erreur lors de la création du compte",
+      "errorGoogle": "Erreur de connexion avec Google"
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "description": "Entrez votre email pour réinitialiser votre mot de passe",
+      "submit": "Envoyer le lien",
+      "success": "Un email de réinitialisation a été envoyé",
+      "backToLogin": "Retour à la connexion"
+    },
+    "validation": {
+      "emailInvalid": "Email invalide",
+      "passwordMin": "Le mot de passe doit contenir au moins 6 caractères",
+      "displayNameMin": "Le nom doit contenir au moins 2 caractères",
+      "passwordMismatch": "Les mots de passe ne correspondent pas"
+    }
+  },
+  "landing": {
+    "hero": {
+      "title": "Un agronome expert dans votre poche",
+      "subtitle": "Budoor surveille vos champs 24h/24 et vous envoie des conseils agronomiques personnalisés via WhatsApp. Météo, sol, risques maladies - tout est analysé pour vous.",
+      "cta": "Essayer gratuitement",
+      "discoverFeatures": "Découvrir les fonctionnalités",
+      "watchDemo": "Voir la démo",
+      "newFeature": "Nouveau : Intégration WhatsApp",
+      "trust": {
+        "secure": "Données sécurisées",
+        "multilang": "Multi-langues",
+        "realtime": "Alertes temps réel"
+      }
+    },
+    "stats": {
+      "farmers": "Agriculteurs actifs",
+      "hectares": "Hectares gérés",
+      "yield": "Rendement moyen",
+      "satisfaction": "Satisfaction client"
+    },
+    "features": {
+      "title": "Tout ce dont vous avez besoin",
+      "subtitle": "Budoor combine cartographie, données météo, analyse du sol et intelligence artificielle pour vous accompagner au quotidien.",
+      "badge": "Fonctionnalités",
+      "map": {
+        "title": "Cartographie Interactive",
+        "description": "Délimitez vos parcelles sur une carte satellite et gérez vos champs visuellement."
+      },
+      "weather": {
+        "title": "Données Météo en Temps Réel",
+        "description": "Prévisions à 7 jours, historique, évapotranspiration et température du sol."
+      },
+      "ai": {
+        "title": "Intelligence Artificielle",
+        "description": "Un agronome virtuel analyse vos données et génère des conseils personnalisés."
+      },
+      "whatsapp": {
+        "title": "Alertes WhatsApp",
+        "description": "Recevez des rapports clairs et actionnables directement sur votre téléphone."
+      }
+    },
+    "whatsappDemo": {
+      "title": "Recevez vos rapports sur WhatsApp",
+      "subtitle": "Recevez vos rapports quotidiens directement sur WhatsApp. Pas besoin d'ouvrir une application, tout arrive sur votre téléphone.",
+      "benefits": [
+        "Alertes météo en temps réel",
+        "Conseils de traitement personnalisés",
+        "Rappels de tâches agricoles",
+        "Rapports de rendement hebdomadaires"
+      ]
+    },
+    "howItWorks": {
+      "badge": "Simple & Rapide",
+      "title": "Comment ça marche ?",
+      "subtitle": "Commencez à optimiser vos cultures en 3 étapes simples",
+      "steps": [
+        {
+          "title": "Créez votre compte",
+          "description": "Inscrivez-vous gratuitement et configurez votre exploitation en quelques minutes."
+        },
+        {
+          "title": "Ajoutez vos parcelles",
+          "description": "Dessinez vos parcelles sur la carte interactive et renseignez vos cultures."
+        },
+        {
+          "title": "Recevez vos alertes",
+          "description": "Notre IA analyse les données et vous envoie des recommandations personnalisées."
+        }
+      ]
+    },
+    "testimonials": {
+      "badge": "Témoignages",
+      "title": "Ce que disent nos utilisateurs",
+      "items": [
+        {
+          "name": "Ahmed Benali",
+          "role": "Céréalier, Maroc",
+          "content": "Budoor a transformé ma façon de gérer mes cultures. Les alertes météo m'ont sauvé plusieurs récoltes."
+        },
+        {
+          "name": "Fatima Zahra",
+          "role": "Maraîchère, Tunisie",
+          "content": "L'interface est intuitive et les conseils IA sont précis. Je recommande à tous les agriculteurs."
+        },
+        {
+          "name": "Omar Kaddouri",
+          "role": "Arboriculteur, Algérie",
+          "content": "Le suivi WhatsApp est génial ! Je reçois mes rapports directement sur mon téléphone."
+        }
+      ]
+    },
+    "exampleReport": {
+      "title": "Exemple de rapport WhatsApp"
+    },
+    "pricing": {
+      "title": "Tarifs simples et transparents",
+      "subtitle": "Commencez gratuitement, évoluez selon vos besoins.",
+      "badge": "Tarifs",
+      "perMonth": "/mois",
+      "popular": "Populaire",
+      "free": {
+        "name": "Gratuit",
+        "description": "Pour démarrer",
+        "features": ["1 parcelle", "Rapports hebdomadaires", "Données météo de base", "Support communautaire"]
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Pour les exploitations",
+        "features": ["Parcelles illimitées", "Rapports quotidiens", "Données sol et élévation", "Alertes prioritaires", "Support prioritaire"],
+        "cta": "Commencer"
+      },
+      "tryFree": "Essayer gratuitement"
+    },
+    "faq": {
+      "badge": "FAQ",
+      "title": "Questions fréquentes",
+      "items": [
+        {
+          "question": "Comment fonctionne l'analyse IA ?",
+          "answer": "Notre IA combine les données météorologiques, l'analyse du sol et les images satellites pour générer des recommandations personnalisées pour chaque parcelle."
+        },
+        {
+          "question": "Budoor fonctionne-t-il hors connexion ?",
+          "answer": "Les rapports WhatsApp sont envoyés même avec une connexion limitée. L'application web nécessite une connexion internet."
+        },
+        {
+          "question": "Quelles cultures sont supportées ?",
+          "answer": "Budoor supporte toutes les grandes cultures : céréales, maraîchage, arboriculture, viticulture, et bien plus encore."
+        },
+        {
+          "question": "Puis-je essayer gratuitement ?",
+          "answer": "Oui ! Le plan gratuit vous permet de gérer jusqu'à 3 parcelles sans engagement ni carte bancaire."
+        }
+      ]
+    },
+    "cta": {
+      "title": "Prêt à optimiser vos cultures ?",
+      "subtitle": "Rejoignez les agriculteurs qui font confiance à Budoor pour leurs décisions quotidiennes.",
+      "button": "Créer mon compte gratuit"
+    },
+    "footer": {
+      "description": "La plateforme intelligente pour optimiser vos cultures et maximiser vos rendements.",
+      "product": "Produit",
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "faq": "FAQ",
+      "resources": "Ressources",
+      "docs": "Documentation",
+      "blog": "Blog",
+      "support": "Support",
+      "legal": "Légal",
+      "privacy": "Confidentialité",
+      "terms": "Conditions"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "welcome": "Bonjour, {name} !",
+    "welcomeDefault": "Agriculteur",
+    "overview": "Voici un aperçu de vos exploitations agricoles",
+    "stats": {
+      "parcelles": {
+        "title": "Parcelles",
+        "description": "Parcelles enregistrées"
+      },
+      "weather": {
+        "title": "Météo",
+        "description": "Température actuelle"
+      },
+      "alerts": {
+        "title": "Alertes",
+        "description": "Alertes actives"
+      },
+      "reports": {
+        "title": "Rapports",
+        "description": "Rapports ce mois"
+      }
+    },
+    "quickActions": {
+      "title": "Démarrer",
+      "addParcelle": {
+        "title": "Ajouter une parcelle",
+        "description": "Délimitez vos champs sur la carte"
+      },
+      "configureAlerts": {
+        "title": "Configurer les alertes",
+        "description": "Recevez des rapports via WhatsApp"
+      }
+    }
+  },
+  "parcelles": {
+    "title": "Mes Parcelles",
+    "draw": "Dessiner une parcelle",
+    "drawingActive": "Mode dessin actif...",
+    "count": "{count} parcelle enregistrée",
+    "countPlural": "{count} parcelles enregistrées",
+    "empty": {
+      "title": "Aucune parcelle",
+      "description": "Cliquez sur \"Dessiner\" puis tracez votre champ sur la carte"
+    },
+    "drawing": {
+      "instruction": "Cliquez sur la carte pour tracer les coins de votre parcelle",
+      "hint": "Cliquez sur le premier point pour terminer",
+      "cancel": "Annuler le dessin"
+    },
+    "dialog": {
+      "title": "Nouvelle parcelle",
+      "name": "Nom de la parcelle",
+      "namePlaceholder": "Ex: Champ Nord, Parcelle 12...",
+      "culture": "Quelle culture sur cette parcelle ?",
+      "customCulturePlaceholder": "Entrez le nom de la culture...",
+      "save": "Enregistrer"
+    },
+    "delete": {
+      "confirm": "Supprimer la parcelle \"{name}\" ?"
+    },
+    "toast": {
+      "created": "Parcelle enregistrée avec succès !",
+      "error": "Erreur lors de l'enregistrement"
+    },
+    "viewDetails": "Voir détails",
+    "cultures": {
+      "ble": "Blé",
+      "mais": "Maïs",
+      "orge": "Orge",
+      "colza": "Colza",
+      "tournesol": "Tournesol",
+      "vigne": "Vigne",
+      "olivier": "Olivier",
+      "legumes": "Légumes",
+      "fruits": "Fruits",
+      "prairie": "Prairie",
+      "autre": "Autre"
+    },
+    "noResults": "Aucune parcelle trouvée"
+  },
+  "reports": {
+    "title": "Rapports IA",
+    "empty": "Aucun rapport disponible",
+    "history": "Historique des rapports",
+    "myParcelles": "Mes parcelles",
+    "selectParcelle": "Sélectionnez une parcelle pour générer un rapport",
+    "noParcelle": "Aucune parcelle",
+    "createParcelle": "Créer une parcelle",
+    "generating": "Budoor analyse votre parcelle...",
+    "generatingDesc": "Préparation de vos recommandations personnalisées",
+    "errorTitle": "Erreur lors de la génération",
+    "retry": "Réessayer",
+    "generateReport": "Générer un rapport",
+    "generatePrompt": "Sélectionnez une parcelle et cliquez pour générer un rapport agronomique personnalisé",
+    "generatedAt": "Généré le",
+    "status": {
+      "optimal": "Optimal",
+      "vigilance": "Vigilance",
+      "alerte": "Alerte"
+    },
+    "sections": {
+      "weather": "Analyse Météo",
+      "soil": "Analyse du Sol",
+      "recommendations": "Recommandations",
+      "disease": "Risque Maladies",
+      "irrigation": "Conseils Irrigation",
+      "actions": "Actions à Planifier",
+      "weeklyForecast": "Prévisions semaine"
+    },
+    "diseaseRisk": {
+      "low": "Faible",
+      "medium": "Moyen",
+      "high": "Élevé",
+      "toWatch": "Maladies à surveiller",
+      "preventive": "Actions préventives"
+    },
+    "priority": {
+      "high": "Urgent",
+      "medium": "Important",
+      "low": "À prévoir"
+    },
+    "parcelleInfo": "Informations parcelle",
+    "downloadPdf": "Télécharger PDF",
+    "shareWhatsapp": "Partager sur WhatsApp",
+    "poweredBy": "Rapport généré par Budoor",
+    "savedReports": "rapport(s) enregistré(s)",
+    "deleteConfirm": "Supprimer ce rapport ?",
+    "historyEmptyDesc": "Générez votre premier rapport pour commencer à suivre vos parcelles",
+    "generateFirst": "Générer un rapport"
+  },
+  "settings": {
+    "title": "Configuration",
+    "profile": {
+      "title": "Profil",
+      "description": "Vos informations personnelles",
+      "displayName": "Nom complet",
+      "displayNamePlaceholder": "Votre nom",
+      "email": "Email"
+    },
+    "whatsapp": {
+      "title": "WhatsApp",
+      "description": "Configurez votre numéro pour recevoir les rapports",
+      "phone": "Numéro de téléphone",
+      "phonePlaceholder": "+33 6 12 34 56 78",
+      "phoneHint": "Format international avec indicatif pays"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Fréquence des rapports",
+      "frequency": "Fréquence des rapports",
+      "daily": {
+        "label": "Quotidien",
+        "description": "Chaque matin à 6h"
+      },
+      "weekly": {
+        "label": "Hebdomadaire",
+        "description": "Chaque lundi matin"
+      },
+      "alertsOnly": {
+        "label": "Alertes uniquement",
+        "description": "En cas d'événement important"
+      },
+      "none": {
+        "label": "Désactivé",
+        "description": "Ne pas recevoir de notifications WhatsApp"
+      }
+    },
+    "language": {
+      "title": "Langue",
+      "description": "Langue de l'interface",
+      "label": "Langue de l'interface",
+      "fr": "Français",
+      "ar": "العربية"
+    },
+    "save": "Enregistrer les modifications",
+    "saveSuccess": "Modifications enregistrées"
+  },
+  "user": {
+    "defaultName": "Utilisateur"
+  }
+}

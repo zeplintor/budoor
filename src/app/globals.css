@@ -1,0 +1,297 @@
+@import "tailwindcss";
+
+:root {
+  /* ========================================
+   * DESIGN SYSTEM - Intelly Style
+   * ======================================== */
+
+  /* Colors - Background */
+  --bg-primary: #FDF8F3;
+  --bg-secondary: #FFFFFF;
+  --bg-dark: #1A1A1A;
+  --bg-dark-hover: #2A2A2A;
+  --bg-muted: #F5F0EB;
+
+  /* Colors - Text */
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --text-inverse: #FFFFFF;
+  --text-inverse-secondary: #A1A1AA;
+
+  /* Colors - Accent */
+  --accent-pink: #FFB5BA;
+  --accent-pink-light: #FFD4D8;
+  --accent-pink-dark: #E89399;
+  --accent-yellow: #F9D949;
+  --accent-yellow-light: #FBE588;
+  --accent-yellow-dark: #E5C33E;
+  --accent-mint: #A8E6CF;
+  --accent-mint-light: #C8F0DE;
+  --accent-mint-dark: #7DD3B0;
+  --accent-purple: #D4A5FF;
+  --accent-purple-light: #E4C8FF;
+  --accent-purple-dark: #B87DE8;
+  --accent-coral: #FFB088;
+  --accent-coral-light: #FFCDB8;
+  --accent-coral-dark: #E89066;
+
+  /* Colors - Status */
+  --status-success: #22C55E;
+  --status-success-light: #DCFCE7;
+  --status-warning: #F59E0B;
+  --status-warning-light: #FEF3C7;
+  --status-error: #EF4444;
+  --status-error-light: #FEE2E2;
+  --status-info: #3B82F6;
+  --status-info-light: #DBEAFE;
+
+  /* Colors - Border */
+  --border-light: #E5E7EB;
+  --border-dark: #2A2A2A;
+  --border-muted: #F0EBE6;
+
+  /* Spacing */
+  --sidebar-width: 280px;
+  --sidebar-collapsed: 80px;
+  --header-height: 64px;
+  --container-padding: 24px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.06);
+
+  /* Legacy support */
+  --background: var(--bg-primary);
+  --foreground: var(--text-primary);
+}
+
+@theme inline {
+  /* Background Colors */
+  --color-background: var(--bg-primary);
+  --color-background-secondary: var(--bg-secondary);
+  --color-background-dark: var(--bg-dark);
+  --color-background-dark-hover: var(--bg-dark-hover);
+  --color-background-muted: var(--bg-muted);
+
+  /* Text Colors */
+  --color-foreground: var(--text-primary);
+  --color-foreground-secondary: var(--text-secondary);
+  --color-foreground-muted: var(--text-muted);
+  --color-foreground-inverse: var(--text-inverse);
+  --color-foreground-inverse-secondary: var(--text-inverse-secondary);
+
+  /* Accent Colors */
+  --color-accent-pink: var(--accent-pink);
+  --color-accent-pink-light: var(--accent-pink-light);
+  --color-accent-pink-dark: var(--accent-pink-dark);
+  --color-accent-yellow: var(--accent-yellow);
+  --color-accent-yellow-light: var(--accent-yellow-light);
+  --color-accent-yellow-dark: var(--accent-yellow-dark);
+  --color-accent-mint: var(--accent-mint);
+  --color-accent-mint-light: var(--accent-mint-light);
+  --color-accent-mint-dark: var(--accent-mint-dark);
+  --color-accent-purple: var(--accent-purple);
+  --color-accent-purple-light: var(--accent-purple-light);
+  --color-accent-purple-dark: var(--accent-purple-dark);
+  --color-accent-coral: var(--accent-coral);
+  --color-accent-coral-light: var(--accent-coral-light);
+  --color-accent-coral-dark: var(--accent-coral-dark);
+
+  /* Status Colors */
+  --color-status-success: var(--status-success);
+  --color-status-success-light: var(--status-success-light);
+  --color-status-warning: var(--status-warning);
+  --color-status-warning-light: var(--status-warning-light);
+  --color-status-error: var(--status-error);
+  --color-status-error-light: var(--status-error-light);
+  --color-status-info: var(--status-info);
+  --color-status-info-light: var(--status-info-light);
+
+  /* Border Colors */
+  --color-border: var(--border-light);
+  --color-border-dark: var(--border-dark);
+  --color-border-muted: var(--border-muted);
+
+  /* Border Radius */
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+
+  /* Fonts */
+  --font-sans: var(--font-inter);
+  --font-arabic: var(--font-arabic);
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Arabic font family */
+.font-arabic {
+  font-family: var(--font-arabic), system-ui, sans-serif;
+}
+
+/* ========================================
+ * UTILITY CLASSES
+ * ======================================== */
+
+/* Card styles */
+.card {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Badge/Pill styles */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-pink {
+  background: var(--accent-pink-light);
+  color: var(--accent-pink-dark);
+}
+
+.badge-yellow {
+  background: var(--accent-yellow-light);
+  color: var(--accent-yellow-dark);
+}
+
+.badge-mint {
+  background: var(--accent-mint-light);
+  color: var(--accent-mint-dark);
+}
+
+.badge-purple {
+  background: var(--accent-purple-light);
+  color: var(--accent-purple-dark);
+}
+
+/* ========================================
+ * RTL Support
+ * ======================================== */
+
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .pl-10 {
+  padding-left: 0;
+  padding-right: 2.5rem;
+}
+
+[dir="rtl"] .left-3 {
+  left: auto;
+  right: 0.75rem;
+}
+
+[dir="rtl"] .text-right {
+  text-align: left;
+}
+
+[dir="rtl"] .text-left {
+  text-align: right;
+}
+
+[dir="rtl"] .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+[dir="rtl"] .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+[dir="rtl"] .border-l-4 {
+  border-left-width: 0;
+  border-right-width: 4px;
+}
+
+[dir="rtl"] .border-r {
+  border-right-width: 0;
+  border-left-width: 1px;
+}
+
+/* ========================================
+ * Leaflet fixes
+ * ======================================== */
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  z-index: 0;
+}
+
+.leaflet-control-container .leaflet-top,
+.leaflet-control-container .leaflet-bottom {
+  z-index: 400;
+}
+
+/* ========================================
+ * Scrollbar styling
+ * ======================================== */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Dark sidebar scrollbar */
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--border-dark);
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-inverse-secondary);
+}

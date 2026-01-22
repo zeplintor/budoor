@@ -1,0 +1,32 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection
+    match /users/{userId} {
+      // Users can read/write their own document
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Parcelles subcollection
+      match /parcelles/{parcelleId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Reports subcollection
+      match /reports/{reportId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Notifications subcollection
+      match /notifications/{notificationId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+
+    // WhatsApp logs - only Cloud Functions can write (no auth check needed for service account)
+    match /whatsappLogs/{logId} {
+      allow read: if false; // Only admin access
+      allow write: if false; // Only Cloud Functions can write
+    }
+  }
+}
