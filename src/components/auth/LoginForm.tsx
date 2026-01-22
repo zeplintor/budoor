@@ -54,7 +54,9 @@ export function LoginForm() {
       await signInWithGoogle();
       // Page will redirect to Google, no need to navigate here
     } catch (err) {
-      setError(t("auth.login.errorGoogle"));
+      console.error("Google Auth Error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(`${t("auth.login.errorGoogle")}: ${errorMessage}`);
       setIsGoogleLoading(false);
     }
   };

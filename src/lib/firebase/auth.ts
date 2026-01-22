@@ -54,12 +54,14 @@ export async function signIn(
 export async function signInWithGoogle(): Promise<FirebaseUser | null> {
   const authInstance = ensureAuth();
 
-  // Use redirect method for better cross-origin compatibility
-  // This works reliably on all deployments (Netlify, Vercel, etc.)
-  await signInWithRedirect(authInstance, googleProvider);
-
-  // This line won't be reached as the page will redirect
-  return null;
+  try {
+    // Use redirect method for better cross-origin compatibility
+    await signInWithRedirect(authInstance, googleProvider);
+    return null;
+  } catch (error) {
+    console.error("Google Sign-In Error:", error);
+    throw error;
+  }
 }
 
 // Handle redirect result (call this on app init)
