@@ -51,17 +51,13 @@ export async function signIn(
   return user;
 }
 
-export async function signInWithGoogle(): Promise<FirebaseUser | null> {
+export async function signInWithGoogle(): Promise<FirebaseUser> {
   const authInstance = ensureAuth();
 
-  try {
-    // Use redirect method for better cross-origin compatibility
-    await signInWithRedirect(authInstance, googleProvider);
-    return null;
-  } catch (error) {
-    console.error("Google Sign-In Error:", error);
-    throw error;
-  }
+  // Use popup method - more reliable for most cases
+  const { user } = await signInWithPopup(authInstance, googleProvider);
+  await handleGoogleUser(user);
+  return user;
 }
 
 // Handle redirect result (call this on app init)

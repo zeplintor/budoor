@@ -52,11 +52,11 @@ export function LoginForm() {
       setIsGoogleLoading(true);
       setError(null);
       await signInWithGoogle();
-      // Page will redirect to Google, no need to navigate here
+      router.push("/dashboard");
     } catch (err) {
       console.error("Google Auth Error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      setError(`${t("auth.login.errorGoogle")}: ${errorMessage}`);
+      setError(t("auth.login.errorGoogle"));
+    } finally {
       setIsGoogleLoading(false);
     }
   };
