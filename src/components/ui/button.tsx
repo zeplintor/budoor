@@ -10,7 +10,7 @@ const buttonVariants = cva(
         default:
           "bg-[var(--text-primary)] text-[var(--text-inverse)] shadow-sm hover:bg-[var(--bg-dark-hover)]",
         primary:
-          "bg-[var(--accent-pink)] text-[var(--text-primary)] shadow-sm hover:bg-[var(--accent-pink-dark)]",
+          "bg-[var(--accent-pink)] text-[var(--text-inverse)] shadow-sm hover:bg-[var(--accent-pink-dark)]",
         secondary:
           "bg-[var(--accent-yellow)] text-[var(--text-primary)] shadow-sm hover:bg-[var(--accent-yellow-dark)]",
         success:

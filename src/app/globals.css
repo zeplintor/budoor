@@ -58,11 +58,11 @@
   --container-padding: 24px;
 
   /* Border Radius */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
 
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -167,7 +167,7 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 4px 12px;
-  border-radius: 9999px;
+  border-radius: var(--radius-xl);
   font-size: 0.75rem;
   font-weight: 500;
 }

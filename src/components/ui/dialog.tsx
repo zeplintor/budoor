@@ -23,7 +23,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
       {/* Content */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <div
-          className="relative bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-auto"
+          className="relative bg-white rounded-[var(--radius-lg)] shadow-lg max-w-md w-full max-h-[90vh] overflow-auto"
           onClick={(e) => e.stopPropagation()}
         >
           {children}
@@ -65,7 +65,7 @@ export function DialogDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn("text-sm text-gray-500", className)} {...props} />
+  <p className={cn("text-sm text-[var(--text-secondary)]", className)} {...props} />
   );
 }
 
@@ -99,7 +99,7 @@ export function DialogClose({
     <button
       onClick={onClose}
       className={cn(
-        "absolute right-4 top-4 rounded-sm opacity-70 hover:opacity-100 focus:outline-none",
+        "absolute right-4 top-4 rounded-[var(--radius-sm)] opacity-70 hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--accent-mint)]",
         className
       )}
     >

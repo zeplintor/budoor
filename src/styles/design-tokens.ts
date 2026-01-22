@@ -84,11 +84,11 @@ export const spacing = {
 } as const;
 
 export const borderRadius = {
-  sm: '8px',
-  md: '12px',
-  lg: '16px',
-  xl: '20px',
-  '2xl': '24px',
+  sm: '6px',
+  md: '8px',
+  lg: '10px',
+  xl: '12px',
+  '2xl': '16px',
   full: '9999px',
 } as const;
 
