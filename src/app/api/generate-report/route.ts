@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get locale from cookie
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
     const locale: Locale = locales.includes(localeCookie as Locale)
       ? (localeCookie as Locale)
