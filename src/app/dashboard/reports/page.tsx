@@ -114,6 +114,16 @@ export default function ReportsPage() {
 
     try {
       const data = await getParcelleData(parcelle);
+
+      // Check if we have all required data
+      if (!data.weather || !data.soil || !data.elevation) {
+        const missing = [];
+        if (!data.weather) missing.push("météo");
+        if (!data.soil) missing.push("sol");
+        if (!data.elevation) missing.push("topographie");
+        throw new Error(`Données manquantes: ${missing.join(", ")}. Veuillez réessayer.`);
+      }
+
       const report = await generateReport({
         parcelle,
         weather: data.weather,

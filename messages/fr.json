@@ -325,6 +325,7 @@
     "generatePrompt": "Sélectionnez une parcelle et cliquez pour générer un rapport agronomique personnalisé",
     "generatedAt": "Généré le",
     "status": {
+      "ok": "OK",
       "optimal": "Optimal",
       "vigilance": "Vigilance",
       "alerte": "Alerte"

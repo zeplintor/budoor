@@ -325,6 +325,7 @@
     "generatePrompt": "اختر حقلاً وانقر لإنشاء تقرير زراعي مخصص",
     "generatedAt": "تم الإنشاء في",
     "status": {
+      "ok": "جيد",
       "optimal": "مثالي",
       "vigilance": "يقظة",
       "alerte": "تنبيه"

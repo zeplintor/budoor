@@ -4,32 +4,48 @@ import { getSoilData, SoilDataWithSource } from "./soilGrids";
 import { getElevationForPolygon } from "./openElevation";
 
 export interface ParcelleDataSnapshot {
-  weather: ExtendedWeatherData;
-  soil: SoilDataWithSource;
-  elevation: ElevationData;
+  weather: ExtendedWeatherData | null;
+  soil: SoilDataWithSource | null;
+  elevation: ElevationData | null;
   fetchedAt: Date;
 }
 
-// Fetch all external data for a parcelle
-export async function getParcelleData(parcelle: Parcelle): Promise<ParcelleDataSnapshot> {
+// Fetch all external data for a parcelle with graceful error handling
+export async function getParcelleData(parcelle: Parcelle): Promise<{
+  weather: ExtendedWeatherData | null;
+  soil: SoilDataWithSource | null;
+  elevation: ElevationData | null;
+  fetchedAt: Date;
+}> {
   const { lat, lng } = parcelle.centroid;
   const coordinates = parcelle.geometry.coordinates[0];
 
-  // Fetch all data in parallel
-  const [weather, soil, elevationResult] = await Promise.all([
-    getWeatherData(lat, lng),
-    getSoilData(lat, lng),
-    getElevationForPolygon(coordinates),
+  // Fetch all data in parallel with individual error handling
+  const [weatherResult, soilResult, elevationResult] = await Promise.all([
+    getWeatherData(lat, lng).catch((err) => {
+      console.error("[ParcelleData] Weather API error:", err);
+      return null;
+    }),
+    getSoilData(lat, lng).catch((err) => {
+      console.error("[ParcelleData] Soil API error:", err);
+      return null;
+    }),
+    getElevationForPolygon(coordinates).catch((err) => {
+      console.error("[ParcelleData] Elevation API error:", err);
+      return null;
+    }),
   ]);
 
   return {
-    weather,
-    soil,
-    elevation: {
-      elevation: elevationResult.elevation,
-      slope: elevationResult.slope,
-      aspect: elevationResult.aspect,
-    },
+    weather: weatherResult,
+    soil: soilResult,
+    elevation: elevationResult
+      ? {
+          elevation: elevationResult.elevation,
+          slope: elevationResult.slope,
+          aspect: elevationResult.aspect,
+        }
+      : null,
     fetchedAt: new Date(),
   };
 }
@@ -39,55 +55,64 @@ export function getParcelleConditionSummary(data: ParcelleDataSnapshot): {
   status: "optimal" | "attention" | "alerte";
   alerts: string[];
   opportunities: string[];
-} {
+} | null {
   const alerts: string[] = [];
   const opportunities: string[] = [];
 
+  const { weather, soil } = data;
+
+  // Return null if no data available
+  if (!weather && !soil) {
+    return null;
+  }
+
   // Weather checks
-  const { weather, soil, elevation } = data;
+  if (weather) {
+    // Temperature extremes
+    if (weather.current.temperature < 5) {
+      alerts.push("Risque de gel - proteger les cultures sensibles");
+    } else if (weather.current.temperature > 35) {
+      alerts.push("Canicule - irrigation recommandee");
+    }
 
-  // Temperature extremes
-  if (weather.current.temperature < 5) {
-    alerts.push("Risque de gel - proteger les cultures sensibles");
-  } else if (weather.current.temperature > 35) {
-    alerts.push("Canicule - irrigation recommandee");
-  }
+    // Precipitation
+    const totalPrecipNext3Days = weather.daily.precipitationSum.slice(0, 3).reduce((a, b) => a + b, 0);
+    if (totalPrecipNext3Days > 50) {
+      alerts.push("Fortes pluies prevues - reporter les traitements");
+    } else if (totalPrecipNext3Days < 5 && weather.current.temperature > 25) {
+      alerts.push("Secheresse - surveiller l'irrigation");
+    }
 
-  // Precipitation
-  const totalPrecipNext3Days = weather.daily.precipitationSum.slice(0, 3).reduce((a, b) => a + b, 0);
-  if (totalPrecipNext3Days > 50) {
-    alerts.push("Fortes pluies prevues - reporter les traitements");
-  } else if (totalPrecipNext3Days < 5 && weather.current.temperature > 25) {
-    alerts.push("Secheresse - surveiller l'irrigation");
-  }
+    // Wind
+    if (weather.current.windSpeed > 30) {
+      alerts.push("Vent fort - eviter les pulverisations");
+    }
 
-  // Wind
-  if (weather.current.windSpeed > 30) {
-    alerts.push("Vent fort - eviter les pulverisations");
+    // Opportunities based on conditions
+    if (weather.current.precipitation === 0 && weather.current.windSpeed < 15) {
+      opportunities.push("Conditions ideales pour pulverisation");
+    }
+
+    if (totalPrecipNext3Days > 10 && totalPrecipNext3Days < 30) {
+      opportunities.push("Pluie prevue - reporter l'irrigation");
+    }
+
+    if (weather.current.humidity > 60 && weather.current.humidity < 80) {
+      opportunities.push("Humidite favorable aux semis");
+    }
   }
 
   // Soil checks
-  if (soil.ph < 5.5) {
-    alerts.push("Sol acide - chaulage recommande");
-  } else if (soil.ph > 8) {
-    alerts.push("Sol alcalin - surveiller les carences en fer");
-  }
+  if (soil) {
+    if (soil.ph < 5.5) {
+      alerts.push("Sol acide - chaulage recommande");
+    } else if (soil.ph > 8) {
+      alerts.push("Sol alcalin - surveiller les carences en fer");
+    }
 
-  if (soil.organicCarbon < 10) {
-    alerts.push("Sol pauvre - apport de matiere organique necessaire");
-  }
-
-  // Opportunities based on conditions
-  if (weather.current.precipitation === 0 && weather.current.windSpeed < 15) {
-    opportunities.push("Conditions ideales pour pulverisation");
-  }
-
-  if (totalPrecipNext3Days > 10 && totalPrecipNext3Days < 30) {
-    opportunities.push("Pluie prevue - reporter l'irrigation");
-  }
-
-  if (weather.current.humidity > 60 && weather.current.humidity < 80) {
-    opportunities.push("Humidite favorable aux semis");
+    if (soil.organicCarbon < 10) {
+      alerts.push("Sol pauvre - apport de matiere organique necessaire");
+    }
   }
 
   // Determine overall status

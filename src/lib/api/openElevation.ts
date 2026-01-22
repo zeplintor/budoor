@@ -51,12 +51,17 @@ export async function getElevationForPolygon(
     const samplePoints = coordinates.slice(0, Math.min(4, coordinates.length));
     const locations = samplePoints.map(([lng, lat]) => `${lat},${lng}`).join("|");
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(`${BASE_URL}?locations=${locations}`, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return { elevation: 100, slope: 0, aspect: "N/A" };
@@ -89,7 +94,11 @@ export async function getElevationForPolygon(
 
     return { elevation: 100, slope: 0, aspect: "N/A" };
   } catch (error) {
-    console.error("Elevation polygon fetch error:", error);
+    if (error instanceof Error && error.name === "AbortError") {
+      console.warn("Elevation API timeout, using fallback");
+    } else {
+      console.error("Elevation polygon fetch error:", error);
+    }
     return { elevation: 100, slope: 0, aspect: "N/A" };
   }
 }

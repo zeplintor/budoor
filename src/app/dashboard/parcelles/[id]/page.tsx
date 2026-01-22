@@ -211,7 +211,7 @@ export default function ParcelleDetailPage() {
         setElevation(data.elevation);
         setReports(parcelleReports);
       } catch (err) {
-        console.error("Error loading data:", err);
+        console.error("Error loading parcelle data:", err);
       } finally {
         setIsLoadingData(false);
       }

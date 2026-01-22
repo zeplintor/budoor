@@ -125,13 +125,20 @@ export async function getWeatherData(lat: number, lng: number): Promise<Extended
     forecast_days: "14",
   });
 
-  const response = await fetch(`${BASE_URL}?${params}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-  if (!response.ok) {
-    throw new Error(`Open-Meteo API error: ${response.status}`);
-  }
+  try {
+    const response = await fetch(`${BASE_URL}?${params}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
 
-  const data: OpenMeteoResponse = await response.json();
+    if (!response.ok) {
+      throw new Error(`Open-Meteo API error: ${response.status}`);
+    }
+
+    const data: OpenMeteoResponse = await response.json();
 
   return {
     current: {
@@ -175,6 +182,13 @@ export async function getWeatherData(lat: number, lng: number): Promise<Extended
       evapotranspiration: data.daily.et0_fao_evapotranspiration,
     },
   };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Open-Meteo API timeout");
+    }
+    throw error;
+  }
 }
 
 // Weather code to description and emoji
