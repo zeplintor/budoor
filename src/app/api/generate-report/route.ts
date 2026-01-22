@@ -6,8 +6,6 @@ import {
   type ReportRequest,
   type AgronomicReport,
 } from "@/lib/api/claudeService";
-import { cookies }from "next/headers";
-import { defaultLocale, type Locale, locales } from "@/i18n/config";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -33,16 +31,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get locale from cookie
-    const cookieStore = await cookies();
-    const localeCookie = cookieStore.get("NEXT_LOCALE")?.value;
-    const locale: Locale = locales.includes(localeCookie as Locale)
-      ? (localeCookie as Locale)
-      : defaultLocale;
-
     const userPrompt = buildReportPrompt(data);
-    const languageInstruction = locale === "ar" ? "Please respond in Arabic." : "Please respond in French.";
-    const systemPrompt = `${AGRONOMIST_SYSTEM_PROMPT}\n${languageInstruction}`;
 
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
@@ -51,7 +40,7 @@ export async function POST(request: NextRequest) {
       messages: [
         {
           role: "system",
-          content: systemPrompt,
+          content: AGRONOMIST_SYSTEM_PROMPT,
         },
         {
           role: "user",

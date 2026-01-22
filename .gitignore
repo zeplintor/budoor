@@ -67,6 +67,3 @@ next-env.d.ts
 # Logs
 logs
 *.log
-
-.gemini/
-gha-creds-*.json

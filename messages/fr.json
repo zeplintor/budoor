@@ -307,72 +307,7 @@
       "prairie": "Prairie",
       "autre": "Autre"
     },
-    "noResults": "Aucune parcelle trouvée",
-    "location": "Localisation",
-    "latitude": "Latitude",
-    "longitude": "Longitude",
-    "reportsHistory": "Historique des rapports",
-    "noReportsGenerated": "Aucun rapport généré",
-    "generateFirstReport": "Générer le premier rapport",
-    "statusSummary": {
-      "alertActionRequired": "Alerte - Action requise",
-      "attentionMonitor": "Attention - À surveiller",
-      "optimalConditions": "Conditions optimales"
-    },
-    "weather": {
-      "feelsLike": "Ressenti",
-      "humidity": "Humidité",
-      "wind": "Vent",
-      "cloudCover": "Nuages",
-      "uvIndex": "Indice UV"
-    },
-    "hourlyForecast": "Prévisions heure par heure",
-    "agriculturalAdvice": "Conseils agricoles",
-    "spraying": "Pulvérisation",
-    "irrigation": "Irrigation",
-    "gddAccumulated": "Degrés-jours cumulés (14j)",
-    "frostRisk": "Risque de gel",
-    "heatStress": "Stress thermique",
-    "daysConcerned": "Jours concernés",
-    "fourteenDayForecast": "Prévisions 14 jours",
-    "soilAnalysis": {
-      "title": "Analyse du sol",
-      "estimatedSource": "⚠️ Source estimée",
-      "verifiedSource": "✓ Source vérifiée",
-      "clay": "Argile",
-      "sand": "Sable",
-      "silt": "Limon",
-      "organicCarbon": "Carbone organique"
-    },
-    "topography": {
-      "title": "Topographie",
-      "altitude": "Altitude",
-      "slope": "Pente",
-      "aspect": "Orientation"
-    },
-    "dialog": {
-      "editTitle": "Modifier la parcelle",
-      "name": "Nom de la parcelle",
-      "namePlaceholder": "Ex: Champ Nord",
-      "culture": "Culture",
-      "customCulturePlaceholder": "Saisissez le type de culture",
-      "nameAndCultureRequired": "Le nom et la culture sont requis"
-    },
-    "deleteDialog": {
-      "title": "Supprimer la parcelle",
-      "confirm": "Êtes-vous sûr de vouloir supprimer la parcelle {name} ?",
-      "warning": "Cette action est irréversible. Tous les rapports associés seront également supprimés."
-    },
-    "toast": {
-      "updated": "Parcelle mise à jour",
-      "updateError": "Impossible de mettre à jour la parcelle",
-      "deleteError": "Impossible de supprimer la parcelle"
-    },
-    "error": {
-      "notFound": "Parcelle non trouvée",
-      "loading": "Erreur lors du chargement"
-    },
-    "backToParcelles": "Retour aux parcelles"
+    "noResults": "Aucune parcelle trouvée"
   },
   "reports": {
     "title": "Rapports IA",

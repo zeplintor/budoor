@@ -63,16 +63,16 @@ import type { Parcelle, ElevationData } from "@/types";
 
 // Culture options
 const CULTURES = [
-  { type: "ble", emoji: "🌾" },
-  { type: "mais", emoji: "🌽" },
-  { type: "orge", emoji: "🌿" },
-  { type: "colza", emoji: "🌻" },
-  { type: "tournesol", emoji: "🌻" },
-  { type: "vigne", emoji: "🍇" },
-  { type: "olivier", emoji: "🫒" },
-  { type: "legumes", emoji: "🥬" },
-  { type: "fruits", emoji: "🍎" },
-  { type: "prairie", emoji: "🌱" },
+  { type: "ble", label: "Blé", emoji: "🌾" },
+  { type: "mais", label: "Maïs", emoji: "🌽" },
+  { type: "orge", label: "Orge", emoji: "🌿" },
+  { type: "colza", label: "Colza", emoji: "🌻" },
+  { type: "tournesol", label: "Tournesol", emoji: "🌻" },
+  { type: "vigne", label: "Vigne", emoji: "🍇" },
+  { type: "olivier", label: "Olivier", emoji: "🫒" },
+  { type: "legumes", label: "Légumes", emoji: "🥬" },
+  { type: "fruits", label: "Fruits", emoji: "🍎" },
+  { type: "prairie", label: "Prairie", emoji: "🌱" },
 ];
 
 // Mini map component for parcelle preview
@@ -123,8 +123,6 @@ function MiniMap({ parcelle }: { parcelle: Parcelle }) {
   return <div ref={mapRef} className="h-full w-full rounded-lg" />;
 }
 
-import { useTranslations } from "next-intl";
-
 // Dynamic import to avoid SSR issues
 const MiniMapNoSSR = dynamic(
   () => Promise.resolve(MiniMap),
@@ -135,7 +133,6 @@ export default function ParcelleDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { firebaseUser } = useAuth();
-  const t = useTranslations("parcelles");
   const [parcelle, setParcelle] = useState<Parcelle | null>(null);
   const [weather, setWeather] = useState<ExtendedWeatherData | null>(null);
   const [soil, setSoil] = useState<SoilDataWithSource | null>(null);
@@ -183,18 +180,18 @@ export default function ParcelleDetailPage() {
             setEditCulture("autre");
           }
         } else {
-          setError(t("error.notFound"));
+          setError("Parcelle non trouvée");
         }
       } catch (err) {
         console.error("Error loading parcelle:", err);
-        setError(t("error.loading"));
+        setError("Erreur lors du chargement");
       } finally {
         setIsLoading(false);
       }
     }
 
     loadParcelle();
-  }, [firebaseUser, params.id, t]);
+  }, [firebaseUser, params.id]);
 
   // Load external data and reports
   useEffect(() => {
@@ -227,7 +224,7 @@ export default function ParcelleDetailPage() {
 
     const newCultureType = editCulture === "autre" ? customCulture : editCulture;
     if (!editName.trim() || !newCultureType.trim()) {
-      setNotification({ type: "error", message: t("dialog.nameAndCultureRequired") });
+      setNotification({ type: "error", message: "Le nom et la culture sont requis" });
       return;
     }
 
@@ -251,10 +248,10 @@ export default function ParcelleDetailPage() {
       });
 
       setIsEditOpen(false);
-      setNotification({ type: "success", message: t("toast.updated") });
+      setNotification({ type: "success", message: "Parcelle mise à jour" });
     } catch (err) {
       console.error("Error updating parcelle:", err);
-      setNotification({ type: "error", message: t("toast.updateError") });
+      setNotification({ type: "error", message: "Impossible de mettre à jour la parcelle" });
     } finally {
       setIsSaving(false);
     }
@@ -270,7 +267,7 @@ export default function ParcelleDetailPage() {
       router.push("/dashboard/parcelles");
     } catch (err) {
       console.error("Error deleting parcelle:", err);
-      setNotification({ type: "error", message: t("toast.deleteError") });
+      setNotification({ type: "error", message: "Impossible de supprimer la parcelle" });
       setIsDeleting(false);
     }
   };
@@ -278,7 +275,7 @@ export default function ParcelleDetailPage() {
   if (isLoading) {
     return (
       <>
-        <Header title={t("common:loading")} />
+        <Header title="Chargement..." />
         <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
           <Loader2 className="h-8 w-8 animate-spin text-green-600" />
         </div>
@@ -289,11 +286,11 @@ export default function ParcelleDetailPage() {
   if (error || !parcelle) {
     return (
       <>
-        <Header title={t("common:error")} />
+        <Header title="Erreur" />
         <div className="p-6">
-          <p className="text-red-500">{error || t("error.notFound")}</p>
+          <p className="text-red-500">{error || "Parcelle non trouvée"}</p>
           <Button onClick={() => router.push("/dashboard/parcelles")} className="mt-4">
-            {t("backToParcelles")}
+            Retour aux parcelles
           </Button>
         </div>
       </>
@@ -328,7 +325,7 @@ export default function ParcelleDetailPage() {
               className="shrink-0 h-10 w-10 p-0 md:h-auto md:w-auto md:px-3"
             >
               <ArrowLeft className="h-4 w-4" />
-              <span className="hidden md:inline ml-2">{t("common:back")}</span>
+              <span className="hidden md:inline ml-2">Retour</span>
             </Button>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
@@ -336,7 +333,7 @@ export default function ParcelleDetailPage() {
                 <span className="text-xl md:text-2xl">{cultureEmoji}</span>
               </div>
               <p className="text-sm md:text-base text-gray-500">
-                {t(`cultures.${parcelle.culture.type}`)} • {parcelle.areaHectares} ha
+                {parcelle.culture.type} • {parcelle.areaHectares} ha
               </p>
             </div>
           </div>
@@ -350,7 +347,7 @@ export default function ParcelleDetailPage() {
               className="shrink-0 h-10"
             >
               <Pencil className="h-4 w-4" />
-              <span className="ml-2">{t("common:edit")}</span>
+              <span className="ml-2">Modifier</span>
             </Button>
             <Button
               variant="outline"
@@ -359,12 +356,12 @@ export default function ParcelleDetailPage() {
               onClick={() => setIsDeleteOpen(true)}
             >
               <Trash2 className="h-4 w-4" />
-              <span className="ml-2">{t("common:delete")}</span>
+              <span className="ml-2">Supprimer</span>
             </Button>
             <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
               <Button className="shrink-0 h-10">
                 <Sparkles className="h-4 w-4" />
-                <span className="ml-2 whitespace-nowrap">{t("reports:title")}</span>
+                <span className="ml-2 whitespace-nowrap">Rapport IA</span>
               </Button>
             </Link>
           </div>
@@ -395,7 +392,7 @@ export default function ParcelleDetailPage() {
             <CardHeader className="pb-2 px-4 md:px-6">
               <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <MapPin className="h-5 w-5 text-green-500" />
-                {t("location")}
+                Localisation
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 md:px-6">
@@ -404,11 +401,11 @@ export default function ParcelleDetailPage() {
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs md:text-sm">
                 <div className="bg-gray-50 p-2 rounded">
-                  <p className="text-gray-500">{t("latitude")}</p>
+                  <p className="text-gray-500">Latitude</p>
                   <p className="font-medium">{parcelle.centroid.lat.toFixed(5)}</p>
                 </div>
                 <div className="bg-gray-50 p-2 rounded">
-                  <p className="text-gray-500">{t("longitude")}</p>
+                  <p className="text-gray-500">Longitude</p>
                   <p className="font-medium">{parcelle.centroid.lng.toFixed(5)}</p>
                 </div>
               </div>
@@ -421,10 +418,10 @@ export default function ParcelleDetailPage() {
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                   <FileText className="h-5 w-5 text-blue-500" />
-                  <span className="truncate">{t("reportsHistory")}</span>
+                  <span className="truncate">Historique</span>
                 </CardTitle>
                 <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
-                  <Button variant="outline" size="sm" className="shrink-0 h-9">{t("common:viewAll")}</Button>
+                  <Button variant="outline" size="sm" className="shrink-0 h-9">Voir tout</Button>
                 </Link>
               </div>
             </CardHeader>
@@ -432,10 +429,10 @@ export default function ParcelleDetailPage() {
               {reports.length === 0 ? (
                 <div className="text-center py-6 md:py-8 text-gray-500">
                   <FileText className="h-10 md:h-12 w-10 md:w-12 mx-auto mb-3 text-gray-300" />
-                  <p className="text-sm md:text-base">{t("noReportsGenerated")}</p>
+                  <p className="text-sm md:text-base">Aucun rapport généré</p>
                   <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
                     <Button variant="outline" size="sm" className="mt-3 h-10">
-                      {t("generateFirstReport")}
+                      Générer le premier rapport
                     </Button>
                   </Link>
                 </div>
@@ -461,7 +458,8 @@ export default function ParcelleDetailPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-sm">
-                            {t(`reports.status.${report.status}`)}
+                            {report.status === "alerte" ? "Alerte" :
+                             report.status === "vigilance" ? "Vigilance" : "OK"}
                           </p>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <Calendar className="h-3 w-3 shrink-0" />
@@ -510,10 +508,10 @@ export default function ParcelleDetailPage() {
                 <div className="flex-1">
                   <p className="font-semibold">
                     {conditionSummary.status === "alerte"
-                      ? t("statusSummary.alertActionRequired")
+                      ? "Alerte - Action requise"
                       : conditionSummary.status === "attention"
-                      ? t("statusSummary.attentionMonitor")
-                      : t("statusSummary.optimalConditions")}
+                      ? "Attention - À surveiller"
+                      : "Conditions optimales"}
                   </p>
                   <div className="flex flex-wrap gap-4 mt-2">
                     {conditionSummary.alerts.length > 0 && (
@@ -556,7 +554,7 @@ export default function ParcelleDetailPage() {
                         {Math.round(weather.current.temperature)}°C
                       </p>
                       <p className="text-blue-100 text-sm md:text-base">
-                        {t("weather.feelsLike")} {Math.round(weather.current.apparentTemperature)}°C
+                        Ressenti {Math.round(weather.current.apparentTemperature)}°C
                       </p>
                     </div>
                   </div>
@@ -567,14 +565,14 @@ export default function ParcelleDetailPage() {
                     <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
                       <Droplets className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-blue-100 text-xs">{t("weather.humidity")}</p>
+                        <p className="text-blue-100 text-xs">Humidité</p>
                         <p className="font-semibold">{weather.current.humidity}%</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
                       <Wind className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-blue-100 text-xs">{t("weather.wind")}</p>
+                        <p className="text-blue-100 text-xs">Vent</p>
                         <p className="font-semibold truncate">
                           {Math.round(weather.current.windSpeed)} km/h
                         </p>
@@ -583,14 +581,14 @@ export default function ParcelleDetailPage() {
                     <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
                       <Cloud className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-blue-100 text-xs">{t("weather.cloudCover")}</p>
+                        <p className="text-blue-100 text-xs">Nuages</p>
                         <p className="font-semibold">{weather.current.cloudCover}%</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
                       <Sun className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
-                        <p className="text-blue-100 text-xs">{t("weather.uvIndex")}</p>
+                        <p className="text-blue-100 text-xs">UV</p>
                         <p className="font-semibold">{weather.current.uvIndex}</p>
                       </div>
                     </div>
@@ -621,7 +619,7 @@ export default function ParcelleDetailPage() {
             {hourlyForecast.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">{t("hourlyForecast")}</CardTitle>
+                  <CardTitle className="text-lg">Prévisions heure par heure</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex overflow-x-auto gap-4 pb-2">
@@ -651,7 +649,7 @@ export default function ParcelleDetailPage() {
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Sprout className="h-5 w-5 text-green-500" />
-                      {t("agriculturalAdvice")}
+                      Conseils agricoles
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -667,7 +665,7 @@ export default function ParcelleDetailPage() {
                         }`} />
                       </div>
                       <div>
-                        <p className="font-medium">{t("spraying")}</p>
+                        <p className="font-medium">Pulvérisation</p>
                         <p className="text-sm text-gray-600">{agriSummary.sprayingAdvice}</p>
                       </div>
                     </div>
@@ -686,7 +684,7 @@ export default function ParcelleDetailPage() {
                         }`} />
                       </div>
                       <div>
-                        <p className="font-medium">{t("irrigation")}</p>
+                        <p className="font-medium">Irrigation</p>
                         <p className="text-sm text-gray-600">{agriSummary.irrigationAdvice}</p>
                       </div>
                     </div>
@@ -697,7 +695,7 @@ export default function ParcelleDetailPage() {
                         <Thermometer className="h-4 w-4 text-orange-600" />
                       </div>
                       <div>
-                        <p className="font-medium">{t("gddAccumulated")}</p>
+                        <p className="font-medium">Degrés-jours cumulés (14j)</p>
                         <p className="text-sm text-gray-600">{agriSummary.gddAccumulated} GDD (base 10°C)</p>
                       </div>
                     </div>
@@ -705,14 +703,14 @@ export default function ParcelleDetailPage() {
                     {/* Frost/Heat warnings */}
                     {agriSummary.frostRisk && (
                       <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="font-medium text-blue-800">{t("frostRisk")}</p>
-                        <p className="text-sm text-blue-600">{t("daysConcerned")}: {agriSummary.frostDays.join(", ")}</p>
+                        <p className="font-medium text-blue-800">Risque de gel</p>
+                        <p className="text-sm text-blue-600">Jours concernés: {agriSummary.frostDays.join(", ")}</p>
                       </div>
                     )}
                     {agriSummary.heatStress && (
                       <div className="p-3 bg-red-50 rounded-lg border border-red-200">
-                        <p className="font-medium text-red-800">{t("heatStress")}</p>
-                        <p className="text-sm text-red-600">{t("daysConcerned")}: {agriSummary.heatDays.join(", ")}</p>
+                        <p className="font-medium text-red-800">Stress thermique</p>
+                        <p className="text-sm text-red-600">Jours concernés: {agriSummary.heatDays.join(", ")}</p>
                       </div>
                     )}
                   </CardContent>
@@ -725,7 +723,7 @@ export default function ParcelleDetailPage() {
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Thermometer className="h-5 w-5 text-orange-500" />
-                      {t("fourteenDayForecast")}
+                      Prévisions 14 jours
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -787,7 +785,7 @@ export default function ParcelleDetailPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Layers className="h-5 w-5 text-amber-600" />
-                    {t("soilAnalysis.title")}
+                    Analyse du sol
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -799,7 +797,7 @@ export default function ParcelleDetailPage() {
                           ? "bg-yellow-100 text-yellow-700"
                           : "bg-green-100 text-green-700"
                       }`}>
-                        {soil.isEstimated ? t("soilAnalysis.estimatedSource") : t("soilAnalysis.verifiedSource")}
+                        {soil.isEstimated ? "⚠️ " : "✓ "}{soil.source}
                       </div>
                       <div className="text-center py-2">
                         <p className="text-xl font-semibold text-gray-900">{soil.texture}</p>
@@ -808,7 +806,7 @@ export default function ParcelleDetailPage() {
                       <div className="space-y-3">
                         <div>
                           <div className="flex justify-between text-sm mb-1">
-                            <span>{t("soilAnalysis.clay")}</span>
+                            <span>Argile</span>
                             <span>{soil.clay}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -820,7 +818,7 @@ export default function ParcelleDetailPage() {
                         </div>
                         <div>
                           <div className="flex justify-between text-sm mb-1">
-                            <span>{t("soilAnalysis.sand")}</span>
+                            <span>Sable</span>
                             <span>{soil.sand}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -832,7 +830,7 @@ export default function ParcelleDetailPage() {
                         </div>
                         <div>
                           <div className="flex justify-between text-sm mb-1">
-                            <span>{t("soilAnalysis.silt")}</span>
+                            <span>Limon</span>
                             <span>{soil.silt}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -844,7 +842,7 @@ export default function ParcelleDetailPage() {
                         </div>
                       </div>
                       <div className="pt-2 border-t text-sm">
-                        <p className="text-gray-500">{t("soilAnalysis.organicCarbon")}: {soil.organicCarbon} g/kg</p>
+                        <p className="text-gray-500">Carbone organique: {soil.organicCarbon} g/kg</p>
                       </div>
                       {soilQuality && (
                         <div className={`p-2 rounded text-center ${
@@ -858,7 +856,7 @@ export default function ParcelleDetailPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-4">{t("common:dataNotAvailable")}</p>
+                    <p className="text-gray-400 text-center py-4">Données non disponibles</p>
                   )}
                 </CardContent>
               </Card>
@@ -868,7 +866,7 @@ export default function ParcelleDetailPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Mountain className="h-5 w-5 text-gray-600" />
-                    {t("topography.title")}
+                    Topographie
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -878,18 +876,18 @@ export default function ParcelleDetailPage() {
                         <p className="text-4xl font-bold text-gray-900">
                           {elevation.elevation} m
                         </p>
-                        <p className="text-gray-500">{t("topography.altitude")}</p>
+                        <p className="text-gray-500">Altitude</p>
                       </div>
                       {elevation.slope !== undefined && (
                         <div className="flex justify-around text-center">
                           <div>
                             <p className="text-2xl font-semibold">{elevation.slope}%</p>
-                            <p className="text-sm text-gray-500">{t("topography.slope")}</p>
+                            <p className="text-sm text-gray-500">Pente</p>
                           </div>
                           {elevation.aspect && (
                             <div>
                               <p className="text-2xl font-semibold">{elevation.aspect}</p>
-                              <p className="text-sm text-gray-500">{t("topography.aspect")}</p>
+                              <p className="text-sm text-gray-500">Orientation</p>
                             </div>
                           )}
                         </div>
@@ -908,7 +906,7 @@ export default function ParcelleDetailPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-4">{t("common:dataNotAvailable")}</p>
+                    <p className="text-gray-400 text-center py-4">Données non disponibles</p>
                   )}
                 </CardContent>
               </Card>
@@ -921,20 +919,20 @@ export default function ParcelleDetailPage() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("dialog.editTitle")}</DialogTitle>
+            <DialogTitle>Modifier la parcelle</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="edit-name">{t("dialog.name")}</Label>
+              <Label htmlFor="edit-name">Nom de la parcelle</Label>
               <Input
                 id="edit-name"
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
-                placeholder={t("dialog.namePlaceholder")}
+                placeholder="Ex: Champ Nord"
               />
             </div>
             <div className="space-y-2">
-              <Label>{t("dialog.culture")}</Label>
+              <Label>Culture</Label>
               <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                 {CULTURES.map((culture) => (
                   <button
@@ -946,7 +944,7 @@ export default function ParcelleDetailPage() {
                         : "border-gray-200 hover:border-gray-300"
                     }`}
                     onClick={() => setEditCulture(culture.type)}
-                    title={t(`cultures.${culture.type}`)}
+                    title={culture.label}
                   >
                     <span className="text-xl md:text-2xl">{culture.emoji}</span>
                   </button>
@@ -959,7 +957,7 @@ export default function ParcelleDetailPage() {
                       : "border-gray-200 hover:border-gray-300"
                   }`}
                   onClick={() => setEditCulture("autre")}
-                  title={t("cultures.autre")}
+                  title="Autre"
                 >
                   <span className="text-xl md:text-2xl">+</span>
                 </button>
@@ -968,7 +966,7 @@ export default function ParcelleDetailPage() {
                 <Input
                   value={customCulture}
                   onChange={(e) => setCustomCulture(e.target.value)}
-                  placeholder={t("dialog.customCulturePlaceholder")}
+                  placeholder="Saisissez le type de culture"
                   className="mt-2"
                 />
               )}
@@ -976,11 +974,11 @@ export default function ParcelleDetailPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsEditOpen(false)}>
-              {t("common:cancel")}
+              Annuler
             </Button>
             <Button onClick={handleSaveEdit} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t("common:save")}
+              Enregistrer
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -990,23 +988,23 @@ export default function ParcelleDetailPage() {
       <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t("deleteDialog.title")}</DialogTitle>
+            <DialogTitle>Supprimer la parcelle</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <p className="text-gray-600">
-              {t("deleteDialog.confirm", { name: parcelle.name })}
+              Êtes-vous sûr de vouloir supprimer la parcelle <strong>{parcelle.name}</strong> ?
             </p>
             <p className="text-sm text-red-500 mt-2">
-              {t("deleteDialog.warning")}
+              Cette action est irréversible. Tous les rapports associés seront également supprimés.
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
-              {t("common:cancel")}
+              Annuler
             </Button>
             <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t("common:delete")}
+              Supprimer
             </Button>
           </DialogFooter>
         </DialogContent>
