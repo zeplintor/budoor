@@ -10,6 +10,7 @@ export interface User {
   language: "fr" | "en" | "ar";
   notificationFrequency: "daily" | "weekly" | "alerts_only" | "none";
   subscription: "free" | "pro";
+  onboardingCompleted?: boolean;
   createdAt: Timestamp;
   updatedAt: Timestamp;
   // WhatsApp settings for Cloud Functions

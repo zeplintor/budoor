@@ -1,9 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import L from "leaflet";
 import { Header } from "@/components/dashboard";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Label,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui";
 import {
   ArrowLeft,
   Loader2,
@@ -15,7 +30,6 @@ import {
   Layers,
   AlertTriangle,
   CheckCircle,
-  Leaf,
   Sun,
   Sunrise,
   Sunset,
@@ -23,10 +37,16 @@ import {
   CloudRain,
   Navigation,
   Sparkles,
+  Pencil,
+  Trash2,
+  FileText,
+  MapPin,
+  Calendar,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { getParcelles } from "@/lib/firebase/parcelles";
+import { getParcelles, updateParcelle, deleteParcelle } from "@/lib/firebase/parcelles";
+import { getReportsByParcelle, type SavedReport } from "@/lib/firebase/reports";
 import {
   getParcelleData,
   getParcelleConditionSummary,
@@ -43,6 +63,74 @@ import { getSoilQuality, SoilDataWithSource } from "@/lib/api/soilGrids";
 import { getElevationClassification } from "@/lib/api/openElevation";
 import type { Parcelle, ElevationData } from "@/types";
 
+// Culture options
+const CULTURES = [
+  { type: "ble", label: "Blé", emoji: "🌾" },
+  { type: "mais", label: "Maïs", emoji: "🌽" },
+  { type: "orge", label: "Orge", emoji: "🌿" },
+  { type: "colza", label: "Colza", emoji: "🌻" },
+  { type: "tournesol", label: "Tournesol", emoji: "🌻" },
+  { type: "vigne", label: "Vigne", emoji: "🍇" },
+  { type: "olivier", label: "Olivier", emoji: "🫒" },
+  { type: "legumes", label: "Légumes", emoji: "🥬" },
+  { type: "fruits", label: "Fruits", emoji: "🍎" },
+  { type: "prairie", label: "Prairie", emoji: "🌱" },
+];
+
+// Mini map component for parcelle preview
+function MiniMap({ parcelle }: { parcelle: Parcelle }) {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      touchZoom: false,
+    });
+
+    mapInstanceRef.current = map;
+
+    L.tileLayer(
+      "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+      {}
+    ).addTo(map);
+
+    const polygon = L.polygon(
+      parcelle.geometry.coordinates[0].map(([lng, lat]) => [lat, lng]),
+      {
+        color: "#22c55e",
+        fillColor: "#22c55e",
+        fillOpacity: 0.4,
+        weight: 2,
+      }
+    );
+
+    polygon.addTo(map);
+    map.fitBounds(polygon.getBounds(), { padding: [20, 20] });
+
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [parcelle]);
+
+  return <div ref={mapRef} className="h-full w-full rounded-lg" />;
+}
+
+// Dynamic import to avoid SSR issues
+const MiniMapNoSSR = dynamic(
+  () => Promise.resolve(MiniMap),
+  { ssr: false }
+);
+
 export default function ParcelleDetailPage() {
   const params = useParams();
   const router = useRouter();
@@ -51,9 +139,30 @@ export default function ParcelleDetailPage() {
   const [weather, setWeather] = useState<ExtendedWeatherData | null>(null);
   const [soil, setSoil] = useState<SoilDataWithSource | null>(null);
   const [elevation, setElevation] = useState<ElevationData | null>(null);
+  const [reports, setReports] = useState<SavedReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // Edit state
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editCulture, setEditCulture] = useState("");
+  const [customCulture, setCustomCulture] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Delete state
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Auto-hide notification
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => setNotification(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   // Load parcelle
   useEffect(() => {
@@ -66,8 +175,14 @@ export default function ParcelleDetailPage() {
         const found = parcelles.find((p) => p.id === params.id);
         if (found) {
           setParcelle(found);
+          setEditName(found.name);
+          setEditCulture(found.culture.type);
+          if (!CULTURES.find(c => c.type === found.culture.type)) {
+            setCustomCulture(found.culture.type);
+            setEditCulture("autre");
+          }
         } else {
-          setError("Parcelle non trouvee");
+          setError("Parcelle non trouvée");
         }
       } catch (err) {
         console.error("Error loading parcelle:", err);
@@ -80,17 +195,21 @@ export default function ParcelleDetailPage() {
     loadParcelle();
   }, [firebaseUser, params.id]);
 
-  // Load external data
+  // Load external data and reports
   useEffect(() => {
     async function loadData() {
-      if (!parcelle) return;
+      if (!parcelle || !firebaseUser) return;
 
       try {
         setIsLoadingData(true);
-        const data = await getParcelleData(parcelle);
+        const [data, parcelleReports] = await Promise.all([
+          getParcelleData(parcelle),
+          getReportsByParcelle(firebaseUser.uid, parcelle.id, 5),
+        ]);
         setWeather(data.weather);
         setSoil(data.soil);
         setElevation(data.elevation);
+        setReports(parcelleReports);
       } catch (err) {
         console.error("Error loading data:", err);
       } finally {
@@ -99,7 +218,61 @@ export default function ParcelleDetailPage() {
     }
 
     loadData();
-  }, [parcelle]);
+  }, [parcelle, firebaseUser]);
+
+  // Handle edit save
+  const handleSaveEdit = async () => {
+    if (!firebaseUser || !parcelle) return;
+
+    const newCultureType = editCulture === "autre" ? customCulture : editCulture;
+    if (!editName.trim() || !newCultureType.trim()) {
+      setNotification({ type: "error", message: "Le nom et la culture sont requis" });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      await updateParcelle(firebaseUser.uid, parcelle.id, {
+        name: editName.trim(),
+        culture: {
+          ...parcelle.culture,
+          type: newCultureType,
+        },
+      });
+
+      setParcelle({
+        ...parcelle,
+        name: editName.trim(),
+        culture: {
+          ...parcelle.culture,
+          type: newCultureType,
+        },
+      });
+
+      setIsEditOpen(false);
+      setNotification({ type: "success", message: "Parcelle mise à jour" });
+    } catch (err) {
+      console.error("Error updating parcelle:", err);
+      setNotification({ type: "error", message: "Impossible de mettre à jour la parcelle" });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Handle delete
+  const handleDelete = async () => {
+    if (!firebaseUser || !parcelle) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteParcelle(firebaseUser.uid, parcelle.id);
+      router.push("/dashboard/parcelles");
+    } catch (err) {
+      console.error("Error deleting parcelle:", err);
+      setNotification({ type: "error", message: "Impossible de supprimer la parcelle" });
+      setIsDeleting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -117,7 +290,7 @@ export default function ParcelleDetailPage() {
       <>
         <Header title="Erreur" />
         <div className="p-6">
-          <p className="text-red-500">{error || "Parcelle non trouvee"}</p>
+          <p className="text-red-500">{error || "Parcelle non trouvée"}</p>
           <Button onClick={() => router.push("/dashboard/parcelles")} className="mt-4">
             Retour aux parcelles
           </Button>
@@ -137,13 +310,15 @@ export default function ParcelleDetailPage() {
       ? getParcelleConditionSummary({ weather, soil, elevation, fetchedAt: new Date() })
       : null;
 
+  const cultureEmoji = CULTURES.find(c => c.type === parcelle.culture.type)?.emoji || "🌱";
+
   return (
     <>
       <Header title={parcelle.name} />
 
       <div className="p-6 max-w-7xl mx-auto space-y-6">
         {/* Back button and header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
@@ -154,18 +329,148 @@ export default function ParcelleDetailPage() {
               Retour
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{parcelle.name}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900">{parcelle.name}</h1>
+                <span className="text-2xl">{cultureEmoji}</span>
+              </div>
               <p className="text-gray-500">
-                {parcelle.culture.type} - {parcelle.areaHectares} ha
+                {parcelle.culture.type} • {parcelle.areaHectares} ha
               </p>
             </div>
           </div>
-          <Link href="/dashboard/reports">
-            <Button>
-              <Sparkles className="h-4 w-4" />
-              Generer rapport IA
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setIsEditOpen(true)}>
+              <Pencil className="h-4 w-4" />
+              Modifier
             </Button>
-          </Link>
+            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" onClick={() => setIsDeleteOpen(true)}>
+              <Trash2 className="h-4 w-4" />
+              Supprimer
+            </Button>
+            <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
+              <Button>
+                <Sparkles className="h-4 w-4" />
+                Générer rapport IA
+              </Button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Notification */}
+        {notification && (
+          <div className={`p-4 rounded-lg ${
+            notification.type === "success"
+              ? "bg-green-50 border border-green-200 text-green-800"
+              : "bg-red-50 border border-red-200 text-red-800"
+          }`}>
+            <div className="flex items-center gap-2">
+              {notification.type === "success" ? (
+                <CheckCircle className="h-5 w-5 text-green-500" />
+              ) : (
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+              )}
+              <span>{notification.message}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Mini map and reports row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Mini Map */}
+          <Card className="lg:col-span-1">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <MapPin className="h-5 w-5 text-green-500" />
+                Localisation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-48 rounded-lg overflow-hidden">
+                <MiniMapNoSSR parcelle={parcelle} />
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div className="bg-gray-50 p-2 rounded">
+                  <p className="text-gray-500">Latitude</p>
+                  <p className="font-medium">{parcelle.centroid.lat.toFixed(5)}</p>
+                </div>
+                <div className="bg-gray-50 p-2 rounded">
+                  <p className="text-gray-500">Longitude</p>
+                  <p className="font-medium">{parcelle.centroid.lng.toFixed(5)}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Reports */}
+          <Card className="lg:col-span-2">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="h-5 w-5 text-blue-500" />
+                  Historique des rapports
+                </CardTitle>
+                <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
+                  <Button variant="outline" size="sm">Voir tout</Button>
+                </Link>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {reports.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <FileText className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+                  <p>Aucun rapport généré pour cette parcelle</p>
+                  <Link href={`/dashboard/reports?parcelleId=${parcelle.id}`}>
+                    <Button variant="outline" size="sm" className="mt-3">
+                      Générer le premier rapport
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {reports.map((report) => (
+                    <div
+                      key={report.odId}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-full ${
+                          report.status === "alerte" ? "bg-red-100" :
+                          report.status === "vigilance" ? "bg-yellow-100" : "bg-green-100"
+                        }`}>
+                          {report.status === "alerte" ? (
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          ) : report.status === "vigilance" ? (
+                            <AlertTriangle className="h-4 w-4 text-yellow-500" />
+                          ) : (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">
+                            {report.status === "alerte" ? "Alerte" :
+                             report.status === "vigilance" ? "Vigilance" : "OK"}
+                          </p>
+                          <p className="text-xs text-gray-500 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(report.generatedAt).toLocaleDateString("fr-FR", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-sm text-gray-600 max-w-md truncate hidden md:block">
+                        {report.summary}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
         {/* Status summary */}
@@ -193,7 +498,7 @@ export default function ParcelleDetailPage() {
                     {conditionSummary.status === "alerte"
                       ? "Alerte - Action requise"
                       : conditionSummary.status === "attention"
-                      ? "Attention - A surveiller"
+                      ? "Attention - À surveiller"
                       : "Conditions optimales"}
                   </p>
                   <div className="flex flex-wrap gap-4 mt-2">
@@ -221,7 +526,7 @@ export default function ParcelleDetailPage() {
         {isLoadingData ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-green-600" />
-            <span className="ml-3 text-gray-500">Chargement des donnees...</span>
+            <span className="ml-3 text-gray-500">Chargement des données...</span>
           </div>
         ) : (
           <>
@@ -251,7 +556,7 @@ export default function ParcelleDetailPage() {
                       <div className="flex items-center gap-2">
                         <Droplets className="h-5 w-5 text-blue-200" />
                         <div>
-                          <p className="text-blue-100">Humidite</p>
+                          <p className="text-blue-100">Humidité</p>
                           <p className="font-semibold">{weather.current.humidity}%</p>
                         </div>
                       </div>
@@ -306,7 +611,7 @@ export default function ParcelleDetailPage() {
             {hourlyForecast.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Previsions heure par heure</CardTitle>
+                  <CardTitle className="text-lg">Prévisions heure par heure</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex overflow-x-auto gap-4 pb-2">
@@ -352,7 +657,7 @@ export default function ParcelleDetailPage() {
                         }`} />
                       </div>
                       <div>
-                        <p className="font-medium">Pulverisation</p>
+                        <p className="font-medium">Pulvérisation</p>
                         <p className="text-sm text-gray-600">{agriSummary.sprayingAdvice}</p>
                       </div>
                     </div>
@@ -382,7 +687,7 @@ export default function ParcelleDetailPage() {
                         <Thermometer className="h-4 w-4 text-orange-600" />
                       </div>
                       <div>
-                        <p className="font-medium">Degres-jours cumules (14j)</p>
+                        <p className="font-medium">Degrés-jours cumulés (14j)</p>
                         <p className="text-sm text-gray-600">{agriSummary.gddAccumulated} GDD (base 10°C)</p>
                       </div>
                     </div>
@@ -391,13 +696,13 @@ export default function ParcelleDetailPage() {
                     {agriSummary.frostRisk && (
                       <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
                         <p className="font-medium text-blue-800">Risque de gel</p>
-                        <p className="text-sm text-blue-600">Jours concernes: {agriSummary.frostDays.join(", ")}</p>
+                        <p className="text-sm text-blue-600">Jours concernés: {agriSummary.frostDays.join(", ")}</p>
                       </div>
                     )}
                     {agriSummary.heatStress && (
                       <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                         <p className="font-medium text-red-800">Stress thermique</p>
-                        <p className="text-sm text-red-600">Jours concernes: {agriSummary.heatDays.join(", ")}</p>
+                        <p className="text-sm text-red-600">Jours concernés: {agriSummary.heatDays.join(", ")}</p>
                       </div>
                     )}
                   </CardContent>
@@ -410,7 +715,7 @@ export default function ParcelleDetailPage() {
                   <CardHeader className="pb-2">
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Thermometer className="h-5 w-5 text-orange-500" />
-                      Previsions 14 jours
+                      Prévisions 14 jours
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -466,7 +771,7 @@ export default function ParcelleDetailPage() {
             </div>
 
             {/* Soil & Elevation Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Soil Card */}
               <Card>
                 <CardHeader className="pb-2">
@@ -543,7 +848,7 @@ export default function ParcelleDetailPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-4">Donnees non disponibles</p>
+                    <p className="text-gray-400 text-center py-4">Données non disponibles</p>
                   )}
                 </CardContent>
               </Card>
@@ -593,44 +898,109 @@ export default function ParcelleDetailPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="text-gray-400 text-center py-4">Donnees non disponibles</p>
+                    <p className="text-gray-400 text-center py-4">Données non disponibles</p>
                   )}
-                </CardContent>
-              </Card>
-
-              {/* Parcelle Info Card */}
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Leaf className="h-5 w-5 text-green-500" />
-                    Informations parcelle
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-500">Culture</span>
-                      <span className="font-medium">{parcelle.culture.type}</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-500">Surface</span>
-                      <span className="font-medium">{parcelle.areaHectares} ha</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span className="text-gray-500">Latitude</span>
-                      <span className="font-medium">{parcelle.centroid.lat.toFixed(5)}</span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                      <span className="text-gray-500">Longitude</span>
-                      <span className="font-medium">{parcelle.centroid.lng.toFixed(5)}</span>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>
           </>
         )}
       </div>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Modifier la parcelle</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-name">Nom de la parcelle</Label>
+              <Input
+                id="edit-name"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                placeholder="Ex: Champ Nord"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Culture</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {CULTURES.map((culture) => (
+                  <button
+                    key={culture.type}
+                    type="button"
+                    className={`p-3 rounded-lg border-2 transition-all ${
+                      editCulture === culture.type
+                        ? "border-green-500 bg-green-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setEditCulture(culture.type)}
+                    title={culture.label}
+                  >
+                    <span className="text-2xl">{culture.emoji}</span>
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    editCulture === "autre"
+                      ? "border-green-500 bg-green-50"
+                      : "border-gray-200 hover:border-gray-300"
+                  }`}
+                  onClick={() => setEditCulture("autre")}
+                  title="Autre"
+                >
+                  <span className="text-2xl">+</span>
+                </button>
+              </div>
+              {editCulture === "autre" && (
+                <Input
+                  value={customCulture}
+                  onChange={(e) => setCustomCulture(e.target.value)}
+                  placeholder="Saisissez le type de culture"
+                  className="mt-2"
+                />
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditOpen(false)}>
+              Annuler
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={isSaving}>
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Supprimer la parcelle</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-600">
+              Êtes-vous sûr de vouloir supprimer la parcelle <strong>{parcelle.name}</strong> ?
+            </p>
+            <p className="text-sm text-red-500 mt-2">
+              Cette action est irréversible. Tous les rapports associés seront également supprimés.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteOpen(false)}>
+              Annuler
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting && <Loader2 className="h-4 w-4 animate-spin" />}
+              Supprimer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
