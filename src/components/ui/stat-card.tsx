@@ -58,7 +58,7 @@ const StatCard = React.forwardRef<HTMLDivElement, StatCardProps>(
               {trend && (
                 <span
                   className={cn(
-                    "inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-medium",
+                    "inline-flex items-center gap-0.5 rounded-[var(--radius-xl)] px-2 py-0.5 text-xs font-medium",
                     trend.isPositive
                       ? "bg-[var(--status-success-light)] text-[var(--status-success)]"
                       : "bg-[var(--status-error-light)] text-[var(--status-error)]"

@@ -125,7 +125,7 @@ export function TourGuide({ steps, onComplete, onSkip }: TourGuideProps) {
                   y={targetRect.top - 8}
                   width={targetRect.width + 16}
                   height={targetRect.height + 16}
-                  rx="8"
+                  rx={8}
                   fill="black"
                 />
               )}
@@ -145,7 +145,7 @@ export function TourGuide({ steps, onComplete, onSkip }: TourGuideProps) {
       {/* Highlight border around target */}
       {targetRect && (
         <div
-          className="fixed z-50 border-2 border-green-500 rounded-lg pointer-events-none animate-pulse"
+          className="fixed z-50 border-2 border-green-500 rounded-[var(--radius-lg)] pointer-events-none animate-pulse"
           style={{
             top: targetRect.top - 8,
             left: targetRect.left - 8,
@@ -157,7 +157,7 @@ export function TourGuide({ steps, onComplete, onSkip }: TourGuideProps) {
 
       {/* Tooltip */}
       <div
-        className="fixed z-50 w-80 bg-white rounded-xl shadow-2xl p-4"
+        className="fixed z-50 w-80 bg-white rounded-[var(--radius-xl)] shadow-2xl p-4"
         style={{
           top: tooltipPosition.top,
           left: tooltipPosition.left,

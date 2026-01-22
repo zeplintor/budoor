@@ -65,7 +65,7 @@ export function WelcomeModal({ userName, onComplete }: WelcomeModalProps) {
       <div className="absolute inset-0 bg-black/60" />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+  <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-2xl max-w-md w-full overflow-hidden">
         {/* Progress bar */}
         <div className="h-1 bg-gray-100">
           <div

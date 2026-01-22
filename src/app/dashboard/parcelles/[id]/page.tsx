@@ -120,7 +120,7 @@ function MiniMap({ parcelle }: { parcelle: Parcelle }) {
     };
   }, [parcelle]);
 
-  return <div ref={mapRef} className="h-full w-full rounded-lg" />;
+  return <div ref={mapRef} className="h-full w-full rounded-[var(--radius-lg)]" />;
 }
 
 // Dynamic import to avoid SSR issues
@@ -369,7 +369,7 @@ export default function ParcelleDetailPage() {
 
         {/* Notification */}
         {notification && (
-          <div className={`p-4 rounded-lg ${
+          <div className={`p-4 rounded-[var(--radius-lg)] ${
             notification.type === "success"
               ? "bg-green-50 border border-green-200 text-green-800"
               : "bg-red-50 border border-red-200 text-red-800"
@@ -396,7 +396,7 @@ export default function ParcelleDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 md:px-6">
-              <div className="h-40 md:h-48 rounded-lg overflow-hidden">
+              <div className="h-40 md:h-48 rounded-[var(--radius-lg)] overflow-hidden">
                 <MiniMapNoSSR parcelle={parcelle} />
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2 text-xs md:text-sm">
@@ -441,7 +441,7 @@ export default function ParcelleDetailPage() {
                   {reports.map((report) => (
                     <div
                       key={report.odId}
-                      className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-[var(--radius-lg)] hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
                         <div className={`p-1.5 md:p-2 rounded-full shrink-0 ${
@@ -562,14 +562,14 @@ export default function ParcelleDetailPage() {
 
                   {/* Weather details grid - 2x2 on mobile, inline on desktop */}
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-sm">
-                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                    <div className="flex items-center gap-2 bg-white/10 rounded-[var(--radius-lg)] p-2.5 md:p-3">
                       <Droplets className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-blue-100 text-xs">Humidité</p>
                         <p className="font-semibold">{weather.current.humidity}%</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                    <div className="flex items-center gap-2 bg-white/10 rounded-[var(--radius-lg)] p-2.5 md:p-3">
                       <Wind className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-blue-100 text-xs">Vent</p>
@@ -578,14 +578,14 @@ export default function ParcelleDetailPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                    <div className="flex items-center gap-2 bg-white/10 rounded-[var(--radius-lg)] p-2.5 md:p-3">
                       <Cloud className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-blue-100 text-xs">Nuages</p>
                         <p className="font-semibold">{weather.current.cloudCover}%</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 bg-white/10 rounded-lg p-2.5 md:p-3">
+                    <div className="flex items-center gap-2 bg-white/10 rounded-[var(--radius-lg)] p-2.5 md:p-3">
                       <Sun className="h-5 w-5 text-blue-200 shrink-0" />
                       <div className="min-w-0">
                         <p className="text-blue-100 text-xs">UV</p>
@@ -626,7 +626,7 @@ export default function ParcelleDetailPage() {
                     {hourlyForecast.slice(0, 12).map((hour, i) => {
                       const hourWeather = getWeatherFromCode(hour.weatherCode);
                       return (
-                        <div key={i} className="flex-shrink-0 text-center p-3 rounded-lg bg-gray-50 min-w-[80px]">
+                        <div key={i} className="flex-shrink-0 text-center p-3 rounded-[var(--radius-lg)] bg-gray-50 min-w-[80px]">
                           <p className="text-sm text-gray-500">{hour.hour}</p>
                           <p className="text-2xl my-1">{hourWeather.emoji}</p>
                           <p className="font-semibold">{Math.round(hour.temperature)}°</p>
@@ -702,13 +702,13 @@ export default function ParcelleDetailPage() {
 
                     {/* Frost/Heat warnings */}
                     {agriSummary.frostRisk && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="p-3 bg-blue-50 rounded-[var(--radius-lg)] border border-blue-200">
                         <p className="font-medium text-blue-800">Risque de gel</p>
                         <p className="text-sm text-blue-600">Jours concernés: {agriSummary.frostDays.join(", ")}</p>
                       </div>
                     )}
                     {agriSummary.heatStress && (
-                      <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                      <div className="p-3 bg-red-50 rounded-[var(--radius-lg)] border border-red-200">
                         <p className="font-medium text-red-800">Stress thermique</p>
                         <p className="text-sm text-red-600">Jours concernés: {agriSummary.heatDays.join(", ")}</p>
                       </div>
@@ -792,7 +792,7 @@ export default function ParcelleDetailPage() {
                   {soil ? (
                     <div className="space-y-4">
                       {/* Source indicator */}
-                      <div className={`text-xs px-2 py-1 rounded-full text-center ${
+                      <div className={`text-xs px-2 py-1 rounded-[var(--radius-xl)] text-center ${
                         soil.isEstimated
                           ? "bg-yellow-100 text-yellow-700"
                           : "bg-green-100 text-green-700"

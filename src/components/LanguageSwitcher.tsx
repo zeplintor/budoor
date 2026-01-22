@@ -19,7 +19,7 @@ export function LanguageSwitcher({ variant = "dropdown", className = "" }: Langu
           <button
             key={loc}
             onClick={() => setLocale(loc)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+            className={`px-3 py-1.5 text-sm font-medium rounded-[var(--radius-md)] transition-colors ${
               locale === loc
                 ? "bg-green-100 text-green-700"
                 : "text-gray-600 hover:bg-gray-100"

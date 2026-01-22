@@ -170,7 +170,7 @@ export default function SettingsPage() {
                   {notificationOptions.map((option) => (
                     <label
                       key={option.value}
-                      className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
+                      className={`flex items-center gap-3 rounded-[var(--radius-lg)] border p-3 cursor-pointer transition-colors ${
                         notificationFrequency === option.value
                           ? "border-green-500 bg-green-50"
                           : "border-gray-200 hover:bg-gray-50"
@@ -213,7 +213,7 @@ export default function SettingsPage() {
                   id="language"
                   value={locale}
                   onChange={(e) => handleLanguageChange(e.target.value as Locale)}
-                  className="flex h-9 w-full max-w-xs rounded-md border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500"
+                  className="flex h-9 w-full max-w-xs rounded-[var(--radius-md)] border border-gray-300 bg-white px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-green-500"
                 >
                   {locales.map((loc) => (
                     <option key={loc} value={loc}>
