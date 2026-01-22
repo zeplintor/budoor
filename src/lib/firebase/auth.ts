@@ -51,23 +51,15 @@ export async function signIn(
   return user;
 }
 
-export async function signInWithGoogle(): Promise<FirebaseUser> {
+export async function signInWithGoogle(): Promise<FirebaseUser | null> {
   const authInstance = ensureAuth();
 
-  try {
-    // Try popup first
-    const { user } = await signInWithPopup(authInstance, googleProvider);
-    await handleGoogleUser(user);
-    return user;
-  } catch (error: unknown) {
-    // If popup blocked, use redirect
-    if (error instanceof Error &&
-        (error.message.includes('popup') || error.message.includes('cross-origin'))) {
-      await signInWithRedirect(authInstance, googleProvider);
-      throw new Error("Redirection en cours...");
-    }
-    throw error;
-  }
+  // Use redirect method for better cross-origin compatibility
+  // This works reliably on all deployments (Netlify, Vercel, etc.)
+  await signInWithRedirect(authInstance, googleProvider);
+
+  // This line won't be reached as the page will redirect
+  return null;
 }
 
 // Handle redirect result (call this on app init)

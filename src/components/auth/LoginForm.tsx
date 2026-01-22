@@ -52,10 +52,9 @@ export function LoginForm() {
       setIsGoogleLoading(true);
       setError(null);
       await signInWithGoogle();
-      router.push("/dashboard");
+      // Page will redirect to Google, no need to navigate here
     } catch (err) {
       setError(t("auth.login.errorGoogle"));
-    } finally {
       setIsGoogleLoading(false);
     }
   };

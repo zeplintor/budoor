@@ -61,10 +61,9 @@ export function RegisterForm() {
       setIsGoogleLoading(true);
       setError(null);
       await signInWithGoogle();
-      router.push("/dashboard");
+      // Page will redirect to Google, no need to navigate here
     } catch (err) {
       setError(t("auth.register.errorGoogle"));
-    } finally {
       setIsGoogleLoading(false);
     }
   };

@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import {
@@ -43,6 +44,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const isConfigured = auth !== null;
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!auth) {
@@ -51,7 +54,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Handle Google redirect result on page load
-    handleGoogleRedirect().catch(console.error);
+    const checkRedirect = async () => {
+      try {
+        const redirectUser = await handleGoogleRedirect();
+        // If we got a user from redirect and we're on an auth page, redirect to dashboard
+        if (redirectUser && (pathname === "/login" || pathname === "/register")) {
+          router.push("/dashboard");
+        }
+      } catch (error) {
+        console.error("Redirect error:", error);
+      }
+    };
+    checkRedirect();
 
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
@@ -72,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [pathname, router]);
 
   const signUp = async (
     email: string,
