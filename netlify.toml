@@ -1,9 +1,16 @@
 [build]
   command = "npm run build"
   publish = ".next"
+  functions = ".netlify/functions"
 
 [build.environment]
   NODE_VERSION = "20"
+  NEXT_PUBLIC_SITE_URL = "https://budoor.me"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    cache-control = "public, max-age=31536000, immutable"
