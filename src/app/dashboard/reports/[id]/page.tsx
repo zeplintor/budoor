@@ -39,7 +39,7 @@ export default function ReportDetailPage() {
 
   useEffect(() => {
     async function loadReport() {
-      if (!firebaseUser || !reportId) return;
+      if (!firebaseUser || !reportId || !db) return;
 
       try {
         setLoading(true);
