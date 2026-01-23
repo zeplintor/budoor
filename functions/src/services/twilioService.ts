@@ -83,7 +83,8 @@ export async function sendDailyReport(
   parcelleName: string,
   reportSummary: string,
   alertLevel: "normal" | "vigilance" | "alerte",
-  reportUrl?: string
+  reportUrl?: string,
+  audioUrl?: string
 ): Promise<MessageResult> {
   const alertEmoji =
     alertLevel === "alerte"
@@ -100,6 +101,7 @@ Voici votre rapport agronomique quotidien:
 
 ${reportSummary}
 
+${audioUrl ? `\n🎧 *Résumé audio en darija*\n${audioUrl}\n` : ""}
 ${reportUrl ? `\n📄 *Voir le rapport détaillé*\n${reportUrl}\n` : ""}
 ---
 _Généré automatiquement par Budoor_
@@ -108,6 +110,7 @@ _Répondez STOP pour vous désabonner_`;
   return sendWhatsAppMessage({
     to: phoneNumber,
     body: message,
+    mediaUrl: audioUrl, // Send audio as attachment
   });
 }
 

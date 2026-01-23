@@ -2,6 +2,8 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import { sendDailyReport } from "../services/twilioService";
 import { generateDailyReport } from "../services/openaiService";
+import { generateDarijaScript } from "../services/darijaScriptGenerator";
+import { generateAudioFromText } from "../services/elevenLabsService";
 
 // Types
 interface UserSettings {
@@ -133,6 +135,40 @@ export const dailyReportGenerator = functions
                 settings.language || "fr"
               );
 
+              // Generate Darija audio script
+              let audioUrl: string | undefined;
+              let darijaScript: string | undefined;
+
+              try {
+                functions.logger.info("Generating Darija script...");
+                darijaScript = await generateDarijaScript(
+                  {
+                    parcelleName: parcelle.name,
+                    status: report.status,
+                    summary: report.summary,
+                    recommendations: report.recommendations,
+                    weather,
+                  },
+                  userData.displayName || "الفلاح"
+                );
+
+                // Generate audio from Darija script
+                functions.logger.info("Generating audio from Darija script...");
+                const audioFileName = `report_${userId}_${parcelleDoc.id}_${Date.now()}.mp3`;
+                audioUrl = await generateAudioFromText(
+                  darijaScript,
+                  "21m00Tcm4TlvDq8ikWAM", // Rachel voice - clear and expressive
+                  audioFileName
+                );
+
+                functions.logger.info("Audio generated successfully", { audioUrl });
+              } catch (audioError) {
+                functions.logger.error("Failed to generate audio, continuing without it", {
+                  error: audioError,
+                });
+                // Continue without audio if generation fails
+              }
+
               // Save report to Firestore FIRST to get the report ID
               const reportRef = await db
                 .collection("users")
@@ -146,6 +182,8 @@ export const dailyReportGenerator = functions
                   status: report.status,
                   recommendations: report.recommendations,
                   weather,
+                  audioUrl, // Add audio URL
+                  darijaScript, // Add darija script for reference
                   source: "scheduled",
                   sentViaWhatsApp: true,
                   createdAt: admin.firestore.FieldValue.serverTimestamp(),
@@ -157,14 +195,15 @@ export const dailyReportGenerator = functions
               // Generate the report details URL
               const reportUrl = `https://budoor.app/dashboard/reports/${reportId}`;
 
-              // Send WhatsApp message with the report link
+              // Send WhatsApp message with the report link and audio
               const result = await sendDailyReport(
                 settings.whatsappNumber,
                 userData.displayName || "Agriculteur",
                 parcelle.name,
                 report.summary,
                 report.status,
-                reportUrl
+                reportUrl,
+                audioUrl // Pass audio URL to WhatsApp service
               );
 
               if (result.success) {
