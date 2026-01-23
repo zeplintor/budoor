@@ -6,3 +6,7 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+[plugins.inputs]
+  distDir = ".next"
+  publish = ".next"
