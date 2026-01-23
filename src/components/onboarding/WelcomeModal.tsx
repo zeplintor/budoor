@@ -65,7 +65,7 @@ export function WelcomeModal({ userName, onComplete }: WelcomeModalProps) {
       <div className="absolute inset-0 bg-black/60" />
 
       {/* Modal */}
-  <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-2xl max-w-md w-full overflow-hidden">
+      <div className="relative bg-white rounded-[var(--radius-2xl)] shadow-2xl max-w-md w-full overflow-hidden">
         {/* Progress bar */}
         <div className="h-1 bg-gray-100">
           <div
@@ -97,13 +97,12 @@ export function WelcomeModal({ userName, onComplete }: WelcomeModalProps) {
               <button
                 key={index}
                 onClick={() => setCurrentStep(index)}
-                className={`w-2 h-2 rounded-full transition-all ${
-                  index === currentStep
+                className={`w-2 h-2 rounded-full transition-all ${index === currentStep
                     ? "w-8 bg-green-500"
                     : index < currentStep
-                    ? "bg-green-300"
-                    : "bg-gray-200"
-                }`}
+                      ? "bg-green-300"
+                      : "bg-gray-200"
+                  }`}
               />
             ))}
           </div>

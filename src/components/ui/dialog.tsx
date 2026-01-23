@@ -65,7 +65,7 @@ export function DialogDescription({
   ...props
 }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-  <p className={cn("text-sm text-[var(--text-secondary)]", className)} {...props} />
+    <p className={cn("text-sm text-[var(--text-secondary)]", className)} {...props} />
   );
 }
 

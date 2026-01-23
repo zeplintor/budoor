@@ -203,15 +203,14 @@ export function TourGuide({ steps, onComplete, onSkip }: TourGuideProps) {
 
         {/* Arrow pointing to target */}
         <div
-          className={`absolute w-3 h-3 bg-white transform rotate-45 ${
-            step.position === "top"
+          className={`absolute w-3 h-3 bg-white transform rotate-45 ${step.position === "top"
               ? "-bottom-1.5 left-1/2 -translate-x-1/2"
               : step.position === "left"
-              ? "-right-1.5 top-1/2 -translate-y-1/2"
-              : step.position === "right"
-              ? "-left-1.5 top-1/2 -translate-y-1/2"
-              : "-top-1.5 left-1/2 -translate-x-1/2"
-          }`}
+                ? "-right-1.5 top-1/2 -translate-y-1/2"
+                : step.position === "right"
+                  ? "-left-1.5 top-1/2 -translate-y-1/2"
+                  : "-top-1.5 left-1/2 -translate-x-1/2"
+            }`}
         />
       </div>
     </>

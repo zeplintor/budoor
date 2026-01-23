@@ -50,6 +50,7 @@ export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedParcelle, setSelectedParcelle] = useState<Parcelle | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStep, setGenerationStep] = useState<string>("");
   const [currentReport, setCurrentReport] = useState<AgronomicReport | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
@@ -111,6 +112,7 @@ export default function ReportsPage() {
     setError(null);
     setIsGenerating(true);
     setCurrentReport(null);
+    setGenerationStep("Collecte des données de la parcelle...");
 
     try {
       const data = await getParcelleData(parcelle);
@@ -124,15 +126,19 @@ export default function ReportsPage() {
         throw new Error(`Données manquantes: ${missing.join(", ")}. Veuillez réessayer.`);
       }
 
+      setGenerationStep("Génération du rapport agronomique avec IA...");
       const report = await generateReport({
         parcelle,
         weather: data.weather,
         soil: data.soil,
         elevation: data.elevation,
       });
+
+      setGenerationStep("Finalisation du rapport...");
       setCurrentReport(report);
 
       // Save report to Firestore
+      setGenerationStep("Enregistrement du rapport...");
       await saveReport(firebaseUser.uid, report);
 
       // Reload saved reports
@@ -433,19 +439,10 @@ ${currentReport.irrigationAdvice}
                       {parcelles.map((parcelle) => (
                         <div
                           key={parcelle.id}
-                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                            selectedParcelle?.id === parcelle.id
-                              ? "border-green-500 bg-green-50 shadow-md"
-                              : "border-gray-200 hover:border-green-300 hover:bg-gray-50"
-                          }`}
-                          onClick={() => setSelectedParcelle(parcelle)}
+                          className="p-4 rounded-lg border-2 border-gray-200 hover:border-green-300 hover:shadow-md transition-all bg-white"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-full ${
-                              selectedParcelle?.id === parcelle.id
-                                ? "bg-green-500 text-white"
-                                : "bg-gray-100 text-gray-500"
-                            }`}>
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="p-2 rounded-full bg-green-100 text-green-600">
                               <Sprout className="h-5 w-5" />
                             </div>
                             <div className="flex-1">
@@ -454,34 +451,29 @@ ${currentReport.irrigationAdvice}
                                 {parcelle.culture.type} • {parcelle.areaHectares} ha
                               </p>
                             </div>
-                            {selectedParcelle?.id === parcelle.id && (
-                              <CheckCircle className="h-5 w-5 text-green-500" />
-                            )}
                           </div>
+
+                          {/* Generate button directly on card */}
+                          <Button
+                            className="w-full"
+                            size="sm"
+                            disabled={isGenerating && selectedParcelle?.id === parcelle.id}
+                            onClick={() => handleGenerateReport(parcelle)}
+                          >
+                            {isGenerating && selectedParcelle?.id === parcelle.id ? (
+                              <>
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                {t("reports.generating")}
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-4 w-4" />
+                                {t("reports.generateReport")}
+                              </>
+                            )}
+                          </Button>
                         </div>
                       ))}
-
-                      {/* Generate button */}
-                      {selectedParcelle && (
-                        <Button
-                          className="w-full mt-4 py-6 text-base"
-                          size="lg"
-                          disabled={isGenerating}
-                          onClick={() => handleGenerateReport(selectedParcelle)}
-                        >
-                          {isGenerating ? (
-                            <>
-                              <Loader2 className="h-5 w-5 animate-spin" />
-                              {t("reports.generating")}
-                            </>
-                          ) : (
-                            <>
-                              <Sparkles className="h-5 w-5" />
-                              {t("reports.generateReport")}
-                            </>
-                          )}
-                        </Button>
-                      )}
                     </div>
                   )}
                 </CardContent>
@@ -632,16 +624,58 @@ ${currentReport.irrigationAdvice}
             {isGenerating ? (
               <Card>
                 <CardContent className="py-16">
-                  <div className="text-center">
-                    <div className="relative mx-auto w-16 h-16 mb-4">
-                      <Sprout className="h-16 w-16 text-green-600 animate-pulse" />
+                  <div className="max-w-md mx-auto">
+                    <div className="text-center mb-8">
+                      <div className="relative mx-auto w-16 h-16 mb-4">
+                        <Sprout className="h-16 w-16 text-green-600 animate-pulse" />
+                      </div>
+                      <p className="text-lg font-medium text-gray-900">
+                        {t("reports.generating")}
+                      </p>
+                      <p className="text-gray-500 mt-2">
+                        {t("reports.generatingDesc")}
+                      </p>
                     </div>
-                    <p className="text-lg font-medium text-gray-900">
-                      {t("reports.generating")}
-                    </p>
-                    <p className="text-gray-500 mt-2">
-                      {t("reports.generatingDesc")}
-                    </p>
+
+                    {/* Progress steps */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 rounded-lg bg-green-50 border-2 border-green-200">
+                        <Loader2 className="h-5 w-5 text-green-600 animate-spin flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-green-900">{generationStep}</p>
+                        </div>
+                      </div>
+
+                      {/* Progress timeline */}
+                      <div className="pl-8 pt-2 space-y-2 text-sm text-gray-500">
+                        <div className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          <span>Collecte des données météo, sol et topographie</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className={`h-4 w-4 ${generationStep.includes("IA") || generationStep.includes("Finalisation") || generationStep.includes("Enregistrement") ? "text-green-500" : "text-gray-300"} animate-spin`} />
+                          <span className={generationStep.includes("IA") || generationStep.includes("Finalisation") || generationStep.includes("Enregistrement") ? "text-gray-900 font-medium" : ""}>
+                            Analyse agronomique par intelligence artificielle
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className={`h-4 w-4 ${generationStep.includes("Finalisation") || generationStep.includes("Enregistrement") ? "text-green-500" : "text-gray-300"} animate-spin`} />
+                          <span className={generationStep.includes("Finalisation") || generationStep.includes("Enregistrement") ? "text-gray-900 font-medium" : ""}>
+                            Génération du script audio en darija
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Loader2 className={`h-4 w-4 ${generationStep.includes("Enregistrement") ? "text-green-500" : "text-gray-300"} animate-spin`} />
+                          <span className={generationStep.includes("Enregistrement") ? "text-gray-900 font-medium" : ""}>
+                            Synthèse vocale et enregistrement
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-6 text-center">
+                      <p className="text-xs text-gray-400">Temps estimé: 20-30 secondes</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

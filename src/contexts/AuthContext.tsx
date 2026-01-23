@@ -104,7 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = async () => {
     if (!isConfigured) throw new Error("Firebase not configured");
-    await firebaseSignInWithGoogle();
+    console.log("🔍 Firebase configured:", isConfigured, "Auth available:", auth !== null);
+    try {
+      await firebaseSignInWithGoogle();
+      console.log("✅ Google Sign-In completed, redirecting...");
+    } catch (error: any) {
+      console.error("❌ Google Sign-In error in context:", error.code, error.message);
+      throw error;
+    }
   };
 
   const signOut = async () => {

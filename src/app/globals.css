@@ -156,7 +156,12 @@ body {
 }
 
 /* Headings use display font */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display), system-ui, sans-serif;
 }
 
@@ -214,15 +219,15 @@ h1, h2, h3, h4, h5, h6 {
   text-align: right;
 }
 
-[dir="rtl"] .space-x-2 > :not([hidden]) ~ :not([hidden]) {
+[dir="rtl"] .space-x-2> :not([hidden])~ :not([hidden]) {
   --tw-space-x-reverse: 1;
 }
 
-[dir="rtl"] .space-x-3 > :not([hidden]) ~ :not([hidden]) {
+[dir="rtl"] .space-x-3> :not([hidden])~ :not([hidden]) {
   --tw-space-x-reverse: 1;
 }
 
-[dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
+[dir="rtl"] .space-x-4> :not([hidden])~ :not([hidden]) {
   --tw-space-x-reverse: 1;
 }
 
@@ -385,15 +390,35 @@ h1, h2, h3, h4, h5, h6 {
  * ======================================== */
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-20px);
+  }
 }
 
 @keyframes blob-morph {
-  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
-  50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
-  75% { border-radius: 60% 40% 60% 40% / 70% 30% 50% 60%; }
+
+  0%,
+  100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+
+  25% {
+    border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+  }
+
+  50% {
+    border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%;
+  }
+
+  75% {
+    border-radius: 60% 40% 60% 40% / 70% 30% 50% 60%;
+  }
 }
 
 @keyframes fade-in-up {
@@ -401,6 +426,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -412,6 +438,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -435,16 +462,33 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Stagger animations for children */
-.stagger-children > * {
+.stagger-children>* {
   animation: fade-in-up 0.6s ease-out backwards;
 }
 
-.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
-.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
-.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
-.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
-.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
-.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+.stagger-children>*:nth-child(1) {
+  animation-delay: 0.1s;
+}
+
+.stagger-children>*:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.stagger-children>*:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.stagger-children>*:nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.stagger-children>*:nth-child(5) {
+  animation-delay: 0.5s;
+}
+
+.stagger-children>*:nth-child(6) {
+  animation-delay: 0.6s;
+}
 
 /* ========================================
  * BLOB SHAPES
@@ -488,8 +532,8 @@ h1, h2, h3, h4, h5, h6 {
 
 .gradient-mesh {
   background: radial-gradient(at 20% 30%, var(--accent-pink) 0px, transparent 50%),
-              radial-gradient(at 80% 50%, var(--accent-yellow) 0px, transparent 50%),
-              radial-gradient(at 50% 80%, var(--accent-mint) 0px, transparent 50%);
+    radial-gradient(at 80% 50%, var(--accent-yellow) 0px, transparent 50%),
+    radial-gradient(at 50% 80%, var(--accent-mint) 0px, transparent 50%);
   opacity: 0.15;
   filter: blur(60px);
 }

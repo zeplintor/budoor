@@ -369,11 +369,10 @@ export default function ParcelleDetailPage() {
 
         {/* Notification */}
         {notification && (
-          <div className={`p-4 rounded-[var(--radius-lg)] ${
-            notification.type === "success"
+          <div className={`p-4 rounded-[var(--radius-lg)] ${notification.type === "success"
               ? "bg-green-50 border border-green-200 text-green-800"
               : "bg-red-50 border border-red-200 text-red-800"
-          }`}>
+            }`}>
             <div className="flex items-center gap-2">
               {notification.type === "success" ? (
                 <CheckCircle className="h-5 w-5 text-green-500" />
@@ -444,10 +443,9 @@ export default function ParcelleDetailPage() {
                       className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-[var(--radius-lg)] hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
-                        <div className={`p-1.5 md:p-2 rounded-full shrink-0 ${
-                          report.status === "alerte" ? "bg-red-100" :
-                          report.status === "vigilance" ? "bg-yellow-100" : "bg-green-100"
-                        }`}>
+                        <div className={`p-1.5 md:p-2 rounded-full shrink-0 ${report.status === "alerte" ? "bg-red-100" :
+                            report.status === "vigilance" ? "bg-yellow-100" : "bg-green-100"
+                          }`}>
                           {report.status === "alerte" ? (
                             <AlertTriangle className="h-4 w-4 text-red-500" />
                           ) : report.status === "vigilance" ? (
@@ -459,7 +457,7 @@ export default function ParcelleDetailPage() {
                         <div className="min-w-0 flex-1">
                           <p className="font-medium text-sm">
                             {report.status === "alerte" ? "Alerte" :
-                             report.status === "vigilance" ? "Vigilance" : "OK"}
+                              report.status === "vigilance" ? "Vigilance" : "OK"}
                           </p>
                           <p className="text-xs text-gray-500 flex items-center gap-1">
                             <Calendar className="h-3 w-3 shrink-0" />
@@ -488,13 +486,12 @@ export default function ParcelleDetailPage() {
         {/* Status summary */}
         {conditionSummary && (
           <Card
-            className={`${
-              conditionSummary.status === "alerte"
+            className={`${conditionSummary.status === "alerte"
                 ? "border-red-300 bg-red-50"
                 : conditionSummary.status === "attention"
-                ? "border-yellow-300 bg-yellow-50"
-                : "border-green-300 bg-green-50"
-            }`}
+                  ? "border-yellow-300 bg-yellow-50"
+                  : "border-green-300 bg-green-50"
+              }`}
           >
             <CardContent className="py-4">
               <div className="flex items-center gap-3">
@@ -510,8 +507,8 @@ export default function ParcelleDetailPage() {
                     {conditionSummary.status === "alerte"
                       ? "Alerte - Action requise"
                       : conditionSummary.status === "attention"
-                      ? "Attention - À surveiller"
-                      : "Conditions optimales"}
+                        ? "Attention - À surveiller"
+                        : "Conditions optimales"}
                   </p>
                   <div className="flex flex-wrap gap-4 mt-2">
                     {conditionSummary.alerts.length > 0 && (
@@ -655,14 +652,12 @@ export default function ParcelleDetailPage() {
                   <CardContent className="space-y-4">
                     {/* Spraying conditions */}
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full ${
-                        agriSummary.sprayingConditions === "optimal" ? "bg-green-100" :
-                        agriSummary.sprayingConditions === "acceptable" ? "bg-yellow-100" : "bg-red-100"
-                      }`}>
-                        <Navigation className={`h-4 w-4 ${
-                          agriSummary.sprayingConditions === "optimal" ? "text-green-600" :
-                          agriSummary.sprayingConditions === "acceptable" ? "text-yellow-600" : "text-red-600"
-                        }`} />
+                      <div className={`p-2 rounded-full ${agriSummary.sprayingConditions === "optimal" ? "bg-green-100" :
+                          agriSummary.sprayingConditions === "acceptable" ? "bg-yellow-100" : "bg-red-100"
+                        }`}>
+                        <Navigation className={`h-4 w-4 ${agriSummary.sprayingConditions === "optimal" ? "text-green-600" :
+                            agriSummary.sprayingConditions === "acceptable" ? "text-yellow-600" : "text-red-600"
+                          }`} />
                       </div>
                       <div>
                         <p className="font-medium">Pulvérisation</p>
@@ -672,16 +667,14 @@ export default function ParcelleDetailPage() {
 
                     {/* Irrigation */}
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full ${
-                        agriSummary.irrigationNeed === "none" ? "bg-green-100" :
-                        agriSummary.irrigationNeed === "low" ? "bg-blue-100" :
-                        agriSummary.irrigationNeed === "medium" ? "bg-yellow-100" : "bg-red-100"
-                      }`}>
-                        <Droplets className={`h-4 w-4 ${
-                          agriSummary.irrigationNeed === "none" ? "text-green-600" :
-                          agriSummary.irrigationNeed === "low" ? "text-blue-600" :
-                          agriSummary.irrigationNeed === "medium" ? "text-yellow-600" : "text-red-600"
-                        }`} />
+                      <div className={`p-2 rounded-full ${agriSummary.irrigationNeed === "none" ? "bg-green-100" :
+                          agriSummary.irrigationNeed === "low" ? "bg-blue-100" :
+                            agriSummary.irrigationNeed === "medium" ? "bg-yellow-100" : "bg-red-100"
+                        }`}>
+                        <Droplets className={`h-4 w-4 ${agriSummary.irrigationNeed === "none" ? "text-green-600" :
+                            agriSummary.irrigationNeed === "low" ? "text-blue-600" :
+                              agriSummary.irrigationNeed === "medium" ? "text-yellow-600" : "text-red-600"
+                          }`} />
                       </div>
                       <div>
                         <p className="font-medium">Irrigation</p>
@@ -792,11 +785,10 @@ export default function ParcelleDetailPage() {
                   {soil ? (
                     <div className="space-y-4">
                       {/* Source indicator */}
-                      <div className={`text-xs px-2 py-1 rounded-[var(--radius-xl)] text-center ${
-                        soil.isEstimated
+                      <div className={`text-xs px-2 py-1 rounded-[var(--radius-xl)] text-center ${soil.isEstimated
                           ? "bg-yellow-100 text-yellow-700"
                           : "bg-green-100 text-green-700"
-                      }`}>
+                        }`}>
                         {soil.isEstimated ? "⚠️ " : "✓ "}{soil.source}
                       </div>
                       <div className="text-center py-2">
@@ -845,12 +837,11 @@ export default function ParcelleDetailPage() {
                         <p className="text-gray-500">Carbone organique: {soil.organicCarbon} g/kg</p>
                       </div>
                       {soilQuality && (
-                        <div className={`p-2 rounded text-center ${
-                          soilQuality.quality === "excellent" ? "bg-green-100 text-green-700" :
-                          soilQuality.quality === "good" ? "bg-green-50 text-green-600" :
-                          soilQuality.quality === "average" ? "bg-yellow-50 text-yellow-700" :
-                          "bg-red-50 text-red-600"
-                        }`}>
+                        <div className={`p-2 rounded text-center ${soilQuality.quality === "excellent" ? "bg-green-100 text-green-700" :
+                            soilQuality.quality === "good" ? "bg-green-50 text-green-600" :
+                              soilQuality.quality === "average" ? "bg-yellow-50 text-yellow-700" :
+                                "bg-red-50 text-red-600"
+                          }`}>
                           {soilQuality.description}
                         </div>
                       )}
@@ -938,11 +929,10 @@ export default function ParcelleDetailPage() {
                   <button
                     key={culture.type}
                     type="button"
-                    className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${
-                      editCulture === culture.type
+                    className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${editCulture === culture.type
                         ? "border-green-500 bg-green-50"
                         : "border-gray-200 hover:border-gray-300"
-                    }`}
+                      }`}
                     onClick={() => setEditCulture(culture.type)}
                     title={culture.label}
                   >
@@ -951,11 +941,10 @@ export default function ParcelleDetailPage() {
                 ))}
                 <button
                   type="button"
-                  className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${
-                    editCulture === "autre"
+                  className={`p-2.5 md:p-3 rounded-lg border-2 transition-all touch-target ${editCulture === "autre"
                       ? "border-green-500 bg-green-50"
                       : "border-gray-200 hover:border-gray-300"
-                  }`}
+                    }`}
                   onClick={() => setEditCulture("autre")}
                   title="Autre"
                 >

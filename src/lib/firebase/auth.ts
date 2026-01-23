@@ -54,10 +54,17 @@ export async function signIn(
 export async function signInWithGoogle(): Promise<FirebaseUser> {
   const authInstance = ensureAuth();
 
-  // Use popup method - more reliable for most cases
-  const { user } = await signInWithPopup(authInstance, googleProvider);
-  await handleGoogleUser(user);
-  return user;
+  try {
+    console.log("🔐 Starting Google Sign-In...");
+    // Use popup method - more reliable for most cases
+    const { user } = await signInWithPopup(authInstance, googleProvider);
+    console.log("✅ Google Sign-In successful:", user.email);
+    await handleGoogleUser(user);
+    return user;
+  } catch (error: any) {
+    console.error("❌ Google Sign-In failed:", error.code, error.message);
+    throw error;
+  }
 }
 
 // Handle redirect result (call this on app init)

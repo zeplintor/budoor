@@ -81,12 +81,12 @@ export async function POST(request: NextRequest) {
 
     const report = useMockAudio
       ? await assembleReport(
-          reportData,
-          data,
-          async (text: string, _voiceId?: string, fileName?: string) =>
-            `https://example.com/${fileName || "mock_audio.mp3"}`,
-          async (r) => `Mock Darija script for ${r.parcelleName}`
-        )
+        reportData,
+        data,
+        async (text: string, _voiceId?: string, fileName?: string) =>
+          `https://example.com/${fileName || "mock_audio.mp3"}`,
+        async (r) => `Mock Darija script for ${r.parcelleName}`
+      )
       : await assembleReport(reportData, data);
 
     return NextResponse.json(report);

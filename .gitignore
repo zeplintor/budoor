@@ -43,6 +43,7 @@ functions/.env
 firebase-debug.log
 firestore-debug.log
 ui-debug.log
+*firebase*key*.json
 
 # Cloud Functions
 functions/node_modules
