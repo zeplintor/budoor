@@ -7,7 +7,7 @@ Cette fonctionnalité génère automatiquement un résumé audio en darija maroc
 ## Architecture
 
 ### 1. Génération du Script Darija (`darijaScriptGenerator.ts`)
-- Utilise **Claude 3.5 Sonnet** via l'API Anthropic
+- Utilise **Google Gemini 2.0 Flash** via l'API Generative AI
 - Génère un script de 130-150 mots (~1 minute)
 - Structure: Salutation + Contexte + Action + Conclusion
 - Style authentique avec mélange arabe dialectal/français technique
@@ -46,11 +46,11 @@ Cette fonctionnalité génère automatiquement un résumé audio en darija maroc
 ### Variables d'environnement requises
 
 ```bash
-# Anthropic Claude
-ANTHROPIC_API_KEY=sk-ant-...
+# Google Gemini
+GEMINI_API_KEY=AIzaSy...
 
 # ElevenLabs
-ELEVENLABS_API_KEY=your_elevenlabs_api_key
+ELEVENLABS_API_KEY=sk_...
 
 # Firebase Storage
 FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
@@ -64,7 +64,7 @@ npm install
 ```
 
 Nouvelles dépendances ajoutées:
-- `@anthropic-ai/sdk`: API Claude pour génération de scripts
+- `@google/generative-ai`: API Google Gemini pour génération de scripts
 - `node-fetch`: Appels HTTP vers ElevenLabs
 
 ## Utilisation
@@ -106,11 +106,10 @@ await sendDailyReport(..., audioUrl);
 
 ## Coûts estimés
 
-### Anthropic Claude
-- ~0.15 mots/token pour la darija
+### Google Gemini
+- Model: gemini-2.0-flash-exp (GRATUIT jusqu'à 1500 requêtes/jour)
 - Script de 150 mots ≈ 200 tokens
-- Input: ~$0.003 par 1K tokens (Claude 3.5 Sonnet)
-- **Coût par script: ~$0.0006**
+- **Coût par script: GRATUIT** (dans les limites du tier gratuit)
 
 ### ElevenLabs
 - Plan Free: 10,000 caractères/mois
@@ -125,7 +124,7 @@ await sendDailyReport(..., audioUrl);
 - **Coût par audio: négligeable**
 
 ### Total par rapport
-**~$0.10 par rapport audio** (principalement ElevenLabs)
+**~$0.10 par rapport audio** (uniquement ElevenLabs, Gemini est gratuit)
 
 ## Voix alternatives ElevenLabs
 
@@ -142,8 +141,8 @@ Recommandations pour darija marocaine:
 
 ## Dépannage
 
-### Erreur: "Anthropic API key not configured"
-Vérifiez que `ANTHROPIC_API_KEY` est définie dans les variables d'environnement Firebase Functions.
+### Erreur: "Gemini API key not configured"
+Vérifiez que `GEMINI_API_KEY` est définie dans `functions/.env.yaml` pour Firebase Functions.
 
 ### Erreur: "ElevenLabs API error"
 - Vérifiez la clé API

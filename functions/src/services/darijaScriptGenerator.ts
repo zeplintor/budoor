@@ -1,4 +1,4 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import * as functions from "firebase-functions";
 
 interface ReportData {
@@ -15,7 +15,7 @@ interface ReportData {
 }
 
 /**
- * Generate a Moroccan Darija audio script from a report
+ * Generate a Moroccan Darija audio script from a report using Google Gemini
  * Structure: Salutation + Context + Action + Conclusion (130-150 words, ~1 min)
  */
 export async function generateDarijaScript(
@@ -23,13 +23,14 @@ export async function generateDarijaScript(
   userName: string
 ): Promise<string> {
   try {
-    const apiKey = process.env.ANTHROPIC_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      throw new Error("Anthropic API key not configured");
+      throw new Error("Gemini API key not configured");
     }
 
-    const client = new Anthropic({ apiKey });
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
     const prompt = `Tu es un expert en dialecte marocain (darija) et en agronomie.
 Génère un script audio en darija marocaine de 130-150 mots maximum (environ 1 minute) pour un rapport agricole WhatsApp.
@@ -62,34 +63,24 @@ IMPORTANT:
 - Maximum 150 mots
 - Naturel et authentique
 - Utilise le script arabe pour la darija
-- Inclus les termes techniques en français entre parenthèses si besoin`;
+- Inclus les termes techniques en français entre parenthèses si besoin
 
-    const message = await client.messages.create({
-      model: "claude-3-5-sonnet-20241022",
-      max_tokens: 500,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-    });
+Génère UNIQUEMENT le script en darija, sans introduction ni commentaire.`;
 
-    const scriptContent = message.content[0];
-    if (scriptContent.type !== "text") {
-      throw new Error("Unexpected response type from Claude");
-    }
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const script = response.text().trim();
 
-    const script = scriptContent.text.trim();
-
-    functions.logger.info("Darija script generated successfully", {
+    functions.logger.info("Darija script generated successfully with Gemini", {
       parcelleName: report.parcelleName,
       scriptLength: script.length,
     });
 
     return script;
   } catch (error) {
-    functions.logger.error("Failed to generate Darija script", { error });
+    functions.logger.error("Failed to generate Darija script with Gemini", {
+      error,
+    });
     throw error;
   }
 }
