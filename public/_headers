@@ -1,7 +1,22 @@
-/* Public static assets - must be cached */
+/* Next.js static files - must be cached forever */
 /_next/static/*
   cache-control: public, max-age=31536000, immutable
-  
+  Content-Type: application/javascript; charset=utf-8
+
+/* CSS files with correct MIME type */
+/*.css
+  Content-Type: text/css; charset=utf-8
+  cache-control: public, max-age=31536000, immutable
+
+/* JavaScript files with correct MIME type */
+/*.js
+  Content-Type: application/javascript; charset=utf-8
+  cache-control: public, max-age=31536000, immutable
+
+/* Font files */
+/fonts/*
+  cache-control: public, max-age=31536000, immutable
+
 /* Security & SEO Headers */
 /*
   cache-control: public, max-age=0, must-revalidate
@@ -10,7 +25,4 @@
   X-XSS-Protection: 1; mode=block
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(self), microphone=()
-
-/* Compress content */
-/*
-  Content-Encoding: gzip
+  Access-Control-Allow-Origin: *
