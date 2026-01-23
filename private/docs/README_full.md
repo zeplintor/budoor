@@ -135,6 +135,12 @@ budoor/
 3. Build command: `npm run build`
 4. Publish directory: `.next`
 
+Note sur la détection de secrets par Netlify
+   - Netlify effectue un scan des sorties de build pour détecter des valeurs qui ressemblent à des clés/API (ex. clés Google commençant par `AIza`). Si votre configuration frontend utilise des variables d'environnement publiques (p.ex. `NEXT_PUBLIC_FIREBASE_API_KEY`) ces valeurs peuvent apparaître dans les fichiers générés et déclencher l'échec du build.
+   - Solution rapide recommandée : dans le panneau Netlify (Site settings → Build & deploy → Environment), ajoutez la variable d'environnement `SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES` et mettez la (ou les) valeur(s) détectée(s) (ex. la clé commençant par `AIza...`). Cela indique au scanner d'omettre ces valeurs et permet au build de réussir.
+   - Alternative (moins recommandée) : désactiver complètement le scan en définissant `SECRETS_SCAN_SMART_DETECTION_ENABLED=false` dans les variables d'environnement.
+   - Meilleure pratique : évitez d'exposer des secrets dans le code client (préfixez les secrets côté serveur sans `NEXT_PUBLIC_`) et limitez l'exposition aux seules clés publiques qui doivent être côté client.
+
 ### Firebase (Cloud Functions)
 
 ```bash
