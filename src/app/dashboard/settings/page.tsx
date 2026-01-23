@@ -5,11 +5,12 @@ import { Header } from "@/components/dashboard";
 import { Button, Card, CardContent, CardHeader, CardTitle, CardDescription, Input, Label, Badge, OrganicBlob, GradientMesh } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { User, Phone, Bell, Globe, Save, Loader2, HelpCircle, RotateCcw, CheckCircle } from "lucide-react";
+import { User, Phone, Bell, Globe, Save, Loader2, HelpCircle, RotateCcw, CheckCircle, Clock } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { locales, localeNames, type Locale } from "@/i18n/config";
 import { useOnboarding } from "@/contexts/OnboardingContext";
 import { getUserSettings, updateUserSettings, updateUserProfile } from "@/lib/firebase/users";
+import { WhatsAppScheduleManager } from "@/components/WhatsAppScheduleManager";
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -371,8 +372,28 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* WhatsApp Scheduling */}
+          <Card className="animate-fade-in-up border border-[var(--border-light)]" style={{ animationDelay: '400ms' }}>
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-[var(--accent-purple-light)]">
+                  <Clock className="h-5 w-5 text-[var(--accent-purple-dark)]" />
+                </div>
+                <div>
+                  <CardTitle>Planifications WhatsApp</CardTitle>
+                  <CardDescription>
+                    Programmez l'envoi automatique de rapports agricoles via WhatsApp
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <WhatsAppScheduleManager />
+            </CardContent>
+          </Card>
+
           {/* Help section */}
-          <Card className="shadow-xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '400ms' }}>
+          <Card className="shadow-xl overflow-hidden animate-fade-in-up" style={{ animationDelay: '450ms' }}>
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-coral)] to-[var(--accent-yellow)]" />
 
             <CardHeader className="pb-4">
@@ -421,7 +442,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Save button */}
-          <div className="flex justify-end gap-4 items-center pt-4 animate-fade-in-up" style={{ animationDelay: '500ms' }}>
+          <div className="flex justify-end gap-4 items-center pt-4 animate-fade-in-up" style={{ animationDelay: '550ms' }}>
             {saveSuccess && (
               <div className="flex items-center gap-2 px-4 py-2 rounded-[var(--radius-lg)] bg-[var(--status-success-light)] animate-scale-in">
                 <CheckCircle className="h-5 w-5 text-[var(--status-success)]" />
