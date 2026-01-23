@@ -6,6 +6,7 @@ import {
   type ReportRequest,
   type AgronomicReport,
 } from "@/lib/api/claudeService";
+import { assembleReport } from "@/lib/reportAssembler";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -71,26 +72,22 @@ export async function POST(request: NextRequest) {
       throw new Error("Impossible de parser la reponse IA");
     }
 
-    // Build final report
-    const report: AgronomicReport = {
-      id: `report-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      parcelleId: data.parcelle.id,
-      parcelleName: data.parcelle.name,
-      generatedAt: new Date(),
-      status: reportData.status || "ok",
-      summary: reportData.summary || "",
-      weatherAnalysis: reportData.weatherAnalysis || "",
-      soilAnalysis: reportData.soilAnalysis || "",
-      recommendations: reportData.recommendations || [],
-      diseaseRisk: reportData.diseaseRisk || {
-        level: "low",
-        diseases: [],
-        preventiveActions: [],
-      },
-      irrigationAdvice: reportData.irrigationAdvice || "",
-      nextActions: reportData.nextActions || [],
-      weeklyForecast: reportData.weeklyForecast || "",
-    };
+    // Optionally use a mocked audio generator for local testing
+    const url = new URL(request.url);
+    const useMockAudio =
+      (url.searchParams.get("mockAudio") === "1" ||
+        url.searchParams.get("mockAudio") === "true") &&
+      process.env.NODE_ENV !== "production";
+
+    const report = useMockAudio
+      ? await assembleReport(
+          reportData,
+          data,
+          async (text: string, _voiceId?: string, fileName?: string) =>
+            `https://example.com/${fileName || "mock_audio.mp3"}`,
+          async (r) => `Mock Darija script for ${r.parcelleName}`
+        )
+      : await assembleReport(reportData, data);
 
     return NextResponse.json(report);
   } catch (error) {

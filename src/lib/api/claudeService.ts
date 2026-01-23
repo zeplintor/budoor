@@ -33,6 +33,14 @@ export interface AgronomicReport {
     timing: string;
   }[];
   weeklyForecast: string;
+  // Optional audio attachments (added when generated)
+  audioUrl?: string;
+  darijaScript?: string;
+  // Debug info populated in non-production for troubleshooting
+  debug?: {
+    audioGenerated?: boolean;
+    audioError?: string;
+  };
 }
 
 export const AGRONOMIST_SYSTEM_PROMPT = `Tu es un agronome expert specialise dans le conseil aux agriculteurs.
