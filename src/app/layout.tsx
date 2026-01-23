@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { isRTL, type Locale } from "@/i18n/config";
+import { defaultMetadata } from "@/lib/metadata";
 
 // Body font - DM Sans (warm, readable, distinctive)
 const dmSans = DM_Sans({
@@ -27,10 +28,7 @@ const notoSansArabic = Noto_Sans_Arabic({
   weight: ["400", "500", "600", "700"],
 });
 
-export const metadata: Metadata = {
-  title: "Budoor - Intelligence Agricole",
-  description: "Un agronome expert dans votre poche, qui surveille vos champs 24h/24",
-};
+export const metadata: Metadata = defaultMetadata;
 
 export default async function RootLayout({
   children,

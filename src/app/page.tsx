@@ -23,6 +23,20 @@ import {
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { JsonLdScripts } from "@/components/JsonLdScripts";
+import { generatePageMetadata } from "@/lib/metadata";
+
+export const metadata = generatePageMetadata(
+  "Budoor - Intelligence Agricole IA pour Agriculteurs Marocains",
+  "Budoor: Un agronome IA expert dans votre poche qui surveille vos champs 24h/24. Conseils agricoles en temps réel, rapports météo, analyses de sol et recommandations personnalisées.",
+  "/",
+  [
+    "intelligence agricole maroc",
+    "agronome IA",
+    "conseil agricole gratuit",
+    "app agriculture marocaine",
+  ]
+);
 
 export default async function Home() {
   const t = await getTranslations();
@@ -125,6 +139,7 @@ export default async function Home() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-primary)]">
+      <JsonLdScripts />
       {/* Header */}
       <header className="sticky top-0 z-50 bg-[var(--bg-primary)]/80 backdrop-blur-md border-b border-[var(--border-muted)]">
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 md:h-16 flex items-center justify-between">
