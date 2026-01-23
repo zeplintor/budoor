@@ -1,5 +1,0 @@
-# Next.js static assets - cache indefinitely
-/_next/static/* /:splat 200!
-
-# Everything else goes through Next.js
-/*  /.netlify/functions/___netlify-server-handler  200
