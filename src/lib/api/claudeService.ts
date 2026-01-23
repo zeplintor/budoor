@@ -139,10 +139,26 @@ export async function generateReport(data: ReportRequest): Promise<AgronomicRepo
     body: JSON.stringify(data),
   });
 
+  // Get response text first so we can parse it properly
+  const responseText = await response.text();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || "Erreur lors de la generation du rapport");
+    let errorMessage = "Erreur lors de la generation du rapport";
+    try {
+      const error = JSON.parse(responseText);
+      errorMessage = error.message || errorMessage;
+    } catch {
+      // If response is not JSON (e.g., HTML error page)
+      console.error("Non-JSON error response:", responseText.substring(0, 200));
+      errorMessage = `Erreur serveur (${response.status}): ${response.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  try {
+    return JSON.parse(responseText);
+  } catch (parseError) {
+    console.error("Failed to parse successful response:", responseText.substring(0, 200));
+    throw new Error("Réponse invalide du serveur");
+  }
 }
