@@ -2,7 +2,7 @@ import { storage } from "@/lib/firebase-admin";
 
 export async function generateAudioFromText(
   text: string,
-  voiceId: string = "21m00Tcm4TlvDq8ikWAM", // Rachel voice
+  voiceId?: string,
   fileName: string = `audio_${Date.now()}.mp3`
 ): Promise<string> {
   const apiKey = process.env.ELEVENLABS_API_KEY;
@@ -11,20 +11,26 @@ export async function generateAudioFromText(
     throw new Error("ELEVENLABS_API_KEY not configured");
   }
 
+  // Use voice from env var if not specified, otherwise use Ghizlane (Moroccan Darija)
+  const selectedVoiceId = voiceId ||
+    process.env.ELEVENLABS_VOICE_ID ||
+    "OfGMGmhShO8iL9jCkXy8"; // Default: Ghizlane - Moroccan Darija voice
+
+  console.log(`🎙️ Generating audio with voice: ${selectedVoiceId}`);
+
   // ElevenLabs API configuration
+  // Optimized for Moroccan Darija (more expressive, natural)
   const voiceSettings = {
-    stability: 0.5,
-    similarity_boost: 0.75,
-    style: 0.4,
+    stability: 0.55, // Slightly more stable for clarity in Darija
+    similarity_boost: 0.8, // Higher for authentic Moroccan accent
+    style: 0.5, // More expressive for conversational Darija
     use_speaker_boost: true,
   };
 
   try {
-    console.log("🎙️ Generating audio with ElevenLabs...");
-
     // Call ElevenLabs API
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`,
       {
         method: "POST",
         headers: {
