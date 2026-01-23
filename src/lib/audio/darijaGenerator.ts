@@ -42,34 +42,36 @@ export async function generateDarijaScript(
 الريح: ${report.weather.windSpeed}km/h
   `.trim();
 
-  const prompt = `Tu es un expert en dialecte marocain (darija) et en agronomie.
-Génère un script audio en darija marocaine de 130-150 mots maximum (~1 minute de lecture) pour un rapport agricole.
+  const prompt = `You are a Moroccan Darija dialect expert and agronomist. 
+Generate a script ONLY IN MOROCCAN DARIJA (NOT in French, NOT mixed with French) for a 1-minute audio report (~130-150 words).
 
-**INFORMATIONS DU RAPPORT:**
-- Parcelle: ${report.parcelleName}
-- Statut: ${statusInDarija} (${report.status})
-- Météo:
+**REPORT INFORMATION:**
+- Plot: ${report.parcelleName}
+- Status: ${statusInDarija}
+- Weather:
 ${weatherContext}
-- Résumé: ${report.summary}
-- Recommandations:
+- Summary: ${report.summary}
+- Recommendations:
 ${report.recommendations.map((r, i) => `  ${i + 1}. ${r}`).join("\n")}
 
-**STRUCTURE OBLIGATOIRE (1 minute max):**
-1. **Salutation chaleureuse**: "السلام عليكم أخي الفلاح، أختي الفلاحة" (obligatoire)
-2. **Contexte**: "3la 7sab ta9rir Budoor dyaL lyouma..." (Selon le rapport Budoor d'aujourd'hui...)
-3. **État actuel**: Décrire le statut (${statusInDarija}) et les conditions météo en darija
-4. **Actions concrètes**: Les recommandations principales traduites en darija authentique
-5. **Conclusion**: "Lah y3awenkom" ou "Lah ysakhər likom" (obligatoire)
+**MANDATORY STRUCTURE (Arabic script only):**
+1. **Warm greeting**: "السلام عليكم ورحمة الله وبركاته يا أخي الفلاح" (Hello brother farmer)
+2. **Context**: Present Budoor daily report for ${report.parcelleName}
+3. **Current status**: Describe the status (${statusInDarija}) and weather conditions ONLY IN DARIJA ARABIC
+4. **Weather details**: Temperature, humidity, wind, rain - all explained in natural Moroccan Darija
+5. **Concrete actions**: The main recommendations translated to authentic Moroccan Darija
+6. **Closing**: "الله يسخر لك الخير والبركة" (May God bless your harvest)
 
-**IMPORTANT:**
-- Utilise un mélange naturel d'arabe dialectal marocain et de français pour les termes techniques
-- Exemple: "l'irrigation" → "السقي" ou "l'irrigation"
-- Exemple: "les racines" → "الجذور" ou "les racines"
-- Ton chaleureux et encourageant, comme un conseiller agricole local
-- Maximum 150 mots
-- Pas de markdown, juste le texte pur du script
+**CRITICAL RULES:**
+- Write ONLY in Moroccan Darija using Arabic script (العربية فقط)
+- NO French words, NO transliteration, NO numbers, NO mixed languages
+- Use proper Arabic spelling for agricultural terms: السقي (irrigation), الجذور (roots), الأمراض (diseases), الرطوبة (humidity), etc.
+- Warm and encouraging tone, like a local agricultural advisor
+- Maximum 150 words
+- Plain text only, NO markdown, NO formatting
 
-Génère UNIQUEMENT le script audio en darija, sans explications additionnelles.`;
+Generate ONLY the Darija script - nothing else, no explanations.`;
+
 
   try {
     const result = await model.generateContent(prompt);
