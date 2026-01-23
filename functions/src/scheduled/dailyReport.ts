@@ -133,36 +133,43 @@ export const dailyReportGenerator = functions
                 settings.language || "fr"
               );
 
-              // Send WhatsApp message
+              // Save report to Firestore FIRST to get the report ID
+              const reportRef = await db
+                .collection("users")
+                .doc(userId)
+                .collection("reports")
+                .add({
+                  parcelleId: parcelleDoc.id,
+                  parcelleName: parcelle.name,
+                  cultureType: parcelle.culture.type,
+                  content: report.fullReport,
+                  status: report.status,
+                  recommendations: report.recommendations,
+                  weather,
+                  source: "scheduled",
+                  sentViaWhatsApp: true,
+                  createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                });
+
+              // Get the report ID
+              const reportId = reportRef.id;
+
+              // Generate the report details URL
+              const reportUrl = `https://budoor.app/dashboard/reports/${reportId}`;
+
+              // Send WhatsApp message with the report link
               const result = await sendDailyReport(
                 settings.whatsappNumber,
                 userData.displayName || "Agriculteur",
                 parcelle.name,
                 report.summary,
-                report.status
+                report.status,
+                reportUrl
               );
 
               if (result.success) {
                 successCount++;
                 functions.logger.info(`Report sent for parcelle ${parcelle.name}`);
-
-                // Save report to Firestore for history
-                await db
-                  .collection("users")
-                  .doc(userId)
-                  .collection("reports")
-                  .add({
-                    parcelleId: parcelleDoc.id,
-                    parcelleName: parcelle.name,
-                    cultureType: parcelle.culture.type,
-                    content: report.fullReport,
-                    status: report.status,
-                    recommendations: report.recommendations,
-                    weather,
-                    source: "scheduled",
-                    sentViaWhatsApp: true,
-                    createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                  });
               } else {
                 errorCount++;
                 functions.logger.error(`Failed to send report: ${result.error}`);

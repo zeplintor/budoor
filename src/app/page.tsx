@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button, Badge } from "@/components/ui";
+import { Button, Badge, OrganicBlob, GradientMesh } from "@/components/ui";
 import {
   Sprout,
   Map,
@@ -168,97 +168,129 @@ export default async function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-12 md:py-20 lg:py-28 px-4 sm:px-6 lg:px-8">
-        {/* Decorative elements - hidden on mobile for cleaner look */}
-        <div className="hidden md:block absolute top-20 left-10 w-72 h-72 bg-[var(--accent-pink)] rounded-full opacity-20 blur-3xl" />
-        <div className="hidden md:block absolute bottom-20 right-10 w-96 h-96 bg-[var(--accent-mint)] rounded-full opacity-20 blur-3xl" />
-        <div className="hidden md:block absolute top-40 right-1/4 w-64 h-64 bg-[var(--accent-yellow)] rounded-full opacity-10 blur-3xl" />
+      <section className="relative overflow-hidden py-12 md:py-20 lg:py-32 px-4 sm:px-6 lg:px-8">
+        {/* Organic background blobs */}
+        <div className="hidden md:block absolute -top-20 -left-20">
+          <OrganicBlob color="pink" size="xl" animated opacity={0.15} />
+        </div>
+        <div className="hidden md:block absolute -bottom-32 -right-32">
+          <OrganicBlob color="mint" size="xl" animated opacity={0.2} className="animation-delay-2000" />
+        </div>
+        <div className="hidden md:block absolute top-1/3 right-1/4">
+          <OrganicBlob color="yellow" size="lg" animated opacity={0.1} className="animation-delay-4000" />
+        </div>
+        <GradientMesh colors={{ top: 'pink', middle: 'coral', bottom: 'yellow' }} />
 
         <div className="max-w-7xl mx-auto relative">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="text-center lg:text-start">
-              <Badge variant="pink" size="lg" className="mb-4 md:mb-6">
+          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-8 lg:gap-16 items-center">
+            <div className="text-center lg:text-start stagger-children">
+              <Badge variant="pink" size="lg" className="mb-4 md:mb-6 animate-scale-in">
                 <Zap className="w-3 h-3 mr-1" />
                 {t("landing.hero.newFeature")}
               </Badge>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-[var(--text-primary)] tracking-tight leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-display font-extrabold text-[var(--text-primary)] tracking-tight leading-[1.1] mb-6">
                 {t("landing.hero.title")}
               </h1>
 
-              <p className="mt-4 md:mt-6 text-base md:text-lg text-[var(--text-secondary)] max-w-xl mx-auto lg:mx-0">
+              <p className="mt-4 md:mt-6 text-lg md:text-xl text-[var(--text-secondary)] max-w-xl mx-auto lg:mx-0 leading-relaxed">
                 {t("landing.hero.subtitle")}
               </p>
 
-              <div className="mt-6 md:mt-10 flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start">
-                <Link href="/register" className="w-full sm:w-auto">
-                  <Button variant="primary" size="lg" className="w-full shadow-lg h-12 md:h-auto">
+              <div className="mt-8 md:mt-12 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link href="/register" className="w-full sm:w-auto group">
+                  <Button variant="primary" size="lg" className="w-full h-14 px-8 text-base shadow-lg hover:shadow-xl transition-all duration-300 group-hover:scale-105">
                     {t("landing.hero.cta")}
-                    <ChevronRight className="h-4 w-4" />
+                    <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </Link>
-                <Link href="#demo" className="w-full sm:w-auto">
-                  <Button variant="outline" size="lg" className="w-full h-12 md:h-auto">
-                    <Play className="h-4 w-4" />
+                <Link href="#demo" className="w-full sm:w-auto group">
+                  <Button variant="outline" size="lg" className="w-full h-14 px-8 text-base hover:bg-[var(--bg-muted)] transition-all duration-300">
+                    <Play className="h-5 w-5" />
                     {t("landing.hero.watchDemo")}
                   </Button>
                 </Link>
               </div>
 
-              {/* Trust badges - scrollable on mobile */}
-              <div className="mt-6 md:mt-10 flex flex-wrap items-center gap-4 md:gap-6 justify-center lg:justify-start">
-                <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4 md:h-5 md:w-5 text-[var(--accent-mint-dark)]" />
-                  <span className="text-xs md:text-sm text-[var(--text-secondary)]">{t("landing.hero.trust.secure")}</span>
+              {/* Trust badges */}
+              <div className="mt-8 md:mt-12 flex flex-wrap items-center gap-6 justify-center lg:justify-start">
+                <div className="flex items-center gap-2 group cursor-default">
+                  <div className="p-2 rounded-full bg-[var(--accent-mint-light)] group-hover:scale-110 transition-transform">
+                    <Shield className="h-4 w-4 text-[var(--accent-mint-dark)]" />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{t("landing.hero.trust.secure")}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 md:h-5 md:w-5 text-[var(--accent-purple-dark)]" />
-                  <span className="text-xs md:text-sm text-[var(--text-secondary)]">{t("landing.hero.trust.multilang")}</span>
+                <div className="flex items-center gap-2 group cursor-default">
+                  <div className="p-2 rounded-full bg-[var(--accent-purple-light)] group-hover:scale-110 transition-transform">
+                    <Globe className="h-4 w-4 text-[var(--accent-purple-dark)]" />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{t("landing.hero.trust.multilang")}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Bell className="h-4 w-4 md:h-5 md:w-5 text-[var(--accent-yellow-dark)]" />
-                  <span className="text-xs md:text-sm text-[var(--text-secondary)]">{t("landing.hero.trust.realtime")}</span>
+                <div className="flex items-center gap-2 group cursor-default">
+                  <div className="p-2 rounded-full bg-[var(--accent-yellow-light)] group-hover:scale-110 transition-transform">
+                    <Bell className="h-4 w-4 text-[var(--accent-yellow-dark)]" />
+                  </div>
+                  <span className="text-sm font-medium text-[var(--text-primary)]">{t("landing.hero.trust.realtime")}</span>
                 </div>
               </div>
             </div>
 
-            {/* Hero illustration - Dashboard preview */}
+            {/* Hero illustration - Dashboard preview with floating cards */}
             <div className="relative hidden lg:block">
-              <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-pink)]/20 to-[var(--accent-mint)]/20 rounded-[var(--radius-2xl)] transform rotate-3" />
-              <div className="relative bg-[var(--bg-secondary)] rounded-[var(--radius-2xl)] shadow-2xl p-6 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
-                {/* Mini dashboard preview */}
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 rounded-full bg-[var(--status-error)]" />
-                  <div className="w-3 h-3 rounded-full bg-[var(--accent-yellow)]" />
-                  <div className="w-3 h-3 rounded-full bg-[var(--accent-mint)]" />
-                </div>
+              {/* Background blob */}
+              <div className="absolute -inset-8 bg-gradient-to-br from-[var(--accent-pink)]/10 via-[var(--accent-coral)]/10 to-[var(--accent-yellow)]/10 rounded-[3rem] blur-2xl" />
 
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-[var(--accent-pink-light)] rounded-[var(--radius-lg)] p-4">
-                    <p className="text-xs text-[var(--text-secondary)] mb-1">Parcelles</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)]">12</p>
+              <div className="relative space-y-4">
+                {/* Floating card 1 - Top left */}
+                <div className="card-float bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] shadow-xl p-5 transform -rotate-2 hover:rotate-0 transition-all duration-500 animate-float" style={{ animationDelay: '0s' }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 rounded-[var(--radius-lg)] bg-[var(--accent-pink-light)]">
+                        <Map className="h-6 w-6 text-[var(--accent-pink-dark)]" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-medium text-[var(--text-secondary)]">Parcelles actives</p>
+                        <p className="text-3xl font-display font-bold text-[var(--text-primary)]">24</p>
+                      </div>
+                    </div>
+                    <Badge variant="pink" size="sm">+8</Badge>
                   </div>
-                  <div className="bg-[var(--accent-yellow-light)] rounded-[var(--radius-lg)] p-4">
-                    <p className="text-xs text-[var(--text-secondary)] mb-1">Alertes</p>
-                    <p className="text-2xl font-bold text-[var(--text-primary)]">3</p>
-                  </div>
-                </div>
-
-                <div className="bg-[var(--bg-muted)] rounded-[var(--radius-lg)] p-4 mb-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium text-[var(--text-primary)]">Rendement prévu</p>
-                    <Badge variant="mint" size="sm">+12%</Badge>
-                  </div>
-                  <div className="h-2 bg-[var(--border-light)] rounded-full overflow-hidden">
-                    <div className="h-full w-3/4 bg-gradient-to-r from-[var(--accent-mint)] to-[var(--accent-yellow)] rounded-full" />
+                  <div className="h-1.5 bg-[var(--accent-pink-light)] rounded-full overflow-hidden">
+                    <div className="h-full w-4/5 bg-[var(--accent-pink)] rounded-full transition-all duration-1000" />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 p-3 bg-[var(--accent-mint-light)] rounded-[var(--radius-md)]">
-                  <CloudSun className="h-5 w-5 text-[var(--accent-mint-dark)]" />
-                  <div>
-                    <p className="text-xs font-medium text-[var(--text-primary)]">Météo favorable</p>
-                    <p className="text-xs text-[var(--text-secondary)]">Idéal pour traitement</p>
+                {/* Floating card 2 - Middle */}
+                <div className="card-float bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] shadow-xl p-5 transform rotate-1 hover:rotate-0 transition-all duration-500 ml-8 animate-float" style={{ animationDelay: '1s' }}>
+                  <div className="flex items-center gap-3 mb-3">
+                    <CloudSun className="h-7 w-7 text-[var(--accent-yellow-dark)]" />
+                    <div>
+                      <p className="text-xs font-medium text-[var(--text-secondary)]">Météo aujourd'hui</p>
+                      <p className="text-2xl font-display font-bold text-[var(--text-primary)]">23°C</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 p-3 bg-[var(--accent-yellow-light)] rounded-[var(--radius-md)]">
+                    <Zap className="h-4 w-4 text-[var(--accent-yellow-dark)]" />
+                    <p className="text-xs font-medium text-[var(--accent-yellow-dark)]">Conditions optimales</p>
+                  </div>
+                </div>
+
+                {/* Floating card 3 - Bottom right */}
+                <div className="card-float bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] shadow-xl p-5 transform -rotate-1 hover:rotate-0 transition-all duration-500 ml-4 animate-float" style={{ animationDelay: '2s' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-full bg-[var(--accent-mint-light)]">
+                      <TrendingUp className="h-5 w-5 text-[var(--accent-mint-dark)]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs text-[var(--text-secondary)] mb-1">Rendement</p>
+                      <div className="flex items-end gap-1">
+                        <div className="h-8 w-2 bg-[var(--accent-mint-light)] rounded-full" />
+                        <div className="h-12 w-2 bg-[var(--accent-mint-light)] rounded-full" />
+                        <div className="h-16 w-2 bg-[var(--accent-mint)] rounded-full" />
+                        <div className="h-10 w-2 bg-[var(--accent-mint-light)] rounded-full" />
+                      </div>
+                    </div>
+                    <Badge variant="mint" size="sm" className="font-bold">+32%</Badge>
                   </div>
                 </div>
               </div>
@@ -268,28 +300,40 @@ export default async function Home() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-10 md:py-16 px-4 sm:px-6 lg:px-8">
+      <section className="py-10 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}
-                className="relative overflow-hidden bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] md:rounded-[var(--radius-xl)] p-4 md:p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 group"
+                className="relative overflow-hidden bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] md:rounded-[var(--radius-2xl)] p-5 md:p-8 shadow-[var(--shadow-card)] card-float group animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className={`absolute top-0 left-0 h-1 w-full ${
+                {/* Decorative blob background */}
+                <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-20 group-hover:opacity-30 transition-opacity ${
                   index === 0 ? "bg-[var(--accent-pink)]" :
                   index === 1 ? "bg-[var(--accent-mint)]" :
                   index === 2 ? "bg-[var(--accent-yellow)]" :
                   "bg-[var(--accent-purple)]"
                 }`} />
-                <stat.icon className={`h-6 w-6 md:h-8 md:w-8 mb-2 md:mb-3 ${
-                  index === 0 ? "text-[var(--accent-pink)]" :
-                  index === 1 ? "text-[var(--accent-mint)]" :
-                  index === 2 ? "text-[var(--accent-yellow)]" :
-                  "text-[var(--accent-purple)]"
-                }`} />
-                <p className="text-xl md:text-3xl font-bold text-[var(--text-primary)] mb-0.5 md:mb-1">{stat.value}</p>
-                <p className="text-xs md:text-sm text-[var(--text-secondary)]">{stat.label}</p>
+
+                <div className="relative">
+                  <div className={`inline-flex p-3 md:p-4 rounded-[var(--radius-xl)] mb-4 ${
+                    index === 0 ? "bg-[var(--accent-pink-light)]" :
+                    index === 1 ? "bg-[var(--accent-mint-light)]" :
+                    index === 2 ? "bg-[var(--accent-yellow-light)]" :
+                    "bg-[var(--accent-purple-light)]"
+                  }`}>
+                    <stat.icon className={`h-6 w-6 md:h-8 md:w-8 ${
+                      index === 0 ? "text-[var(--accent-pink-dark)]" :
+                      index === 1 ? "text-[var(--accent-mint-dark)]" :
+                      index === 2 ? "text-[var(--accent-yellow-dark)]" :
+                      "text-[var(--accent-purple-dark)]"
+                    }`} />
+                  </div>
+                  <p className="text-2xl md:text-4xl font-display font-bold text-[var(--text-primary)] mb-2">{stat.value}</p>
+                  <p className="text-sm md:text-base font-medium text-[var(--text-secondary)]">{stat.label}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -309,98 +353,221 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-            {features.map((feature) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {features.map((feature, index) => (
               <div
                 key={feature.title}
-                className="group relative bg-[var(--bg-secondary)] rounded-[var(--radius-lg)] md:rounded-[var(--radius-xl)] p-4 md:p-6 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 hover:-translate-y-1"
+                className="group relative bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] md:rounded-[var(--radius-2xl)] p-6 md:p-8 shadow-[var(--shadow-card)] card-float overflow-hidden animate-fade-in-up"
+                style={{ animationDelay: `${index * 100}ms` }}
               >
-                <div className={`w-10 h-10 md:w-14 md:h-14 rounded-[var(--radius-md)] md:rounded-[var(--radius-lg)] ${accentColors[feature.accent].bg} flex items-center justify-center mb-3 md:mb-5 group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className="h-5 w-5 md:h-7 md:w-7 text-[var(--text-primary)]" />
+                {/* Hover gradient effect */}
+                <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${accentColors[feature.accent].bgLight}`} style={{ mixBlendMode: 'multiply' }} />
+
+                <div className="relative">
+                  <div className={`w-14 h-14 md:w-16 md:h-16 rounded-[var(--radius-xl)] ${accentColors[feature.accent].bg} flex items-center justify-center mb-5 md:mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-500 shadow-lg`}>
+                    <feature.icon className="h-7 w-7 md:h-8 md:w-8 text-[var(--text-primary)]" />
+                  </div>
+                  <h3 className="font-display font-bold text-base md:text-xl text-[var(--text-primary)] mb-2 md:mb-3 group-hover:text-[var(--accent-${feature.accent}-dark)] transition-colors">
+                    {feature.title}
+                  </h3>
+                  <p className="text-sm md:text-base text-[var(--text-secondary)] leading-relaxed">
+                    {feature.description}
+                  </p>
+
+                  {/* Arrow indicator */}
+                  <div className="absolute bottom-6 right-6 hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-[var(--bg-muted)] opacity-0 group-hover:opacity-100 transition-all duration-300 group-hover:translate-x-1">
+                    <ArrowRight className="h-5 w-5 text-[var(--text-primary)]" />
+                  </div>
                 </div>
-                <h3 className="font-semibold text-sm md:text-lg text-[var(--text-primary)] mb-1 md:mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-xs md:text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3 md:line-clamp-none">
-                  {feature.description}
-                </p>
-                <ArrowRight className="hidden md:block absolute bottom-6 right-6 h-5 w-5 text-[var(--text-muted)] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* WhatsApp Demo Section */}
-      <section id="demo" className="py-12 md:py-20 px-4 sm:px-6 lg:px-8 bg-[var(--bg-muted)]">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="order-2 lg:order-1">
-              <Badge variant="mint" className="mb-3 md:mb-4">
-                <MessageCircle className="w-3 h-3 mr-1" />
-                WhatsApp
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-4 md:mb-6">
-                {t("landing.whatsappDemo.title")}
-              </h2>
-              <p className="text-sm md:text-lg text-[var(--text-secondary)] mb-6 md:mb-8">
-                {t("landing.whatsappDemo.subtitle")}
-              </p>
+      {/* WhatsApp Demo Section - Enhanced */}
+      <section id="demo" className="relative py-16 md:py-24 px-4 sm:px-6 lg:px-8 overflow-hidden bg-gradient-to-br from-[#25D366]/5 via-[var(--bg-muted)] to-[var(--accent-mint)]/10">
+        {/* Decorative blobs */}
+        <div className="absolute -top-20 -left-20 hidden lg:block">
+          <OrganicBlob color="mint" size="xl" animated opacity={0.15} />
+        </div>
+        <div className="absolute -bottom-32 -right-32 hidden lg:block">
+          <OrganicBlob color="yellow" size="xl" animated opacity={0.12} className="animation-delay-2000" />
+        </div>
 
-              <div className="space-y-3 md:space-y-4">
-                {whatsappBenefits.map((item) => (
-                  <div key={item} className="flex items-center gap-3">
-                    <div className="flex h-5 w-5 md:h-6 md:w-6 items-center justify-center rounded-full bg-[var(--accent-mint)] shrink-0">
-                      <Check className="h-3 w-3 md:h-4 md:w-4 text-[var(--text-primary)]" />
-                    </div>
-                    <span className="text-sm md:text-base text-[var(--text-primary)]">{item}</span>
-                  </div>
-                ))}
-              </div>
+        <div className="max-w-7xl mx-auto relative">
+          {/* Section header */}
+          <div className="text-center mb-12 md:mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366]/10 border-2 border-[#25D366]/20 mb-4 md:mb-6">
+              <div className="w-2 h-2 rounded-full bg-[#25D366] animate-pulse" />
+              <span className="text-sm font-semibold text-[#25D366]">WhatsApp Integration</span>
             </div>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-extrabold text-[var(--text-primary)] mb-4 md:mb-6 leading-tight">
+              Vos rapports quotidiens<br />
+              <span className="bg-gradient-to-r from-[#25D366] to-[var(--accent-mint)] bg-clip-text text-transparent">directement sur WhatsApp</span>
+            </h2>
+            <p className="text-base md:text-xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed">
+              Recevez chaque jour une analyse personnalisée de vos parcelles avec un lien cliquable pour accéder aux détails complets. Simple, rapide et toujours à portée de main.
+            </p>
+          </div>
 
-            <div className="relative order-1 lg:order-2">
-              {/* Phone mockup */}
-              <div className="relative mx-auto w-64 sm:w-72 md:w-80">
-                <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-mint)] to-[var(--accent-yellow)] rounded-[2.5rem] transform rotate-3 opacity-50" />
-                <div className="relative bg-[var(--text-primary)] rounded-[2.5rem] p-2 shadow-2xl">
-                  <div className="bg-[#e5ddd5] rounded-[2rem] overflow-hidden">
-                    {/* WhatsApp header */}
-                    <div className="bg-[#075e54] px-4 py-3 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-[var(--accent-mint)] flex items-center justify-center">
-                        <Sprout className="h-5 w-5 text-[var(--text-primary)]" />
-                      </div>
-                      <div>
-                        <p className="text-white font-medium text-sm">Budoor</p>
-                        <p className="text-green-200 text-xs">en ligne</p>
-                      </div>
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Benefits side */}
+            <div className="order-2 lg:order-1">
+              <div className="space-y-6">
+                {/* Key benefit cards */}
+                <div className="group bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-[#25D366]/30">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-[var(--radius-lg)] bg-[#25D366]/10 group-hover:scale-110 transition-transform">
+                      <MessageCircle className="h-6 w-6 text-[#25D366]" />
                     </div>
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-lg text-[var(--text-primary)] mb-2">Rapports quotidiens automatiques</h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                        Chaque matin, recevez un rapport détaillé avec météo, alertes et recommandations personnalisées pour chacune de vos parcelles.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                    {/* Chat content */}
-                    <div className="p-4 min-h-[320px]">
-                      <div className="bg-white rounded-lg p-3 shadow-sm max-w-[90%]">
-                        <p className="text-sm whitespace-pre-line text-gray-800 leading-relaxed">
-{`🌾 *Rapport : Le Grand Pré*
-📅 23 Janvier 2026
+                <div className="group bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-[var(--accent-mint)]/30">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-[var(--radius-lg)] bg-[var(--accent-mint-light)] group-hover:scale-110 transition-transform">
+                      <ArrowRight className="h-6 w-6 text-[var(--accent-mint-dark)]" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-lg text-[var(--text-primary)] mb-2">Liens cliquables vers les détails</h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                        Un simple clic sur le lien dans le message WhatsApp vous donne accès au rapport complet avec graphiques, historique et analyses approfondies.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-🚦 *Statut :* Vigilance
-
-🌦️ *Météo 3 jours :*
-Pluies prévues mercredi (30mm)
-
-🚜 *Actions recommandées :*
-• Reporter l'épandage d'azote
-• Vérifier le drainage Nord
-• Fenêtre semis : 28 Jan
-
-💬 _"Détails" pour plus d'infos_`}
-                        </p>
-                        <p className="text-[10px] text-gray-400 mt-2 text-end">14:32 ✓✓</p>
-                      </div>
+                <div className="group bg-[var(--bg-secondary)] rounded-[var(--radius-xl)] p-6 shadow-lg hover:shadow-xl transition-all duration-300 border-2 border-transparent hover:border-[var(--accent-yellow)]/30">
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-[var(--radius-lg)] bg-[var(--accent-yellow-light)] group-hover:scale-110 transition-transform">
+                      <Bell className="h-6 w-6 text-[var(--accent-yellow-dark)]" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-display font-bold text-lg text-[var(--text-primary)] mb-2">Alertes en temps réel</h3>
+                      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                        En cas de conditions météo défavorables ou d'alertes importantes, vous êtes immédiatement notifié pour agir rapidement.
+                      </p>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Additional benefits list */}
+              <div className="mt-8 p-6 rounded-[var(--radius-xl)] bg-gradient-to-br from-[var(--accent-mint-light)] to-[var(--accent-yellow-light)] border-2 border-[var(--accent-mint)]">
+                <h4 className="font-display font-bold text-base text-[var(--text-primary)] mb-4 flex items-center gap-2">
+                  <Check className="h-5 w-5 text-[var(--accent-mint-dark)]" />
+                  Avantages supplémentaires
+                </h4>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {whatsappBenefits.map((item) => (
+                    <div key={item} className="flex items-start gap-2">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[var(--accent-mint)] shrink-0 mt-0.5">
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-sm text-[var(--text-primary)] font-medium">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Phone mockup side */}
+            <div className="relative order-1 lg:order-2">
+              <div className="relative mx-auto w-72 sm:w-80 md:w-96 lg:w-full lg:max-w-md">
+                {/* Glow effect */}
+                <div className="absolute inset-0 bg-gradient-to-br from-[#25D366] to-[var(--accent-mint)] rounded-[3rem] transform rotate-3 opacity-20 blur-2xl animate-pulse" />
+
+                {/* Phone frame */}
+                <div className="relative bg-[var(--text-primary)] rounded-[2.5rem] p-3 shadow-2xl transform hover:scale-105 transition-transform duration-500">
+                  <div className="bg-[#e5ddd5] rounded-[2rem] overflow-hidden">
+                    {/* WhatsApp header */}
+                    <div className="bg-[#075e54] px-4 py-4 flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-full bg-[var(--accent-mint)] flex items-center justify-center ring-2 ring-white/20">
+                        <Sprout className="h-6 w-6 text-[var(--text-primary)]" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-white font-semibold text-base">Budoor Agro</p>
+                        <p className="text-green-200 text-xs flex items-center gap-1">
+                          <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse" />
+                          en ligne
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Chat content */}
+                    <div className="p-4 min-h-[400px] space-y-3">
+                      {/* Message 1 */}
+                      <div className="bg-white rounded-2xl rounded-tl-sm p-4 shadow-md max-w-[90%] animate-fade-in-up">
+                        <p className="text-sm whitespace-pre-line text-gray-800 leading-relaxed font-medium">
+{`✅ *Rapport quotidien : Le Grand Pré*
+📅 23 Janvier 2026
+
+🚦 *Statut :* Normal
+
+🌦️ *Météo 3 jours :*
+Temps sec et ensoleillé
+Température : 18-24°C
+
+🚜 *Actions recommandées :*
+• Conditions idéales pour semis
+• Irrigation recommandée
+• Surveillance des adventices
+
+📄 *Voir le rapport détaillé*
+https://budoor.app/reports/abc123`}
+                        </p>
+                        <p className="text-[10px] text-gray-400 mt-2 text-end">08:30 ✓✓</p>
+                      </div>
+
+                      {/* Clickable link preview */}
+                      <div className="bg-white rounded-2xl rounded-tl-sm p-3 shadow-md max-w-[90%] border-l-4 border-[var(--accent-mint)] animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 rounded-lg bg-[var(--accent-mint)] flex items-center justify-center">
+                            <TrendingUp className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-[var(--text-primary)] truncate">Budoor - Rapport détaillé</p>
+                            <p className="text-[10px] text-gray-500 truncate">budoor.app</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-600">Consultez le rapport complet avec graphiques et analyses</p>
+                        <p className="text-[10px] text-gray-400 mt-2 text-end">08:30 ✓✓</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating indicators */}
+                <div className="absolute -top-4 -right-4 bg-[#25D366] text-white px-4 py-2 rounded-full shadow-lg animate-float font-semibold text-sm">
+                  100% Gratuit
+                </div>
+                <div className="absolute -bottom-4 -left-4 bg-[var(--bg-secondary)] text-[var(--text-primary)] px-4 py-2 rounded-full shadow-lg animate-float font-semibold text-sm border-2 border-[var(--accent-mint)]" style={{ animationDelay: '1s' }}>
+                  Aucune app requise
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom CTA */}
+          <div className="mt-12 md:mt-16 text-center">
+            <div className="inline-flex flex-col sm:flex-row items-center gap-4">
+              <Link href="/register" className="group">
+                <Button variant="primary" size="lg" className="h-14 px-8 text-base shadow-xl hover:shadow-2xl transition-all duration-300 group-hover:scale-105 bg-[#25D366] hover:bg-[#128C7E]">
+                  <MessageCircle className="h-5 w-5" />
+                  Activer WhatsApp
+                  <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </Link>
+              <p className="text-sm text-[var(--text-secondary)]">
+                Configuration en 2 minutes • Aucun téléchargement requis
+              </p>
             </div>
           </div>
         </div>

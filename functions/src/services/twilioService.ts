@@ -82,7 +82,8 @@ export async function sendDailyReport(
   userName: string,
   parcelleName: string,
   reportSummary: string,
-  alertLevel: "normal" | "vigilance" | "alerte"
+  alertLevel: "normal" | "vigilance" | "alerte",
+  reportUrl?: string
 ): Promise<MessageResult> {
   const alertEmoji =
     alertLevel === "alerte"
@@ -99,6 +100,7 @@ Voici votre rapport agronomique quotidien:
 
 ${reportSummary}
 
+${reportUrl ? `\n📄 *Voir le rapport détaillé*\n${reportUrl}\n` : ""}
 ---
 _Généré automatiquement par Budoor_
 _Répondez STOP pour vous désabonner_`;

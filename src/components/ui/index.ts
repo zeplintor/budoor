@@ -6,3 +6,5 @@ export { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, Di
 export { Badge, badgeVariants } from "./badge";
 export { StatCard } from "./stat-card";
 export { Avatar, AvatarGroup } from "./avatar";
+export { OrganicBlob } from "./organic-blob";
+export { GradientMesh } from "./gradient-mesh";

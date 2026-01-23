@@ -17,6 +17,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
+  OrganicBlob,
+  GradientMesh,
 } from "@/components/ui";
 import { useTranslations } from "next-intl";
 import { useSubscription, PLAN_LIMITS } from "@/hooks/useSubscription";
@@ -151,147 +153,184 @@ export default function PricingPage() {
     <>
       <Header title={t("pricing.title")} />
 
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-8 relative">
+        {/* Background decorative elements */}
+        <div className="absolute -top-20 -right-20 pointer-events-none">
+          <OrganicBlob color="purple" size="xl" animated opacity={0.08} />
+        </div>
+        <div className="absolute top-1/2 -left-32 pointer-events-none">
+          <OrganicBlob color="pink" size="lg" animated opacity={0.06} />
+        </div>
+        <GradientMesh colors={{ top: 'purple', middle: 'pink', bottom: 'coral' }} />
+
         {/* Notification */}
         {notification && (
           <div
-            className={`p-4 rounded-lg flex items-center gap-3 ${
+            className={`p-5 rounded-[var(--radius-xl)] flex items-center gap-4 shadow-lg animate-fade-in-up backdrop-blur-sm ${
               notification.type === "success"
-                ? "bg-green-50 text-green-800 border border-green-200"
-                : "bg-red-50 text-red-800 border border-red-200"
+                ? "bg-[var(--status-success-light)] border-2 border-[var(--status-success)]"
+                : "bg-[var(--status-error-light)] border-2 border-[var(--status-error)]"
             }`}
           >
             {notification.type === "success" ? (
-              <CheckCircle className="h-5 w-5 text-green-500 shrink-0" />
+              <div className="p-2 rounded-full bg-[var(--status-success)]">
+                <CheckCircle className="h-5 w-5 text-white shrink-0" />
+              </div>
             ) : (
-              <AlertTriangle className="h-5 w-5 text-red-500 shrink-0" />
+              <div className="p-2 rounded-full bg-[var(--status-error)]">
+                <AlertTriangle className="h-5 w-5 text-white shrink-0" />
+              </div>
             )}
-            <p>{notification.message}</p>
+            <p className="font-medium text-[var(--text-primary)] flex-1">{notification.message}</p>
             <button
               onClick={() => setNotification(null)}
-              className="ml-auto text-gray-500 hover:text-gray-700"
+              className="p-2 hover:bg-white/50 rounded-full transition-colors"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 text-[var(--text-primary)]" />
             </button>
           </div>
         )}
 
         {/* Current plan status */}
-        <Card className="bg-gradient-to-r from-[var(--accent-mint-light)] to-[var(--accent-yellow-light)] border-0">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`p-3 rounded-full ${
-                    isPro
-                      ? "bg-[var(--accent-pink)]"
-                      : "bg-[var(--accent-mint)]"
-                  }`}
-                >
-                  {isPro ? (
-                    <Crown className="h-6 w-6 text-white" />
-                  ) : (
-                    <Sparkles className="h-6 w-6 text-[var(--text-primary)]" />
-                  )}
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-[var(--text-primary)]">
-                    {isPro
-                      ? t("pricing.currentPlan.pro")
-                      : t("pricing.currentPlan.free")}
-                  </h2>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {isPro
-                      ? t("pricing.currentPlan.proDescription")
-                      : t("pricing.currentPlan.freeDescription")}
-                  </p>
-                </div>
+        <div className="relative overflow-hidden bg-gradient-to-br from-[var(--accent-mint-light)] via-[var(--accent-yellow-light)] to-[var(--accent-coral-light)] rounded-[var(--radius-2xl)] p-8 shadow-xl">
+          {/* Animated blob background */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-[var(--accent-mint)] opacity-20 rounded-full blur-3xl animate-blob" />
+
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-5">
+              <div
+                className={`p-4 rounded-[var(--radius-xl)] shadow-lg ${
+                  isPro
+                    ? "bg-gradient-to-br from-[var(--accent-pink)] to-[var(--accent-purple)]"
+                    : "bg-[var(--accent-mint)]"
+                }`}
+              >
+                {isPro ? (
+                  <Crown className="h-8 w-8 text-white" />
+                ) : (
+                  <Sparkles className="h-8 w-8 text-[var(--text-primary)]" />
+                )}
               </div>
-              {isPro && status === "active" && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCancelDialog(true)}
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  {t("pricing.cancelSubscription")}
-                </Button>
-              )}
+              <div>
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-[var(--text-primary)] mb-1">
+                  {isPro
+                    ? t("pricing.currentPlan.pro")
+                    : t("pricing.currentPlan.free")}
+                </h2>
+                <p className="text-base text-[var(--text-primary)]/80">
+                  {isPro
+                    ? t("pricing.currentPlan.proDescription")
+                    : t("pricing.currentPlan.freeDescription")}
+                </p>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+            {isPro && status === "active" && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowCancelDialog(true)}
+                className="bg-white/50 backdrop-blur-sm border-2 text-red-600 hover:text-red-700 hover:bg-white/70 hover:border-red-300"
+              >
+                {t("pricing.cancelSubscription")}
+              </Button>
+            )}
+          </div>
+        </div>
 
         {/* Plans grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {plans.map((planItem) => (
-            <Card
+        <div className="grid md:grid-cols-2 gap-6 relative">
+          {plans.map((planItem, index) => (
+            <div
               key={planItem.id}
-              className={`relative overflow-hidden ${
-                planItem.popular
-                  ? "border-2 border-[var(--accent-pink)] shadow-lg"
-                  : "border border-[var(--border-light)]"
-              } ${planItem.current ? "ring-2 ring-[var(--accent-mint)]" : ""}`}
+              className={`relative overflow-hidden bg-[var(--bg-secondary)] rounded-[var(--radius-2xl)] shadow-xl card-float animate-fade-in-up ${
+                planItem.popular ? "md:scale-105" : ""
+              }`}
+              style={{ animationDelay: `${index * 150}ms` }}
             >
+              {/* Decorative blob */}
+              <div className={`absolute -top-20 -right-20 w-56 h-56 rounded-full blur-3xl opacity-10 ${
+                planItem.popular ? "bg-[var(--accent-pink)]" : "bg-[var(--accent-mint)]"
+              }`} />
+
+              {/* Border glow for popular plan */}
               {planItem.popular && (
-                <div className="absolute top-0 right-0">
-                  <Badge
-                    variant="pink"
-                    className="rounded-none rounded-bl-lg px-3 py-1"
-                  >
-                    {t("pricing.popular")}
-                  </Badge>
+                <div className="absolute inset-0 rounded-[var(--radius-2xl)] bg-gradient-to-br from-[var(--accent-pink)]/20 to-[var(--accent-purple)]/20 p-[2px]">
+                  <div className="h-full w-full bg-[var(--bg-secondary)] rounded-[var(--radius-2xl)]" />
                 </div>
               )}
 
-              {planItem.current && (
-                <div className="absolute top-0 left-0">
-                  <Badge
-                    variant="mint"
-                    className="rounded-none rounded-br-lg px-3 py-1"
-                  >
-                    {t("pricing.currentPlan.badge")}
-                  </Badge>
-                </div>
+              {/* Current plan ring */}
+              {planItem.current && !planItem.popular && (
+                <div className="absolute inset-0 rounded-[var(--radius-2xl)] ring-2 ring-[var(--accent-mint)]" />
               )}
 
-              <CardHeader className="pt-8">
-                <CardTitle className="text-2xl">{planItem.name}</CardTitle>
-                <CardDescription>{planItem.description}</CardDescription>
-                <div className="mt-4">
-                  <span className="text-4xl font-bold text-[var(--text-primary)]">
-                    {planItem.price}€
-                  </span>
-                  <span className="text-[var(--text-secondary)]">
-                    /{t("pricing.perMonth")}
-                  </span>
+              <div className="relative p-8">
+                {/* Badges */}
+                <div className="flex gap-2 mb-6">
+                  {planItem.popular && (
+                    <Badge variant="pink" size="lg" className="shadow-lg">
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      {t("pricing.popular")}
+                    </Badge>
+                  )}
+                  {planItem.current && (
+                    <Badge variant="mint" size="lg">
+                      <Check className="h-3 w-3 mr-1" />
+                      {t("pricing.currentPlan.badge")}
+                    </Badge>
+                  )}
                 </div>
-              </CardHeader>
 
-              <CardContent className="space-y-6">
-                <ul className="space-y-3">
+                {/* Plan header */}
+                <div className="mb-6">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold text-[var(--text-primary)] mb-2">
+                    {planItem.name}
+                  </h3>
+                  <p className="text-[var(--text-secondary)]">{planItem.description}</p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl md:text-6xl font-display font-extrabold text-[var(--text-primary)]">
+                      {planItem.price}€
+                    </span>
+                    <span className="text-lg text-[var(--text-secondary)]">
+                      /{t("pricing.perMonth")}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <ul className="space-y-4 mb-8">
                   {planItem.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      {feature.included ? (
-                        <Check className="h-5 w-5 text-[var(--status-success)] shrink-0 mt-0.5" />
-                      ) : (
-                        <X className="h-5 w-5 text-[var(--text-muted)] shrink-0 mt-0.5" />
-                      )}
-                      <span
-                        className={
-                          feature.included
-                            ? "text-[var(--text-primary)]"
-                            : "text-[var(--text-muted)]"
-                        }
-                      >
+                      <div className={`mt-0.5 p-1 rounded-full ${
+                        feature.included
+                          ? "bg-[var(--status-success-light)]"
+                          : "bg-[var(--bg-muted)]"
+                      }`}>
+                        {feature.included ? (
+                          <Check className="h-4 w-4 text-[var(--status-success)]" />
+                        ) : (
+                          <X className="h-4 w-4 text-[var(--text-muted)]" />
+                        )}
+                      </div>
+                      <span className={`text-sm ${
+                        feature.included
+                          ? "text-[var(--text-primary)] font-medium"
+                          : "text-[var(--text-muted)]"
+                      }`}>
                         {feature.text}
                       </span>
                     </li>
                   ))}
                 </ul>
 
+                {/* CTA Button */}
                 {planItem.id === "pro" && !isPro && (
                   <Button
-                    className="w-full"
+                    className="w-full h-14 text-base shadow-lg hover:shadow-xl transition-all"
                     variant="primary"
                     size="lg"
                     onClick={handleUpgrade}
@@ -299,12 +338,12 @@ export default function PricingPage() {
                   >
                     {isUpgrading ? (
                       <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <Loader2 className="h-5 w-5 animate-spin" />
                         {t("pricing.processing")}
                       </>
                     ) : (
                       <>
-                        <CreditCard className="h-4 w-4" />
+                        <CreditCard className="h-5 w-5" />
                         {t("pricing.upgrade")}
                       </>
                     )}
@@ -313,7 +352,7 @@ export default function PricingPage() {
 
                 {planItem.id === "free" && isPro && (
                   <Button
-                    className="w-full"
+                    className="w-full h-14 text-base"
                     variant="outline"
                     size="lg"
                     disabled
@@ -324,67 +363,77 @@ export default function PricingPage() {
 
                 {planItem.current && (
                   <Button
-                    className="w-full"
+                    className="w-full h-14 text-base bg-[var(--accent-mint-light)] border-2 border-[var(--accent-mint)]"
                     variant="outline"
                     size="lg"
                     disabled
                   >
-                    <Check className="h-4 w-4" />
+                    <Check className="h-5 w-5" />
                     {t("pricing.currentPlan.badge")}
                   </Button>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 
         {/* Benefits section */}
-        <Card>
+        <Card className="relative overflow-hidden shadow-xl">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-mint)] via-[var(--accent-yellow)] to-[var(--accent-pink)]" />
+
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-[var(--accent-yellow)]" />
+            <CardTitle className="flex items-center gap-3 font-display text-2xl">
+              <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-yellow-light)]">
+                <Zap className="h-6 w-6 text-[var(--accent-yellow-dark)]" />
+              </div>
               {t("pricing.benefits.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-[var(--accent-mint-light)]">
-                  <Shield className="h-5 w-5 text-[var(--accent-mint-dark)]" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-[var(--text-primary)]">
-                    {t("pricing.benefits.secure.title")}
-                  </h4>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {t("pricing.benefits.secure.description")}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-[var(--accent-yellow-light)]">
-                  <Clock className="h-5 w-5 text-[var(--accent-yellow-dark)]" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-[var(--text-primary)]">
-                    {t("pricing.benefits.flexible.title")}
-                  </h4>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {t("pricing.benefits.flexible.description")}
-                  </p>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="group">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-[var(--radius-xl)] bg-[var(--accent-mint-light)] group-hover:bg-[var(--accent-mint)] group-hover:scale-110 transition-all duration-300">
+                    <Shield className="h-6 w-6 text-[var(--accent-mint-dark)] group-hover:text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <h4 className="font-display font-semibold text-lg text-[var(--text-primary)] mb-2">
+                      {t("pricing.benefits.secure.title")}
+                    </h4>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {t("pricing.benefits.secure.description")}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-[var(--accent-pink-light)]">
-                  <CreditCard className="h-5 w-5 text-[var(--accent-pink-dark)]" />
+              <div className="group">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-[var(--radius-xl)] bg-[var(--accent-yellow-light)] group-hover:bg-[var(--accent-yellow)] group-hover:scale-110 transition-all duration-300">
+                    <Clock className="h-6 w-6 text-[var(--accent-yellow-dark)] group-hover:text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <h4 className="font-display font-semibold text-lg text-[var(--text-primary)] mb-2">
+                      {t("pricing.benefits.flexible.title")}
+                    </h4>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {t("pricing.benefits.flexible.description")}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="font-medium text-[var(--text-primary)]">
-                    {t("pricing.benefits.trial.title")}
-                  </h4>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    {t("pricing.benefits.trial.description")}
-                  </p>
+              </div>
+              <div className="group">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-[var(--radius-xl)] bg-[var(--accent-pink-light)] group-hover:bg-[var(--accent-pink)] group-hover:scale-110 transition-all duration-300">
+                    <CreditCard className="h-6 w-6 text-[var(--accent-pink-dark)] group-hover:text-[var(--text-primary)]" />
+                  </div>
+                  <div>
+                    <h4 className="font-display font-semibold text-lg text-[var(--text-primary)] mb-2">
+                      {t("pricing.benefits.trial.title")}
+                    </h4>
+                    <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                      {t("pricing.benefits.trial.description")}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

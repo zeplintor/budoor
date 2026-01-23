@@ -12,8 +12,6 @@ import {
   Sprout,
   ChevronLeft,
   Search,
-  Bell,
-  HelpCircle,
   Crown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -179,18 +177,6 @@ export function Sidebar() {
 
       {/* Bottom Section */}
       <div className="border-t border-[var(--border-dark)] p-4">
-        {/* Quick Actions */}
-        {!collapsed && (
-          <div className="mb-4 flex items-center justify-around">
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-inverse-secondary)] hover:bg-[var(--bg-dark-hover)] hover:text-[var(--text-inverse)] transition-colors">
-              <Bell className="h-5 w-5" />
-            </button>
-            <button className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-inverse-secondary)] hover:bg-[var(--bg-dark-hover)] hover:text-[var(--text-inverse)] transition-colors">
-              <HelpCircle className="h-5 w-5" />
-            </button>
-          </div>
-        )}
-
         {/* User Profile */}
         <div
           className={cn(
