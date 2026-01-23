@@ -33,6 +33,7 @@ import {
   History,
   Trash2,
   Clock,
+  Volume2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { getParcelles } from "@/lib/firebase/parcelles";
@@ -63,6 +64,7 @@ export default function ReportsPage() {
     recommendations: true,
     disease: true,
     irrigation: true,
+    audio: false,
     actions: true,
   });
   const reportRef = useRef<HTMLDivElement>(null);
@@ -946,6 +948,55 @@ ${currentReport.irrigationAdvice}
                     </CardContent>
                   )}
                 </Card>
+
+                {/* Audio & Darija Script */}
+                {(currentReport.audioUrl || currentReport.darijaScript) && (
+                  <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-pink-50">
+                    <CardHeader
+                      className="cursor-pointer py-3"
+                      onClick={() => toggleSection("audio")}
+                    >
+                      <CardTitle className="flex items-center justify-between text-base">
+                        <span className="flex items-center gap-2">
+                          <Volume2 className="h-5 w-5 text-purple-600" />
+                          Rapport Audio & Darija
+                        </span>
+                        {expandedSections.audio ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
+                      </CardTitle>
+                    </CardHeader>
+                    {expandedSections.audio && (
+                      <CardContent className="pt-0 space-y-4">
+                        {currentReport.audioUrl && (
+                          <div className="p-4 bg-white rounded-lg border border-purple-200">
+                            <p className="font-medium text-gray-900 mb-3">🎙️ Rapport Audio</p>
+                            <audio
+                              controls
+                              className="w-full"
+                              src={currentReport.audioUrl}
+                            >
+                              Votre navigateur ne supporte pas la balise audio.
+                            </audio>
+                            <p className="text-xs text-gray-500 mt-2">
+                              Narration en Darija (Marocain) du rapport agronomique
+                            </p>
+                          </div>
+                        )}
+                        {currentReport.darijaScript && (
+                          <div className="p-4 bg-white rounded-lg border border-purple-200">
+                            <p className="font-medium text-gray-900 mb-2">📝 Script Darija</p>
+                            <div className="bg-purple-50 p-3 rounded text-gray-700 text-sm leading-relaxed max-h-40 overflow-y-auto">
+                              {currentReport.darijaScript}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    )}
+                  </Card>
+                )}
 
                 {/* Next Actions */}
                 {currentReport.nextActions.length > 0 && (
