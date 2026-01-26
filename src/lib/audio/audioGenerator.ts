@@ -28,7 +28,8 @@ export async function generateAudioFromText(
   };
 
   // Use model from env var, default to v3 (best for Arabic/Darija)
-  const modelId = process.env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v3";
+  // eleven_v3: Latest model with 70+ languages, most expressive and human-like
+  const modelId = process.env.ELEVENLABS_MODEL_ID || "eleven_v3";
 
   console.log(`🎙️ Using model: ${modelId}`);
 
