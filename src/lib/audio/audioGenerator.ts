@@ -19,13 +19,18 @@ export async function generateAudioFromText(
   console.log(`🎙️ Generating audio with voice: ${selectedVoiceId}`);
 
   // ElevenLabs API configuration
-  // Optimized for Moroccan Darija (more expressive, natural)
+  // Optimized for Moroccan Darija with v3 (better Arabic support)
   const voiceSettings = {
-    stability: 0.55, // Slightly more stable for clarity in Darija
-    similarity_boost: 0.8, // Higher for authentic Moroccan accent
-    style: 0.5, // More expressive for conversational Darija
+    stability: 0.5, // Natural variability for conversational tone
+    similarity_boost: 0.85, // High similarity for authentic Moroccan accent
+    style: 0.6, // More expressive for natural Darija speech
     use_speaker_boost: true,
   };
+
+  // Use model from env var, default to v3 (best for Arabic/Darija)
+  const modelId = process.env.ELEVENLABS_MODEL_ID || "eleven_multilingual_v3";
+
+  console.log(`🎙️ Using model: ${modelId}`);
 
   try {
     // Call ElevenLabs API
@@ -40,7 +45,7 @@ export async function generateAudioFromText(
         },
         body: JSON.stringify({
           text,
-          model_id: "eleven_multilingual_v2",
+          model_id: modelId,
           voice_settings: voiceSettings,
         }),
       }
