@@ -2,10 +2,22 @@ import * as admin from "firebase-admin";
 import * as functions from "firebase-functions";
 import twilio from "twilio";
 
-const twilioClient = twilio(
-  process.env.TWILIO_ACCOUNT_SID,
-  process.env.TWILIO_AUTH_TOKEN
-);
+/**
+ * Get Twilio client with credentials from environment
+ */
+const getTwilioClient = () => {
+  const accountSid = process.env.TWILIO_ACCOUNT_SID;
+  const authToken = process.env.TWILIO_AUTH_TOKEN;
+
+  if (!accountSid) {
+    throw new Error("TWILIO_ACCOUNT_SID not configured");
+  }
+  if (!authToken) {
+    throw new Error("TWILIO_AUTH_TOKEN not configured");
+  }
+
+  return twilio(accountSid, authToken);
+};
 
 /**
  * Send WhatsApp report via Twilio
@@ -16,7 +28,8 @@ export async function sendWhatsAppReport(
   scheduleRef: admin.firestore.DocumentReference
 ): Promise<void> {
   try {
-    // Get user's phone number
+    // Get Twilio client
+    const twilioClient = getTwilioClient();
     const userDoc = await admin.firestore().collection("users").doc(userId).get();
     const userData = userDoc.data();
     
@@ -78,8 +91,9 @@ export async function sendWhatsAppReport(
       ? userData.phoneNumber
       : `+${userData.phoneNumber}`;
 
+    const whatsappNumber = process.env.TWILIO_WHATSAPP_PHONE || "+14155238886";
     await twilioClient.messages.create({
-      from: `whatsapp:${process.env.TWILIO_WHATSAPP_PHONE}`,
+      from: whatsappNumber.startsWith("whatsapp:") ? whatsappNumber : `whatsapp:${whatsappNumber}`,
       to: `whatsapp:${phoneNumber}`,
       body: message,
     });
