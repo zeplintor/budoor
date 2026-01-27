@@ -53,10 +53,18 @@ export default function ReportDetailPage() {
         const reportSnap = await getDoc(reportRef);
 
         if (reportSnap.exists()) {
-          setReport({
+          const reportData = {
             id: reportSnap.id,
             ...reportSnap.data(),
-          } as Report);
+          } as Report;
+          console.log("📊 Report loaded:", {
+            id: reportData.id,
+            parcelleName: reportData.parcelleName,
+            hasAudioUrl: !!reportData.audioUrl,
+            audioUrl: reportData.audioUrl,
+            keys: Object.keys(reportSnap.data())
+          });
+          setReport(reportData);
         } else {
           setError("Rapport introuvable");
         }
