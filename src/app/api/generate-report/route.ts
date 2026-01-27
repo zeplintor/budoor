@@ -72,28 +72,19 @@ export async function POST(request: NextRequest) {
       throw new Error("Impossible de parser la reponse IA");
     }
 
-    // Optionally use a mocked audio generator for local testing
-    const url = new URL(request.url);
-    const useMockAudio =
-      (url.searchParams.get("mockAudio") === "1" ||
-        url.searchParams.get("mockAudio") === "true") &&
-      process.env.NODE_ENV !== "production";
+    // Generate report WITHOUT audio (to avoid timeout)
+    // Audio will be generated asynchronously after saving the report
+    const report = await assembleReport(
+      reportData,
+      data,
+      // Skip audio generation - return empty promise
+      async () => "",
+      async () => ""
+    );
 
-    const report = useMockAudio
-      ? await assembleReport(
-        reportData,
-        data,
-        async (text: string, _voiceId?: string, fileName?: string) =>
-          `https://example.com/${fileName || "mock_audio.mp3"}`,
-        async (r) => `Mock Darija script for ${r.parcelleName}`
-      )
-      : await assembleReport(reportData, data);
-
-    console.log("✅ Report generated successfully:", {
+    console.log("✅ Report generated successfully (audio will be generated async):", {
       parcelleId: report.parcelleId,
-      hasAudio: !!report.audioUrl,
-      hasDarija: !!report.darijaScript,
-      debug: report.debug
+      status: report.status
     });
 
     return NextResponse.json(report);
