@@ -18,7 +18,7 @@ if (getApps().length === 0) {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { reportId: string } }
+  { params }: { params: Promise<{ reportId: string }> }
 ) {
   try {
     const { searchParams } = new URL(request.url);
@@ -31,12 +31,15 @@ export async function GET(
       );
     }
 
+    // Await params in Next.js 16+
+    const { reportId } = await params;
+
     const db = getFirestore();
     const reportRef = db
       .collection("users")
       .doc(userId)
       .collection("reports")
-      .doc(params.reportId);
+      .doc(reportId);
 
     const reportSnap = await reportRef.get();
 
