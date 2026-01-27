@@ -141,32 +141,9 @@ export default function ReportsPage() {
 
       // Save report to Firestore
       setGenerationStep("Enregistrement du rapport...");
-      const reportId = await saveReport(firebaseUser.uid, report);
+      await saveReport(firebaseUser.uid, report);
 
-      // Generate audio asynchronously (don't wait for it)
-      setGenerationStep("Génération de l'audio en arrière-plan...");
-      fetch("/api/generate-audio", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: firebaseUser.uid,
-          reportId,
-          parcelleName: parcelle.name,
-          status: report.status === "ok" ? "normal" : report.status,
-          summary: report.summary,
-          recommendations: report.recommendations,
-          weather: {
-            temperature: data.weather.current.temperature,
-            humidity: data.weather.current.humidity,
-            precipitation: data.weather.current.precipitation,
-            windSpeed: data.weather.current.windSpeed,
-          },
-        }),
-      }).then(() => {
-        console.log("🎙️ Audio generation started in background");
-      }).catch((err) => {
-        console.error("❌ Failed to start audio generation:", err);
-      });
+      // Note: Audio generation is now manual via button in report details
 
       // Reload saved reports
       const reports = await getReports(firebaseUser.uid);

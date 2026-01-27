@@ -40,6 +40,8 @@ export default function ReportDetailPage() {
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadReport() {
@@ -68,6 +70,53 @@ export default function ReportDetailPage() {
 
     loadReport();
   }, [firebaseUser, reportId]);
+
+  const handleGenerateAudio = async () => {
+    if (!firebaseUser || !report) return;
+
+    setIsGeneratingAudio(true);
+    setAudioError(null);
+
+    try {
+      const response = await fetch("/api/generate-audio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: firebaseUser.uid,
+          reportId: report.id,
+          parcelleName: report.parcelleName,
+          status: report.status,
+          summary: report.content,
+          recommendations: report.recommendations || [],
+          weather: report.weather,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Échec de la génération audio");
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Reload report to get updated audio
+        const reportRef = doc(db!, "users", firebaseUser.uid, "reports", reportId);
+        const reportSnap = await getDoc(reportRef);
+
+        if (reportSnap.exists()) {
+          setReport({
+            id: reportSnap.id,
+            ...reportSnap.data(),
+          } as Report);
+        }
+      }
+    } catch (err) {
+      console.error("Error generating audio:", err);
+      setAudioError(err instanceof Error ? err.message : "Erreur lors de la génération audio");
+    } finally {
+      setIsGeneratingAudio(false);
+    }
+  };
 
   const statusConfig = {
     normal: {
@@ -184,19 +233,47 @@ export default function ReportDetailPage() {
             </CardHeader>
           </Card>
 
-          {/* Audio generation in progress or error */}
+          {/* Audio generation button */}
           {!report.audioUrl && (
-            <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-yellow)]/30" style={{ animationDelay: '50ms' }}>
+            <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-purple)]/30" style={{ animationDelay: '50ms' }}>
               <CardContent className="p-6">
-                <div className="flex items-start gap-3 p-4 rounded-lg bg-[var(--accent-yellow-light)] border border-[var(--accent-yellow)]">
-                  <Loader2 className="h-5 w-5 text-[var(--accent-yellow-dark)] shrink-0 mt-0.5 animate-spin" />
-                  <div>
-                    <p className="font-semibold text-[var(--text-primary)] mb-1">
-                      Audio en cours de génération...
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">
-                      L'audio en darija est en cours de génération. Rafraîchissez la page dans quelques secondes pour l'écouter.
-                    </p>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-full bg-[var(--accent-purple-light)] shrink-0">
+                      <Volume2 className="h-5 w-5 text-[var(--accent-purple-dark)]" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-[var(--text-primary)] mb-1">
+                        Audio non disponible
+                      </p>
+                      <p className="text-sm text-[var(--text-secondary)] mb-3">
+                        Générez l'audio en darija pour écouter le résumé de votre rapport (~15-20 secondes)
+                      </p>
+                      <button
+                        onClick={handleGenerateAudio}
+                        disabled={isGeneratingAudio}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isGeneratingAudio ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Génération en cours...
+                          </>
+                        ) : (
+                          <>
+                            <Volume2 className="h-4 w-4" />
+                            Générer l'audio
+                          </>
+                        )}
+                      </button>
+                      {audioError && (
+                        <div className="mt-3 p-3 rounded-lg bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
+                          <p className="text-sm text-[var(--accent-coral-dark)]">
+                            ⚠️ {audioError}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>
