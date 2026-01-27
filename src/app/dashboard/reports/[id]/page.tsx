@@ -12,23 +12,41 @@ import { db } from "@/lib/firebase";
 
 interface Report {
   id: string;
+  parcelleId: string;
   parcelleName: string;
-  cultureType: string;
-  content: string;
-  status: "normal" | "vigilance" | "alerte";
+  generatedAt: any;
+  status: "ok" | "vigilance" | "alerte";
+  summary: string;
+  weatherAnalysis: string;
+  soilAnalysis: string;
   recommendations: string[];
-  weather: {
-    temperature: number;
-    humidity: number;
-    precipitation: number;
-    windSpeed: number;
+  diseaseRisk: {
+    level: "low" | "medium" | "high";
+    diseases: string[];
+    preventiveActions: string[];
   };
+  irrigationAdvice: string;
+  nextActions: {
+    action: string;
+    priority: "high" | "medium" | "low";
+    timing: string;
+  }[];
+  weeklyForecast: string;
   audioUrl?: string;
   darijaScript?: string;
   createdAt: any;
   debug?: {
     audioGenerated?: boolean;
     audioError?: string;
+  };
+  // Legacy fields for backward compatibility
+  content?: string;
+  cultureType?: string;
+  weather?: {
+    temperature: number;
+    humidity: number;
+    precipitation: number;
+    windSpeed: number;
   };
 }
 
@@ -86,6 +104,9 @@ export default function ReportDetailPage() {
     setAudioError(null);
 
     try {
+      // Convert status for audio generation (ok → normal)
+      const audioStatus = report.status === "ok" ? "normal" : report.status;
+
       const response = await fetch("/api/generate-audio", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -93,10 +114,15 @@ export default function ReportDetailPage() {
           userId: firebaseUser.uid,
           reportId: report.id,
           parcelleName: report.parcelleName,
-          status: report.status,
-          summary: report.content,
+          status: audioStatus,
+          summary: report.summary || report.content || "",
           recommendations: report.recommendations || [],
-          weather: report.weather,
+          weather: report.weather || {
+            temperature: 20,
+            humidity: 60,
+            precipitation: 0,
+            windSpeed: 10,
+          },
         }),
       });
 
@@ -127,6 +153,13 @@ export default function ReportDetailPage() {
   };
 
   const statusConfig = {
+    ok: {
+      label: "Normal",
+      icon: CheckCircle,
+      color: "mint" as const,
+      bgColor: "bg-[var(--accent-mint-light)]",
+      textColor: "text-[var(--accent-mint-dark)]",
+    },
     normal: {
       label: "Normal",
       icon: CheckCircle,
@@ -148,7 +181,7 @@ export default function ReportDetailPage() {
       bgColor: "bg-[var(--accent-coral-light)]",
       textColor: "text-[var(--accent-coral-dark)]",
     },
-  };
+  } as const;
 
   if (loading) {
     return (
@@ -221,14 +254,20 @@ export default function ReportDetailPage() {
                     </Badge>
                   </div>
                   <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-secondary)]">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4" />
-                      <span>{report.cultureType}</span>
-                    </div>
+                    {report.cultureType && (
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4" />
+                        <span>{report.cultureType}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
                       <span>
                         {report.createdAt?.toDate?.()?.toLocaleDateString('fr-FR', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric',
+                        }) || report.generatedAt?.toDate?.()?.toLocaleDateString('fr-FR', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric',
@@ -370,51 +409,53 @@ export default function ReportDetailPage() {
           )}
 
           {/* Weather Card */}
-          <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-yellow-light)]">
-                  <CloudSun className="h-6 w-6 text-[var(--accent-yellow-dark)]" />
-                </div>
-                Conditions météorologiques
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-coral-light)] border-2 border-[var(--accent-coral)]">
-                  <ThermometerSun className="h-6 w-6 text-[var(--accent-coral-dark)] mb-2" />
-                  <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                    {report.weather.temperature}°C
-                  </p>
-                  <p className="text-sm text-[var(--text-secondary)]">Température</p>
-                </div>
+          {report.weather && (
+            <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '100ms' }}>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 font-display text-2xl">
+                  <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-yellow-light)]">
+                    <CloudSun className="h-6 w-6 text-[var(--accent-yellow-dark)]" />
+                  </div>
+                  Conditions météorologiques
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-coral-light)] border-2 border-[var(--accent-coral)]">
+                    <ThermometerSun className="h-6 w-6 text-[var(--accent-coral-dark)] mb-2" />
+                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
+                      {report.weather.temperature}°C
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">Température</p>
+                  </div>
 
-                <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-mint-light)] border-2 border-[var(--accent-mint)]">
-                  <Droplets className="h-6 w-6 text-[var(--accent-mint-dark)] mb-2" />
-                  <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                    {report.weather.humidity}%
-                  </p>
-                  <p className="text-sm text-[var(--text-secondary)]">Humidité</p>
-                </div>
+                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-mint-light)] border-2 border-[var(--accent-mint)]">
+                    <Droplets className="h-6 w-6 text-[var(--accent-mint-dark)] mb-2" />
+                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
+                      {report.weather.humidity}%
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">Humidité</p>
+                  </div>
 
-                <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-purple-light)] border-2 border-[var(--accent-purple)]">
-                  <CloudSun className="h-6 w-6 text-[var(--accent-purple-dark)] mb-2" />
-                  <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                    {report.weather.precipitation}mm
-                  </p>
-                  <p className="text-sm text-[var(--text-secondary)]">Précipitations</p>
-                </div>
+                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-purple-light)] border-2 border-[var(--accent-purple)]">
+                    <CloudSun className="h-6 w-6 text-[var(--accent-purple-dark)] mb-2" />
+                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
+                      {report.weather.precipitation}mm
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">Précipitations</p>
+                  </div>
 
-                <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-yellow-light)] border-2 border-[var(--accent-yellow)]">
-                  <Wind className="h-6 w-6 text-[var(--accent-yellow-dark)] mb-2" />
-                  <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                    {report.weather.windSpeed} km/h
-                  </p>
-                  <p className="text-sm text-[var(--text-secondary)]">Vent</p>
+                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-yellow-light)] border-2 border-[var(--accent-yellow)]">
+                    <Wind className="h-6 w-6 text-[var(--accent-yellow-dark)] mb-2" />
+                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
+                      {report.weather.windSpeed} km/h
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">Vent</p>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Report Content */}
           <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '200ms' }}>
@@ -427,10 +468,46 @@ export default function ReportDetailPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="prose prose-sm md:prose-base max-w-none">
-                <div className="whitespace-pre-wrap text-[var(--text-primary)] leading-relaxed">
-                  {report.content}
+              <div className="prose prose-sm md:prose-base max-w-none space-y-4">
+                <div>
+                  <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Résumé</h3>
+                  <p className="text-[var(--text-primary)] leading-relaxed">{report.summary}</p>
                 </div>
+
+                {report.weatherAnalysis && (
+                  <div>
+                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Analyse météorologique</h3>
+                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.weatherAnalysis}</p>
+                  </div>
+                )}
+
+                {report.soilAnalysis && (
+                  <div>
+                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Analyse du sol</h3>
+                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.soilAnalysis}</p>
+                  </div>
+                )}
+
+                {report.irrigationAdvice && (
+                  <div>
+                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Conseils d'irrigation</h3>
+                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.irrigationAdvice}</p>
+                  </div>
+                )}
+
+                {report.weeklyForecast && (
+                  <div>
+                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Prévisions hebdomadaires</h3>
+                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.weeklyForecast}</p>
+                  </div>
+                )}
+
+                {/* Fallback for old reports with content field */}
+                {!report.summary && report.content && (
+                  <div className="whitespace-pre-wrap text-[var(--text-primary)] leading-relaxed">
+                    {report.content}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
