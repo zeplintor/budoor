@@ -2,13 +2,15 @@ import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth, Auth } from "firebase/auth";
 import { getFirestore, Firestore } from "firebase/firestore";
 
+// Firebase config - these are public and safe to hard-code
+// They're secured by Firebase Security Rules, not by hiding the config
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey: "AIzaSyBpddw6FhRhal-NhO06wzbbVqocePcrsAs",
+  authDomain: "budoor-406c2.firebaseapp.com",
+  projectId: "budoor-406c2",
+  storageBucket: "budoor-406c2.firebasestorage.app",
+  messagingSenderId: "1060953515791",
+  appId: "1:1060953515791:web:e66f1b3a0de8aba5b5807a",
 };
 
 // Check if Firebase config is valid
