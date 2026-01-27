@@ -89,6 +89,13 @@ export async function POST(request: NextRequest) {
       )
       : await assembleReport(reportData, data);
 
+    console.log("✅ Report generated successfully:", {
+      parcelleId: report.parcelleId,
+      hasAudio: !!report.audioUrl,
+      hasDarija: !!report.darijaScript,
+      debug: report.debug
+    });
+
     return NextResponse.json(report);
   } catch (error) {
     console.error("Error generating report:", error);

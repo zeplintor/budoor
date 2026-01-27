@@ -104,11 +104,18 @@ export async function assembleReport(
         ...reportBase,
         audioUrl,
         darijaScript,
-        debug: process.env.NODE_ENV !== "production" ? { 
+        debug: {
             audioGenerated: !!audioUrl,
-            audioError 
-        } : undefined,
+            audioError
+        },
     };
+
+    console.log("📊 Report assembled:", {
+        hasAudio: !!audioUrl,
+        audioUrl: audioUrl?.substring(0, 80) + "...",
+        hasDarija: !!darijaScript,
+        error: audioError
+    });
 
     return report;
 }

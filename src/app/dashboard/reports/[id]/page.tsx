@@ -26,6 +26,10 @@ interface Report {
   audioUrl?: string;
   darijaScript?: string;
   createdAt: any;
+  debug?: {
+    audioGenerated?: boolean;
+    audioError?: string;
+  };
 }
 
 export default function ReportDetailPage() {
@@ -179,6 +183,25 @@ export default function ReportDetailPage() {
               </div>
             </CardHeader>
           </Card>
+
+          {/* Debug info for audio generation */}
+          {report.debug?.audioError && !report.audioUrl && (
+            <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-coral)]/30" style={{ animationDelay: '50ms' }}>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-3 p-4 rounded-lg bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
+                  <AlertTriangle className="h-5 w-5 text-[var(--accent-coral-dark)] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-[var(--text-primary)] mb-1">
+                      Audio non disponible
+                    </p>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      L'audio n'a pas pu être généré pour ce rapport: {report.debug.audioError}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Audio Summary Card */}
           {report.audioUrl && (
