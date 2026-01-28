@@ -280,88 +280,35 @@ export default function ReportDetailPage() {
             </CardHeader>
           </Card>
 
-          {/* Audio generation button */}
-          {!report.audioUrl && (
-            <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-purple)]/30" style={{ animationDelay: '50ms' }}>
-              <CardContent className="p-6">
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="p-2 rounded-full bg-[var(--accent-purple-light)] shrink-0">
-                      <Volume2 className="h-5 w-5 text-[var(--accent-purple-dark)]" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-semibold text-[var(--text-primary)] mb-1">
-                        Audio non disponible
-                      </p>
-                      <p className="text-sm text-[var(--text-secondary)] mb-3">
-                        Générez l'audio en darija pour écouter le résumé de votre rapport (~15-20 secondes)
-                      </p>
-                      <button
-                        onClick={handleGenerateAudio}
-                        disabled={isGeneratingAudio}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isGeneratingAudio ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Génération en cours...
-                          </>
-                        ) : (
-                          <>
-                            <Volume2 className="h-4 w-4" />
-                            Générer l'audio
-                          </>
-                        )}
-                      </button>
-                      {audioError && (
-                        <div className="mt-3 p-3 rounded-lg bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
-                          <p className="text-sm text-[var(--accent-coral-dark)]">
-                            ⚠️ {audioError}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+          {/* Audio Card - Always show, either player or generation button */}
+          <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-purple)]/30" style={{ animationDelay: '50ms' }}>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-pink)]" />
+
+            <CardHeader className="pb-4 bg-gradient-to-br from-[var(--accent-purple)]/5 to-transparent">
+              <CardTitle className="flex items-center gap-3 font-display text-2xl">
+                <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-purple-light)]">
+                  <Volume2 className="h-6 w-6 text-[var(--accent-purple-dark)]" />
                 </div>
-              </CardContent>
-            </Card>
-          )}
+                Résumé audio en darija
+              </CardTitle>
+            </CardHeader>
 
-          {/* Audio Summary Card */}
-          {report.audioUrl && (
-            <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-purple)]/30" style={{ animationDelay: '50ms' }}>
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-pink)]" />
-
-              <CardHeader className="pb-4 bg-gradient-to-br from-[var(--accent-purple)]/5 to-transparent">
-                <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                  <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-purple-light)]">
-                    <Volume2 className="h-6 w-6 text-[var(--accent-purple-dark)]" />
-                  </div>
-                  Résumé audio en darija
-                  <Badge variant="purple" size="sm">Nouveau</Badge>
-                </CardTitle>
-                <p className="text-sm text-[var(--text-secondary)] mt-2">
-                  Écoutez votre rapport agronomique en dialecte marocain (~1 minute)
-                </p>
-              </CardHeader>
-
-              <CardContent>
+            <CardContent className="p-6">
+              {report.audioUrl ? (
                 <div className="space-y-4">
                   {/* Audio Player */}
                   <div className="p-6 rounded-[var(--radius-xl)] bg-gradient-to-br from-[var(--accent-purple-light)] to-[var(--accent-pink-light)] border-2 border-[var(--accent-purple)]">
                     <audio
                       controls
                       className="w-full"
-                      style={{
-                        filter: 'hue-rotate(250deg)',
-                      }}
+                      style={{ filter: 'hue-rotate(250deg)' }}
                     >
                       <source src={report.audioUrl} type="audio/mpeg" />
                       Votre navigateur ne supporte pas la lecture audio.
                     </audio>
                   </div>
 
-                  {/* Darija Script (if available) */}
+                  {/* Darija Script */}
                   {report.darijaScript && (
                     <details className="group">
                       <summary className="cursor-pointer list-none p-4 rounded-[var(--radius-lg)] bg-[var(--bg-muted)] hover:bg-[var(--bg-muted)]/70 transition-colors border border-[var(--border-light)]">
@@ -386,27 +333,40 @@ export default function ReportDetailPage() {
                       </div>
                     </details>
                   )}
-
-                  {/* Info box */}
-                  <div className="flex items-start gap-3 p-4 rounded-[var(--radius-lg)] bg-[var(--accent-mint-light)] border border-[var(--accent-mint)]">
-                    <div className="p-1.5 rounded-full bg-[var(--accent-mint)] shrink-0">
-                      <svg className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-[var(--text-primary)] mb-1">
-                        Rapport audio personnalisé
-                      </p>
-                      <p className="text-xs text-[var(--text-secondary)]">
-                        Ce résumé audio a été généré automatiquement en dialecte marocain (darija) pour faciliter la compréhension des recommandations agricoles.
-                      </p>
-                    </div>
-                  </div>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-[var(--text-secondary)] mb-3">
+                    Générez l'audio en darija pour écouter le résumé de votre rapport (~15-20 secondes)
+                  </p>
+                  <button
+                    onClick={handleGenerateAudio}
+                    disabled={isGeneratingAudio}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isGeneratingAudio ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Génération en cours...
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="h-4 w-4" />
+                        Générer l'audio
+                      </>
+                    )}
+                  </button>
+                  {audioError && (
+                    <div className="mt-3 p-3 rounded-lg bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
+                      <p className="text-sm text-[var(--accent-coral-dark)]">
+                        ⚠️ {audioError}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Weather Card */}
           {report.weather && (
