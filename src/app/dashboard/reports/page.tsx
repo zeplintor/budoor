@@ -42,10 +42,12 @@ import { getParcelleData } from "@/lib/api/parcelleData";
 import { generateReport, type AgronomicReport } from "@/lib/api/claudeService";
 import type { Parcelle } from "@/types";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 export default function ReportsPage() {
   const t = useTranslations();
+  const router = useRouter();
   const { firebaseUser } = useAuth();
   const [parcelles, setParcelles] = useState<Parcelle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -139,15 +141,18 @@ export default function ReportsPage() {
       setGenerationStep("Finalisation du rapport...");
       setCurrentReport(report);
 
-      // Save report to Firestore
+      // Save report to Firestore and get the Firestore document ID
       setGenerationStep("Enregistrement du rapport...");
-      await saveReport(firebaseUser.uid, report);
+      const firestoreDocId = await saveReport(firebaseUser.uid, report);
 
-      // Note: Audio generation is now manual via button in report details
+      console.log("✅ Report generated, navigating to detail page:", firestoreDocId);
 
       // Reload saved reports
       const reports = await getReports(firebaseUser.uid);
       setSavedReports(reports);
+
+      // Navigate to report detail page where audio can be generated
+      router.push(`/dashboard/reports/${firestoreDocId}`);
     } catch (err) {
       console.error("Error generating report:", err);
       setError(err instanceof Error ? err.message : t("reports.errorTitle"));
@@ -587,6 +592,14 @@ ${currentReport.irrigationAdvice}
                                 {formatDate(report.generatedAt)}
                               </div>
                               <div className="flex items-center gap-1">
+                                <Link
+                                  href={`/dashboard/reports/${report.id}`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="p-1.5 rounded text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all"
+                                  title="Voir les détails et générer l'audio"
+                                >
+                                  <FileText className="h-4 w-4" />
+                                </Link>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
