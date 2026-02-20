@@ -438,9 +438,10 @@ export default function ParcelleDetailPage() {
               ) : (
                 <div className="space-y-2 md:space-y-3">
                   {reports.map((report) => (
-                    <div
+                    <Link
                       key={report.odId}
-                      className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-[var(--radius-lg)] hover:bg-gray-100 transition-colors"
+                      href={`/dashboard/reports/${report.odId}`}
+                      className="flex items-center justify-between p-2.5 md:p-3 bg-gray-50 rounded-[var(--radius-lg)] hover:bg-gray-100 transition-colors group"
                     >
                       <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-1">
                         <div className={`p-1.5 md:p-2 rounded-full shrink-0 ${report.status === "alerte" ? "bg-red-100" :
@@ -472,10 +473,13 @@ export default function ParcelleDetailPage() {
                           </p>
                         </div>
                       </div>
-                      <p className="text-sm text-gray-600 max-w-[200px] lg:max-w-md truncate hidden md:block ml-2">
-                        {report.summary}
-                      </p>
-                    </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <p className="text-sm text-gray-600 max-w-[200px] lg:max-w-md truncate hidden md:block">
+                          {report.summary}
+                        </p>
+                        <FileText className="h-4 w-4 text-gray-300 group-hover:text-gray-500 transition-colors" />
+                      </div>
+                    </Link>
                   ))}
                 </div>
               )}

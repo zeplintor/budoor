@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Header } from "@/components/dashboard";
 import { Card, CardContent, CardHeader, CardTitle, Badge, OrganicBlob, GradientMesh } from "@/components/ui";
@@ -50,16 +50,24 @@ interface Report {
   };
 }
 
+const AUDIO_STEPS = [
+  { label: "Génération du script en darija…", duration: 8000 },
+  { label: "Synthèse vocale ElevenLabs…", duration: 10000 },
+  { label: "Enregistrement de l'audio…", duration: 4000 },
+];
+
 export default function ReportDetailPage() {
   const params = useParams();
   const reportId = params.id as string;
   const { firebaseUser } = useAuth();
-  const t = useTranslations();
+  useTranslations();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
+  const [audioStep, setAudioStep] = useState(0);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const audioStepIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     async function loadReport() {
@@ -102,9 +110,16 @@ export default function ReportDetailPage() {
 
     setIsGeneratingAudio(true);
     setAudioError(null);
+    setAudioStep(0);
+
+    // Cycle through visual steps every ~8 seconds
+    let step = 0;
+    audioStepIntervalRef.current = setInterval(() => {
+      step = Math.min(step + 1, AUDIO_STEPS.length - 1);
+      setAudioStep(step);
+    }, 8000);
 
     try {
-      // Convert status for audio generation (ok → normal)
       const audioStatus = report.status === "ok" ? "normal" : report.status;
 
       const response = await fetch("/api/generate-audio", {
@@ -117,37 +132,26 @@ export default function ReportDetailPage() {
           status: audioStatus,
           summary: report.summary || report.content || "",
           recommendations: report.recommendations || [],
-          weather: report.weather || {
-            temperature: 20,
-            humidity: 60,
-            precipitation: 0,
-            windSpeed: 10,
-          },
+          weather: report.weather || { temperature: 20, humidity: 60, precipitation: 0, windSpeed: 10 },
         }),
       });
 
-      if (!response.ok) {
-        throw new Error("Échec de la génération audio");
-      }
+      if (!response.ok) throw new Error("Échec de la génération audio");
 
       const data = await response.json();
 
       if (data.success) {
-        // Reload report to get updated audio
         const reportRef = doc(db!, "users", firebaseUser.uid, "reports", reportId);
         const reportSnap = await getDoc(reportRef);
-
         if (reportSnap.exists()) {
-          setReport({
-            id: reportSnap.id,
-            ...reportSnap.data(),
-          } as Report);
+          setReport({ id: reportSnap.id, ...reportSnap.data() } as Report);
         }
       }
     } catch (err) {
       console.error("Error generating audio:", err);
       setAudioError(err instanceof Error ? err.message : "Erreur lors de la génération audio");
     } finally {
+      if (audioStepIntervalRef.current) clearInterval(audioStepIntervalRef.current);
       setIsGeneratingAudio(false);
     }
   };
@@ -336,31 +340,57 @@ export default function ReportDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-sm text-[var(--text-secondary)] mb-3">
-                    Générez l'audio en darija pour écouter le résumé de votre rapport (~15-20 secondes)
-                  </p>
-                  <button
-                    onClick={handleGenerateAudio}
-                    disabled={isGeneratingAudio}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isGeneratingAudio ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Génération en cours...
-                      </>
-                    ) : (
-                      <>
-                        <Volume2 className="h-4 w-4" />
-                        Générer l'audio
-                      </>
-                    )}
-                  </button>
-                  {audioError && (
-                    <div className="mt-3 p-3 rounded-lg bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
-                      <p className="text-sm text-[var(--accent-coral-dark)]">
-                        ⚠️ {audioError}
+                  {isGeneratingAudio ? (
+                    /* Progress steps during generation */
+                    <div className="space-y-3">
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        Génération de l'audio en cours…
                       </p>
+                      <div className="space-y-2">
+                        {AUDIO_STEPS.map((step, i) => (
+                          <div
+                            key={i}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] border transition-all duration-500 ${
+                              i < audioStep
+                                ? "bg-[var(--accent-mint-light)] border-[var(--accent-mint)] opacity-60"
+                                : i === audioStep
+                                ? "bg-[var(--accent-purple-light)] border-[var(--accent-purple)] shadow-sm"
+                                : "bg-[var(--bg-muted)] border-[var(--border-light)] opacity-40"
+                            }`}
+                          >
+                            {i < audioStep ? (
+                              <CheckCircle className="h-4 w-4 text-[var(--accent-mint-dark)] shrink-0" />
+                            ) : i === audioStep ? (
+                              <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-purple-dark)] shrink-0" />
+                            ) : (
+                              <div className="h-4 w-4 rounded-full border-2 border-[var(--border-light)] shrink-0" />
+                            )}
+                            <p className={`text-sm ${i === audioStep ? "font-medium text-[var(--accent-purple-dark)]" : "text-[var(--text-secondary)]"}`}>
+                              {step.label}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    /* Generate button */
+                    <div className="flex flex-col items-start gap-3">
+                      <p className="text-sm text-[var(--text-secondary)]">
+                        Obtenez un résumé audio de ce rapport narré en darija marocain (~20 secondes).
+                      </p>
+                      <button
+                        onClick={handleGenerateAudio}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-lg)] bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-semibold transition-all active:scale-95 shadow-sm"
+                      >
+                        <Volume2 className="h-4 w-4" />
+                        Générer l'audio en darija
+                      </button>
+                    </div>
+                  )}
+                  {audioError && (
+                    <div className="flex items-start gap-2 p-3 rounded-[var(--radius-lg)] bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
+                      <AlertTriangle className="h-4 w-4 text-[var(--accent-coral-dark)] shrink-0 mt-0.5" />
+                      <p className="text-sm text-[var(--accent-coral-dark)]">{audioError}</p>
                     </div>
                   )}
                 </div>

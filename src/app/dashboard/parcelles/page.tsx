@@ -157,9 +157,17 @@ export default function ParcellesPage() {
       setShowDialog(false);
       setNewParcelleData(null);
 
-      // Show success toast
-      setToast({ type: "success", message: t("parcelles.toast.created") });
-      setTimeout(() => setToast(null), 3000);
+      // Navigate to the new parcelle's detail page so user sees the "Rapport IA" CTA
+      const created = data.find(p =>
+        p.name === newParcelleName.trim() &&
+        Math.abs(p.centroid.lat - newParcelleData.centroid.lat) < 0.0001
+      );
+      if (created) {
+        router.push(`/dashboard/parcelles/${created.id}`);
+      } else {
+        setToast({ type: "success", message: t("parcelles.toast.created") });
+        setTimeout(() => setToast(null), 3000);
+      }
     } catch (error) {
       console.error("Error saving parcelle:", error);
       setToast({ type: "error", message: t("parcelles.toast.error") });
