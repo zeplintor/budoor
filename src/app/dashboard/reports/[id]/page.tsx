@@ -136,7 +136,14 @@ export default function ReportDetailPage() {
         }),
       });
 
-      if (!response.ok) throw new Error("Échec de la génération audio");
+      if (!response.ok) {
+        let errMsg = "Échec de la génération audio";
+        try {
+          const errData = await response.json();
+          if (errData.error) errMsg = errData.error;
+        } catch {}
+        throw new Error(errMsg);
+      }
 
       const data = await response.json();
 

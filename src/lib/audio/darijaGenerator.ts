@@ -24,8 +24,14 @@ export async function generateDarijaScript(
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  // Use Gemini 2.5 Flash (stable, free tier, latest)
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  // Use Gemini 2.5 Flash with thinking disabled for speed (8s → 2s)
+  // thinkingBudget: 0 disables chain-of-thought reasoning — not needed for structured scripts
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generationConfig: {
+      thinkingConfig: { thinkingBudget: 0 },
+    } as any,
+  });
 
   // Map status to Darija terms
   const statusInDarija =

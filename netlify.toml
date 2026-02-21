@@ -8,6 +8,18 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Extend function timeout to 26s for audio generation pipeline
+# (Gemini script ~2s + ElevenLabs TTS ~5s + Firebase Storage ~2s ≈ 9s total)
+[functions]
+  node_bundler = "nft"
+  included_files = ["node_modules/firebase-admin/**"]
+
+[functions."api/generate-audio"]
+  timeout = 26
+
+[functions."api/generate-report"]
+  timeout = 26
+
 # Security headers applied at the CDN level (belt-and-suspenders with next.config.ts)
 [[headers]]
   for = "/*"
