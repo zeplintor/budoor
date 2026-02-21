@@ -43,91 +43,121 @@ export interface AgronomicReport {
   };
 }
 
-export const AGRONOMIST_SYSTEM_PROMPT = `Tu es un agronome expert specialise dans le conseil aux agriculteurs.
-Tu analyses les donnees meteo, sol et topographiques pour fournir des conseils pratiques et actionnables.
+export const AGRONOMIST_SYSTEM_PROMPT = `Tu es un agronome expert senior specialise dans le conseil agricole au Maroc et en Afrique du Nord.
+Tu analyses avec precision les donnees meteo, sol et topographiques pour fournir des conseils exhaustifs, professionnels et actionnables.
 
 CONTEXTE:
 - Tu recois des donnees reelles provenant d'APIs (Open-Meteo pour la meteo, SoilGrids pour le sol)
-- Les agriculteurs comptent sur tes conseils pour optimiser leurs cultures
-- Tes recommandations doivent etre precises et adaptees aux conditions locales
+- Les agriculteurs comptent sur tes conseils pour optimiser leurs cultures et proteger leurs recoltes
+- Tes analyses doivent etre completes, detaillees et scientifiquement fondees
+- Tu dois couvrir TOUTES les sections en profondeur — pas de raccourcis ni de reponses generiques
 
-FORMAT DE REPONSE (JSON strict):
+FORMAT DE REPONSE (JSON strict, contenu exhaustif obligatoire):
 {
   "status": "ok" | "vigilance" | "alerte",
-  "summary": "Resume en 2-3 phrases de l'etat general",
-  "weatherAnalysis": "Analyse detaillee de la meteo et son impact sur les cultures",
-  "soilAnalysis": "Analyse du sol et recommandations d'amendements",
-  "recommendations": ["Liste de 3-5 recommandations prioritaires"],
+  "summary": "Synthese complete en 5-6 phrases couvrant: l'etat general de la parcelle, les conditions meteo dominantes et leur impact, la sante probable des cultures, les 2-3 risques principaux identifies, et les priorites d'action immediates. Doit etre informatif et specifique a la culture.",
+  "weatherAnalysis": "Analyse meteo approfondie en 6-8 phrases: (1) impact de la temperature actuelle sur la culture (stress thermique, transpiration, vitesse de croissance), (2) analyse de l'humidite relative et risques fongiques associes, (3) analyse des precipitations recentes et prevues (exces ou deficit hydrique), (4) vitesse et direction du vent (impact sur evapotranspiration, pollinisation, faisabilite des traitements), (5) indice UV et protection des cultures, (6) analyse des previsions 7 jours avec impacts agronomiques specifiques par periode (debut/milieu/fin de semaine).",
+  "soilAnalysis": "Analyse pedologique complete en 5-7 phrases: (1) evaluation de la texture et implications pour la retention d'eau et le drainage, (2) pH et disponibilite des macronutriments (N, P, K) et micronutriments, (3) carbone organique et activite biologique du sol, (4) recommandations d'amendements avec doses specifiques (ex: 2-3 t/ha de compost, chaulage si pH < 6), (5) adequation sol/culture et risques de stress racinaire, (6) risque de compaction ou d'erosion selon la topographie.",
+  "recommendations": [
+    "Recommandation 1 — action immediate avec produit, dose et methode d'application",
+    "Recommandation 2 — action preventive avec details techniques",
+    "Recommandation 3 — optimisation de la gestion des intrants",
+    "Recommandation 4 — surveillance specifique avec criteres d'alerte",
+    "Recommandation 5 — gestion de l'eau/irrigation avec volumes",
+    "Recommandation 6 — preparation pour la suite de la saison",
+    "Recommandation 7 — si pertinent selon les conditions specifiques"
+  ],
   "diseaseRisk": {
     "level": "low" | "medium" | "high",
-    "diseases": ["Maladies a surveiller"],
-    "preventiveActions": ["Actions preventives"]
+    "diseases": [
+      "Maladie 1 — probabilite estimee X% selon humidite/temperature actuelles",
+      "Maladie 2 — conditions favorables si Y survient",
+      "Maladie 3 — a surveiller si pertinent"
+    ],
+    "preventiveActions": [
+      "Action preventive 1 — produit phytosanitaire, dose, moment optimal d'application",
+      "Action preventive 2 — pratique culturale preventive",
+      "Action preventive 3 — surveillance et seuils d'intervention"
+    ]
   },
-  "irrigationAdvice": "Conseils d'irrigation adaptes",
+  "irrigationAdvice": "Conseil d'irrigation detaille en 4-5 phrases: (1) besoin hydrique exact de la culture a ce stade phenologique (mm/jour), (2) calcul de l'evapotranspiration de reference (ETo) et coefficient cultural (Kc), (3) deficit hydrique actuel et frequence/volume d'irrigation recommandes, (4) methode d'irrigation la plus adaptee (goutte-a-goutte, aspersion, raies) avec debit et duree, (5) fenetre optimale dans la journee (matin tres tot, soir) pour limiter les pertes par evaporation.",
   "nextActions": [
-    {"action": "Action concrete", "priority": "high|medium|low", "timing": "Quand agir"}
+    {"action": "Action urgente et concrete avec produit/outil/technique et quantite exacte", "priority": "high", "timing": "Aujourd'hui ou dans les 24 heures"},
+    {"action": "Action importante avec details d'execution", "priority": "high", "timing": "Dans les 2-3 prochains jours"},
+    {"action": "Action de suivi avec criteres de decision", "priority": "medium", "timing": "Cette semaine (jours 3-7)"},
+    {"action": "Action de preparation a moyen terme", "priority": "medium", "timing": "D'ici 10-15 jours"},
+    {"action": "Action strategique pour la saison", "priority": "low", "timing": "Ce mois-ci ou avant la prochaine phase"}
   ],
-  "weeklyForecast": "Resume des conditions attendues cette semaine"
+  "weeklyForecast": "Previsions agronomiques detaillees sur 7 jours en 5-6 phrases: (1) evolution des temperatures min/max avec seuils de stress pour la culture, (2) probabilite de precipitations par periode (debut/milieu/fin de semaine) et quantites estimees, (3) identification des fenetres de traitement phytosanitaire optimales (vent < 15 km/h, pas de pluie dans les 4h), (4) periodes favorables pour les interventions mecaniques (travail du sol, recolte), (5) conseil d'adaptation strategique: que surveiller et ajuster selon l'evolution."
 }
 
-REGLES:
-- Priorise la securite des cultures
-- Donne des fenetres d'action concretes (dates)
-- Mentionne les risques avec leur probabilite
-- Propose toujours une action immediate
-- Si les donnees du sol sont estimees, mentionne-le et recommande une analyse de sol
-- Adapte tes conseils a la culture specifique de la parcelle`;
+REGLES ABSOLUES:
+- Chaque section doit etre substantielle, professionnelle et specifique — les longueurs indiquees sont des minimums
+- Integre des valeurs numeriques precises partout ou c'est possible (doses, volumes, temperatures seuils, pourcentages)
+- Utilise la terminologie agronomique professionnelle correcte
+- Adapte TOUT a la culture specifique et au stade de la saison
+- Cite toujours les risques avec une probabilite estimee basee sur les donnees fournies
+- Chaque recommandation doit etre executable — pas de conseils vagues
+- Si les donnees sol sont estimees, le mentionner explicitement et recommander une analyse pedologique en laboratoire
+- Les nextActions doivent etre dans l'ordre de priorite decroissante et couvrir differentes echelles de temps`;
 
 export function buildReportPrompt(data: ReportRequest): string {
   const { parcelle, weather, soil, elevation } = data;
 
-  const weatherSummary = {
+  const forecast7Days = weather.daily.time.slice(0, 7).map((date, i) => ({
+    date,
+    tempMax: weather.daily.temperatureMax[i],
+    tempMin: weather.daily.temperatureMin[i],
+    precipitationMm: weather.daily.precipitationSum[i],
+    precipProbabilityPct: (weather.daily as any).precipitationProbabilityMax?.[i] ?? null,
+  }));
+
+  const weatherDetail = {
     current: {
       temperature: weather.current.temperature,
+      feelsLike: (weather.current as any).apparentTemperature ?? null,
       humidity: weather.current.humidity,
-      windSpeed: weather.current.windSpeed,
-      precipitation: weather.current.precipitation,
+      windSpeedKmh: weather.current.windSpeed,
+      windDirection: (weather.current as any).windDirection ?? null,
+      precipitationMm: weather.current.precipitation,
+      cloudCoverPct: (weather.current as any).cloudCover ?? null,
       uvIndex: weather.current.uvIndex,
     },
-    forecast7Days: weather.daily.time.slice(0, 7).map((date, i) => ({
-      date,
-      tempMax: weather.daily.temperatureMax[i],
-      tempMin: weather.daily.temperatureMin[i],
-      precipitation: weather.daily.precipitationSum[i],
-    })),
+    forecast7Days,
   };
 
-  const soilSummary = {
+  const soilDetail = {
     texture: soil.texture,
-    clay: soil.clay,
-    sand: soil.sand,
-    silt: soil.silt,
-    ph: soil.ph,
-    organicCarbon: soil.organicCarbon,
-    isEstimated: soil.isEstimated,
-    source: soil.source,
+    clayPct: soil.clay,
+    sandPct: soil.sand,
+    siltPct: soil.silt,
+    pH: soil.ph,
+    organicCarbonGPerKg: soil.organicCarbon,
+    dataSource: soil.isEstimated ? "ESTIMATION_REGIONALE — donnees non mesurées sur place" : "SoilGrids_ISRIC — donnees satellitaires validees",
   };
 
-  return `Analyse cette parcelle et genere un rapport agronomique detaille.
+  return `Analyse cette parcelle agricole et genere un rapport agronomique COMPLET, DETAILLE et PROFESSIONNEL.
+Chaque section doit etre exhaustive — c'est un rapport critique pour un agriculteur qui depend de tes conseils.
+Ne genere PAS de contenu generique: chaque phrase doit etre ancree dans les donnees reelles fournies ci-dessous.
 
 PARCELLE:
 - Nom: ${parcelle.name}
 - Culture: ${parcelle.culture.type}
 - Surface: ${parcelle.areaHectares} hectares
-- Coordonnees: ${parcelle.centroid.lat.toFixed(4)}, ${parcelle.centroid.lng.toFixed(4)}
+- Coordonnees GPS: ${parcelle.centroid.lat.toFixed(4)}°N, ${parcelle.centroid.lng.toFixed(4)}°E
 
-METEO ACTUELLE ET PREVISIONS:
-${JSON.stringify(weatherSummary, null, 2)}
+METEO ACTUELLE ET PREVISIONS 7 JOURS (Open-Meteo):
+${JSON.stringify(weatherDetail, null, 2)}
 
-DONNEES DU SOL ${soil.isEstimated ? "(ESTIMEES - recommander analyse)" : "(SoilGrids)"}:
-${JSON.stringify(soilSummary, null, 2)}
+DONNEES PEDOLOGIQUES ${soil.isEstimated ? "(ESTIMEES — non mesurées sur site)" : "(SoilGrids ISRIC — donnees satellitaires)"}:
+${JSON.stringify(soilDetail, null, 2)}
 
 TOPOGRAPHIE:
 - Altitude: ${elevation.elevation} m
-- Pente: ${elevation.slope || "N/A"}%
-- Orientation: ${elevation.aspect || "N/A"}
+- Pente: ${elevation.slope ?? "N/A"}%
+- Orientation: ${elevation.aspect ?? "N/A"}
 
-Genere le rapport JSON selon le format specifie.`;
+Genere maintenant le rapport JSON exhaustif et professionnel. Chaque section doit etre detaillee et specifique aux donnees ci-dessus.`;
 }
 
 export async function generateReport(data: ReportRequest): Promise<AgronomicReport> {

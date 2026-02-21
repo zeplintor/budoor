@@ -22,23 +22,20 @@ export async function POST(request: NextRequest) {
   try {
     const data: AudioRequest = await request.json();
 
-    console.log("🎙️ Starting async audio generation for report:", data.reportId);
+    console.log("🎙️ Starting audio generation for report:", data.reportId);
 
-    // Generate Darija script
-    const darijaScript = await generateDarijaScript(
-      {
-        parcelleName: data.parcelleName,
-        status: data.status,
-        summary: data.summary,
-        recommendations: data.recommendations,
-        weather: data.weather,
-      },
-      "الفلاح"
-    );
+    // Generate short Darija summary script (~1 minute)
+    const darijaScript = await generateDarijaScript({
+      parcelleName: data.parcelleName,
+      status: data.status,
+      summary: data.summary,
+      recommendations: data.recommendations,
+      weather: data.weather,
+    }, "الفلاح");
 
     console.log("✅ Darija script generated:", darijaScript.length, "chars");
 
-    // Generate audio
+    // Generate audio from the Darija script
     const audioFileName = `report_${data.reportId}_${Date.now()}.mp3`;
     const audioUrl = await generateAudioFromText(darijaScript, undefined, audioFileName);
 
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       audioUrl,
-      darijaScript: darijaScript.substring(0, 100) + "...",
+      darijaScript: darijaScript.substring(0, 150) + "...",
     });
   } catch (error: any) {
     console.error("❌ Failed to generate audio:", error);

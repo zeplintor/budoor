@@ -43,8 +43,9 @@ export async function generateDarijaScript(
 الريح: ${report.weather.windSpeed}km/h
   `.trim();
 
-  const prompt = `You are a Moroccan Darija dialect expert and agronomist. 
-Generate a script ONLY IN MOROCCAN DARIJA (NOT in French, NOT mixed with French) for a 1-minute audio report (~130-150 words).
+  const prompt = `You are a Moroccan Darija dialect expert and agronomist.
+Generate a script ONLY IN MOROCCAN DARIJA (NOT in French, NOT mixed with French) for a 1-minute audio summary (~130-150 words).
+This is a QUICK DAILY SUMMARY — concise and actionable, not a long report.
 
 **REPORT INFORMATION:**
 - Plot: ${report.parcelleName}
@@ -52,15 +53,15 @@ Generate a script ONLY IN MOROCCAN DARIJA (NOT in French, NOT mixed with French)
 - Weather:
 ${weatherContext}
 - Summary: ${report.summary}
-- Recommendations:
-${report.recommendations.map((r, i) => `  ${i + 1}. ${r}`).join("\n")}
+- Top recommendations:
+${report.recommendations.slice(0, 3).map((r, i) => `  ${i + 1}. ${r}`).join("\n")}
 
 **MANDATORY STRUCTURE (Arabic script only):**
 1. **Warm greeting**: "السلام عليكم ورحمة الله وبركاته يا أخي الفلاح" (Hello brother farmer)
 2. **Context**: Present Budoor daily report for ${report.parcelleName}
 3. **Current status**: Describe the status (${statusInDarija}) and weather conditions ONLY IN DARIJA ARABIC
 4. **Weather details**: Temperature, humidity, wind, rain - all explained in natural Moroccan Darija
-5. **Concrete actions**: The main recommendations translated to authentic Moroccan Darija
+5. **Top 2-3 actions**: The most important recommendations in authentic Moroccan Darija
 6. **Closing**: "الله يسخر لك الخير والبركة" (May God bless your harvest)
 
 **CRITICAL RULES:**
@@ -68,17 +69,16 @@ ${report.recommendations.map((r, i) => `  ${i + 1}. ${r}`).join("\n")}
 - NO French words, NO transliteration, NO numbers, NO mixed languages
 - Use proper Arabic spelling for agricultural terms: السقي (irrigation), الجذور (roots), الأمراض (diseases), الرطوبة (humidity), etc.
 - Warm and encouraging tone, like a local agricultural advisor
-- Maximum 150 words
+- Maximum 150 words — this is a QUICK summary, not a full report
 - Plain text only, NO markdown, NO formatting
 
 Generate ONLY the Darija script - nothing else, no explanations.`;
-
 
   try {
     const result = await model.generateContent(prompt);
     const script = result.response.text().trim();
 
-    console.log("✅ Darija script generated successfully with Gemini");
+    console.log("✅ Darija script generated successfully with Gemini 2.5 Flash");
     return script;
   } catch (error) {
     console.error("❌ Failed to generate Darija script:", error);
