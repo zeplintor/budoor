@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDarijaScript } from "@/lib/audio/darijaGenerator";
 import { generateAudioFromText } from "@/lib/audio/audioGenerator";
-import { doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { adminFirestore } from "@/lib/firebase-admin";
 
 interface AudioRequest {
   userId: string;
@@ -45,13 +44,13 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Audio generated:", audioUrl);
 
-    // Update report in Firestore with audio
-    if (!db) {
-      throw new Error("Firestore not configured");
-    }
-
-    const reportRef = doc(db, "users", data.userId, "reports", data.reportId);
-    await updateDoc(reportRef, {
+    // Update report in Firestore with audio (using Admin SDK for server-side reliability)
+    const reportRef = adminFirestore
+      .collection("users")
+      .doc(data.userId)
+      .collection("reports")
+      .doc(data.reportId);
+    await reportRef.update({
       audioUrl,
       darijaScript,
     });
