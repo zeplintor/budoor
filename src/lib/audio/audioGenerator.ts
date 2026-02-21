@@ -71,17 +71,22 @@ export async function generateAudioFromText(
     const bucket = storage.bucket(bucketName);
     const file = bucket.file(`audio-reports/${fileName}`);
 
+    // Generate a download token (same mechanism Firebase client SDK uses for getDownloadURL)
+    // This avoids makePublic() which requires object-level ACLs (disabled on firebasestorage.app buckets)
+    const downloadToken = crypto.randomUUID();
+
     await file.save(buffer, {
       metadata: {
         contentType: "audio/mpeg",
+        metadata: {
+          firebaseStorageDownloadTokens: downloadToken,
+        },
       },
     });
 
-    // Make file public
-    await file.makePublic();
-
-    // Get public URL
-    const publicUrl = `https://storage.googleapis.com/${bucket.name}/${file.name}`;
+    // Firebase-style download URL — publicly accessible via token, no ACL needed
+    const encodedPath = encodeURIComponent(`audio-reports/${fileName}`);
+    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodedPath}?alt=media&token=${downloadToken}`;
 
     console.log(`✅ Audio uploaded to Firebase Storage: ${publicUrl}`);
     return publicUrl;
