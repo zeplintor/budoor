@@ -21,6 +21,11 @@ service cloud.firestore {
       match /notifications/{notificationId} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+
+      // WhatsApp schedules subcollection
+      match /whatsappSchedules/{scheduleId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
     // WhatsApp logs - only Cloud Functions can write (no auth check needed for service account)

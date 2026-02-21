@@ -7,3 +7,14 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
+
+# Security headers applied at the CDN level (belt-and-suspenders with next.config.ts)
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # Required for Firebase Auth Google popup to communicate back to the opener window
+    Cross-Origin-Opener-Policy = "same-origin-allow-popups"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
