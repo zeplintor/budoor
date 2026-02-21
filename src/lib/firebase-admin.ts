@@ -8,33 +8,38 @@ if (!admin.apps.length) {
     // 2) Use GOOGLE_APPLICATION_CREDENTIALS file path (local dev / gcloud ADC)
     // 3) Fallback to applicationDefault() if available
 
+    // Resolve storage bucket — NEXT_PUBLIC_ vars may be inlined at build time and absent at runtime
+    const storageBucket = process.env.FIREBASE_STORAGE_BUCKET
+      || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      || "budoor-406c2.firebasestorage.app";
+
     if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
       // Decode base64 encoded service account
       const serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf-8');
       const serviceAccount = JSON.parse(serviceAccountJson);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        storageBucket,
       });
       console.log("✅ Firebase Admin initialized with SERVICE_ACCOUNT_BASE64");
     } else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
       const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        storageBucket,
       });
       console.log("✅ Firebase Admin initialized with SERVICE_ACCOUNT");
     } else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
       admin.initializeApp({
         credential: admin.credential.applicationDefault(),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        storageBucket,
       });
       console.log("✅ Firebase Admin initialized with APPLICATION_CREDENTIALS");
     } else {
       // Last resort: try application default credentials
       admin.initializeApp({
         credential: admin.credential.applicationDefault(),
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+        storageBucket,
       });
       console.log("✅ Firebase Admin initialized with default credentials");
     }

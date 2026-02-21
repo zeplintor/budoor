@@ -64,7 +64,11 @@ export async function generateAudioFromText(
     console.log(`✅ Audio generated: ${buffer.length} bytes`);
 
     // Upload to Firebase Storage (required - base64 is too large for Firestore)
-    const bucket = storage.bucket();
+    // Pass bucket name explicitly — NEXT_PUBLIC_ vars may not be available server-side at runtime
+    const bucketName = process.env.FIREBASE_STORAGE_BUCKET
+      || process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+      || "budoor-406c2.firebasestorage.app";
+    const bucket = storage.bucket(bucketName);
     const file = bucket.file(`audio-reports/${fileName}`);
 
     await file.save(buffer, {
