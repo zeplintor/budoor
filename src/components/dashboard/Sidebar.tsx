@@ -80,7 +80,7 @@ export function Sidebar() {
       className={cn(
         "group flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2.5 text-sm font-medium transition-all duration-200",
         isActive
-          ? "bg-[var(--accent-pink)] text-[var(--text-primary)]"
+          ? "bg-[var(--accent-green)] text-white"
           : "text-[var(--text-inverse-secondary)] hover:bg-[var(--bg-dark-hover)] hover:text-[var(--text-inverse)]"
       )}
     >
@@ -88,7 +88,7 @@ export function Sidebar() {
         className={cn(
           "h-5 w-5 flex-shrink-0 transition-colors",
           isActive
-            ? "text-[var(--text-primary)]"
+            ? "text-white"
             : "text-[var(--text-inverse-secondary)] group-hover:text-[var(--text-inverse)]"
         )}
       />
@@ -106,8 +106,8 @@ export function Sidebar() {
       {/* Logo Header */}
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-[var(--accent-mint)]">
-            <Sprout className="h-5 w-5 text-[var(--text-primary)]" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)]" style={{ background: "var(--accent-green)" }}>
+            <Sprout className="h-5 w-5 text-white" />
           </div>
           {!collapsed && (
             <span className="text-lg font-bold text-[var(--text-inverse)]">
@@ -185,7 +185,7 @@ export function Sidebar() {
           )}
         >
           <div className="relative">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[var(--accent-purple)] to-[var(--accent-pink)] text-[var(--text-primary)] font-semibold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full font-semibold text-white" style={{ background: "var(--accent-green)" }}>
               {user?.displayName?.charAt(0).toUpperCase() || "U"}
             </div>
             <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-[var(--bg-dark)] bg-[var(--status-success)]" />

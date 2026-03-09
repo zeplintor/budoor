@@ -3,11 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { Header } from "@/components/dashboard";
-import { Card, CardContent, CardHeader, CardTitle, Badge, OrganicBlob, GradientMesh } from "@/components/ui";
 import { useAuth } from "@/contexts/AuthContext";
-import { CloudSun, Calendar, MapPin, Loader2, AlertTriangle, CheckCircle, TrendingUp, Droplets, Wind, ThermometerSun, Volume2 } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { getDoc, doc } from "firebase/firestore";
+import { CloudSun, Calendar, MapPin, Loader2, AlertTriangle, CheckCircle, Droplets, Wind, ThermometerSun, Volume2, ShieldAlert, Zap, ArrowRight, Download } from "lucide-react";
+import { getDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface Report {
@@ -60,7 +58,6 @@ export default function ReportDetailPage() {
   const params = useParams();
   const reportId = params.id as string;
   const { firebaseUser } = useAuth();
-  useTranslations();
   const [report, setReport] = useState<Report | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +145,13 @@ export default function ReportDetailPage() {
       const data = await response.json();
 
       if (data.success) {
+        // Write audioUrl + darijaScript to Firestore using the client SDK
+        // (the service account used server-side lacks Firestore IAM permissions)
         const reportRef = doc(db!, "users", firebaseUser.uid, "reports", reportId);
+        await updateDoc(reportRef, {
+          audioUrl: data.audioUrl,
+          darijaScript: data.darijaScript,
+        });
         const reportSnap = await getDoc(reportRef);
         if (reportSnap.exists()) {
           setReport({ id: reportSnap.id, ...reportSnap.data() } as Report);
@@ -199,7 +202,7 @@ export default function ReportDetailPage() {
       <>
         <Header title="Détails du rapport" />
         <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-[var(--accent-mint)]" />
+          <Loader2 className="h-8 w-8 animate-spin" style={{ color: "var(--accent-green)" }} />
         </div>
       </>
     );
@@ -210,17 +213,18 @@ export default function ReportDetailPage() {
       <>
         <Header title="Détails du rapport" />
         <div className="p-6">
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-8 text-center">
-              <AlertTriangle className="h-12 w-12 text-[var(--accent-coral)] mx-auto mb-4" />
-              <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-2">
-                {error || "Rapport introuvable"}
-              </h2>
-              <p className="text-[var(--text-secondary)]">
-                Ce rapport n'existe pas ou vous n'avez pas les permissions pour y accéder.
-              </p>
-            </CardContent>
-          </Card>
+          <div
+            className="max-w-2xl mx-auto rounded-xl border p-8 text-center"
+            style={{ background: "white", borderColor: "var(--border-light)", boxShadow: "var(--shadow-card)" }}
+          >
+            <AlertTriangle className="h-10 w-10 mx-auto mb-4" style={{ color: "var(--accent-coral)" }} />
+            <h2 className="text-xl font-display font-bold mb-2" style={{ color: "var(--text-primary)" }}>
+              {error || "Rapport introuvable"}
+            </h2>
+            <p style={{ color: "var(--text-secondary)" }}>
+              Ce rapport n'existe pas ou vous n'avez pas les permissions pour y accéder.
+            </p>
+          </div>
         </div>
       </>
     );
@@ -229,336 +233,419 @@ export default function ReportDetailPage() {
   const status = statusConfig[report.status];
   const StatusIcon = status.icon;
 
+  const statusBorderColor =
+    report.status === "alerte" ? "var(--accent-coral)" :
+    report.status === "vigilance" ? "var(--accent-gold)" :
+    "var(--accent-green)";
+
+  const statusBg =
+    report.status === "alerte" ? "var(--accent-coral-light)" :
+    report.status === "vigilance" ? "var(--accent-gold-light)" :
+    "var(--accent-green-light)";
+
+  const statusTextColor =
+    report.status === "alerte" ? "var(--accent-coral)" :
+    report.status === "vigilance" ? "var(--accent-gold)" :
+    "var(--accent-green)";
+
+  const diseaseRiskColor =
+    report.diseaseRisk?.level === "high" ? "var(--accent-coral)" :
+    report.diseaseRisk?.level === "medium" ? "var(--accent-gold)" :
+    "var(--accent-green)";
+
+  const diseaseRiskBg =
+    report.diseaseRisk?.level === "high" ? "var(--accent-coral-light)" :
+    report.diseaseRisk?.level === "medium" ? "var(--accent-gold-light)" :
+    "var(--accent-green-light)";
+
+  const diseaseRiskLabel =
+    report.diseaseRisk?.level === "high" ? "Risque élevé" :
+    report.diseaseRisk?.level === "medium" ? "Risque modéré" :
+    "Risque faible";
+
+  const dateLabel =
+    report.createdAt?.toDate?.()?.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) ||
+    report.generatedAt?.toDate?.()?.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) ||
+    "Date inconnue";
+
+  const cardStyle = { background: "white", borderColor: "var(--border-light)", boxShadow: "var(--shadow-card)" };
+
   return (
     <>
       <Header title="Détails du rapport" />
 
-      <div className="p-6 max-w-5xl mx-auto relative">
-        {/* Background decorative elements */}
-        <div className="absolute -top-20 -right-20 pointer-events-none">
-          <OrganicBlob color="mint" size="xl" animated opacity={0.06} />
-        </div>
-        <div className="absolute top-1/2 -left-32 pointer-events-none">
-          <OrganicBlob color="yellow" size="lg" animated opacity={0.08} />
-        </div>
-        <GradientMesh colors={{ top: 'mint', middle: 'yellow', bottom: 'coral' }} />
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-5">
 
-        <div className="space-y-6 relative">
-          {/* Header Card */}
-          <Card className="shadow-xl overflow-hidden animate-fade-in-up">
-            <div className={`absolute top-0 left-0 w-full h-1 ${
-              report.status === 'alerte' ? 'bg-gradient-to-r from-[var(--accent-coral)] to-[var(--accent-pink)]' :
-              report.status === 'vigilance' ? 'bg-gradient-to-r from-[var(--accent-yellow)] to-[var(--accent-coral)]' :
-              'bg-gradient-to-r from-[var(--accent-mint)] to-[var(--accent-yellow)]'
-            }`} />
+        {/* ── Print-only branding header ─────────────────── */}
+        <div
+          data-print-header=""
+          className="hidden items-center justify-between mb-6 pb-4 border-b"
+          style={{ borderColor: "var(--border-light)" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "var(--accent-green)" }}>
+              <div className="w-4 h-4 bg-white rounded-sm" />
+            </div>
+            <span className="font-display font-bold text-lg" style={{ color: "var(--text-primary)" }}>Budoor</span>
+          </div>
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>budoor.me · Rapport généré par IA</span>
+        </div>
 
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <h1 className="text-3xl font-display font-bold text-[var(--text-primary)]">
-                      {report.parcelleName}
-                    </h1>
-                    <Badge variant={status.color} size="lg" className="shadow-md">
-                      <StatusIcon className="h-4 w-4 mr-1" />
-                      {status.label}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-secondary)]">
-                    {report.cultureType && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{report.cultureType}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      <span>
-                        {report.createdAt?.toDate?.()?.toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        }) || report.generatedAt?.toDate?.()?.toLocaleDateString('fr-FR', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        }) || 'Date inconnue'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+        {/* ── Toolbar ───────────────────────────────────── */}
+        <div className="flex justify-end" data-print-hide="">
+          <button
+            onClick={() => window.print()}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium border transition-all hover:bg-[var(--bg-muted)] active:scale-[0.98]"
+            style={{ borderColor: "var(--border-light)", color: "var(--text-secondary)", background: "white" }}
+          >
+            <Download className="h-4 w-4" />
+            Exporter PDF
+          </button>
+        </div>
+
+        {/* ── Header ────────────────────────────────────── */}
+        <div
+          className="rounded-xl border p-4 sm:p-5 animate-fade-in-up"
+          style={{ ...cardStyle, borderLeftWidth: "4px", borderLeftColor: statusBorderColor }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h1 className="font-display font-bold text-xl sm:text-2xl md:text-3xl mb-1" style={{ color: "var(--text-primary)" }}>
+                {report.parcelleName}
+              </h1>
+              <div className="flex flex-wrap items-center gap-3 text-sm" style={{ color: "var(--text-secondary)" }}>
+                {report.cultureType && (
+                  <span className="flex items-center gap-1.5">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {report.cultureType}
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {dateLabel}
+                </span>
               </div>
-            </CardHeader>
-          </Card>
+            </div>
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold shrink-0"
+              style={{ background: statusBg, color: statusTextColor }}
+            >
+              <StatusIcon className="h-4 w-4" />
+              {status.label}
+            </span>
+          </div>
 
-          {/* Audio Card - Always show, either player or generation button */}
-          <Card className="shadow-xl animate-fade-in-up border-2 border-[var(--accent-purple)]/30" style={{ animationDelay: '50ms' }}>
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[var(--accent-purple)] to-[var(--accent-pink)]" />
-
-            <CardHeader className="pb-4 bg-gradient-to-br from-[var(--accent-purple)]/5 to-transparent">
-              <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-purple-light)]">
-                  <Volume2 className="h-6 w-6 text-[var(--accent-purple-dark)]" />
-                </div>
-                Résumé audio en darija
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="p-6">
-              {report.audioUrl ? (
-                <div className="space-y-4">
-                  {/* Audio Player */}
-                  <div className="p-6 rounded-[var(--radius-xl)] bg-gradient-to-br from-[var(--accent-purple-light)] to-[var(--accent-pink-light)] border-2 border-[var(--accent-purple)]">
-                    <audio
-                      controls
-                      className="w-full"
-                      style={{ filter: 'hue-rotate(250deg)' }}
-                    >
-                      <source src={report.audioUrl} type="audio/mpeg" />
-                      Votre navigateur ne supporte pas la lecture audio.
-                    </audio>
-                  </div>
-
-                  {/* Darija Script */}
-                  {report.darijaScript && (
-                    <details className="group">
-                      <summary className="cursor-pointer list-none p-4 rounded-[var(--radius-lg)] bg-[var(--bg-muted)] hover:bg-[var(--bg-muted)]/70 transition-colors border border-[var(--border-light)]">
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-[var(--text-primary)]">
-                            📝 Voir le script en darija
-                          </span>
-                          <svg
-                            className="h-5 w-5 text-[var(--text-secondary)] group-open:rotate-180 transition-transform"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </summary>
-                      <div className="mt-3 p-4 rounded-[var(--radius-lg)] bg-white border border-[var(--border-light)]">
-                        <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap text-right" dir="rtl" style={{ fontFamily: 'var(--font-arabic)' }}>
-                          {report.darijaScript}
-                        </p>
-                      </div>
-                    </details>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {isGeneratingAudio ? (
-                    /* Progress steps during generation */
-                    <div className="space-y-3">
-                      <p className="text-sm font-medium text-[var(--text-primary)]">
-                        Génération de l'audio en cours…
-                      </p>
-                      <div className="space-y-2">
-                        {AUDIO_STEPS.map((step, i) => (
-                          <div
-                            key={i}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-[var(--radius-lg)] border transition-all duration-500 ${
-                              i < audioStep
-                                ? "bg-[var(--accent-mint-light)] border-[var(--accent-mint)] opacity-60"
-                                : i === audioStep
-                                ? "bg-[var(--accent-purple-light)] border-[var(--accent-purple)] shadow-sm"
-                                : "bg-[var(--bg-muted)] border-[var(--border-light)] opacity-40"
-                            }`}
-                          >
-                            {i < audioStep ? (
-                              <CheckCircle className="h-4 w-4 text-[var(--accent-mint-dark)] shrink-0" />
-                            ) : i === audioStep ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-purple-dark)] shrink-0" />
-                            ) : (
-                              <div className="h-4 w-4 rounded-full border-2 border-[var(--border-light)] shrink-0" />
-                            )}
-                            <p className={`text-sm ${i === audioStep ? "font-medium text-[var(--accent-purple-dark)]" : "text-[var(--text-secondary)]"}`}>
-                              {step.label}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    /* Generate button */
-                    <div className="flex flex-col items-start gap-3">
-                      <p className="text-sm text-[var(--text-secondary)]">
-                        Obtenez un résumé audio de ce rapport narré en darija marocain (~20 secondes).
-                      </p>
-                      <button
-                        onClick={handleGenerateAudio}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[var(--radius-lg)] bg-[var(--accent-purple)] hover:bg-[var(--accent-purple-dark)] text-white font-semibold transition-all active:scale-95 shadow-sm"
-                      >
-                        <Volume2 className="h-4 w-4" />
-                        Générer l'audio en darija
-                      </button>
-                    </div>
-                  )}
-                  {audioError && (
-                    <div className="flex items-start gap-2 p-3 rounded-[var(--radius-lg)] bg-[var(--accent-coral-light)] border border-[var(--accent-coral)]">
-                      <AlertTriangle className="h-4 w-4 text-[var(--accent-coral-dark)] shrink-0 mt-0.5" />
-                      <p className="text-sm text-[var(--accent-coral-dark)]">{audioError}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Weather Card */}
-          {report.weather && (
-            <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '100ms' }}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                  <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-yellow-light)]">
-                    <CloudSun className="h-6 w-6 text-[var(--accent-yellow-dark)]" />
-                  </div>
-                  Conditions météorologiques
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-coral-light)] border-2 border-[var(--accent-coral)]">
-                    <ThermometerSun className="h-6 w-6 text-[var(--accent-coral-dark)] mb-2" />
-                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                      {report.weather.temperature}°C
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">Température</p>
-                  </div>
-
-                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-mint-light)] border-2 border-[var(--accent-mint)]">
-                    <Droplets className="h-6 w-6 text-[var(--accent-mint-dark)] mb-2" />
-                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                      {report.weather.humidity}%
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">Humidité</p>
-                  </div>
-
-                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-purple-light)] border-2 border-[var(--accent-purple)]">
-                    <CloudSun className="h-6 w-6 text-[var(--accent-purple-dark)] mb-2" />
-                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                      {report.weather.precipitation}mm
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">Précipitations</p>
-                  </div>
-
-                  <div className="p-4 rounded-[var(--radius-xl)] bg-[var(--accent-yellow-light)] border-2 border-[var(--accent-yellow)]">
-                    <Wind className="h-6 w-6 text-[var(--accent-yellow-dark)] mb-2" />
-                    <p className="text-2xl font-display font-bold text-[var(--text-primary)]">
-                      {report.weather.windSpeed} km/h
-                    </p>
-                    <p className="text-sm text-[var(--text-secondary)]">Vent</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          {/* Summary */}
+          {report.summary && (
+            <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
+              {report.summary}
+            </p>
           )}
+          {!report.summary && report.content && (
+            <p className="mt-4 text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>
+              {report.content}
+            </p>
+          )}
+        </div>
 
-          {/* Report Content */}
-          <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '200ms' }}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-pink-light)]">
-                  <TrendingUp className="h-6 w-6 text-[var(--accent-pink-dark)]" />
+        {/* ── Weather strip ─────────────────────────────── */}
+        {report.weather && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in-up" style={{ animationDelay: "70ms" }}>
+            {[
+              { icon: ThermometerSun, value: `${report.weather.temperature}°C`, label: "Température", iconBg: "var(--accent-coral-light)", iconColor: "var(--accent-coral)" },
+              { icon: Droplets, value: `${report.weather.humidity}%`, label: "Humidité", iconBg: "var(--accent-green-light)", iconColor: "var(--accent-green)" },
+              { icon: CloudSun, value: `${report.weather.precipitation} mm`, label: "Précipitations", iconBg: "var(--accent-purple-light)", iconColor: "var(--accent-purple)" },
+              { icon: Wind, value: `${report.weather.windSpeed} km/h`, label: "Vent", iconBg: "var(--accent-gold-light)", iconColor: "var(--accent-gold)" },
+            ].map((m) => (
+              <div key={m.label} className="rounded-xl border p-4" style={cardStyle}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-2" style={{ background: m.iconBg }}>
+                  <m.icon className="h-4 w-4" style={{ color: m.iconColor }} />
                 </div>
-                Rapport détaillé
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="prose prose-sm md:prose-base max-w-none space-y-4">
-                <div>
-                  <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Résumé</h3>
-                  <p className="text-[var(--text-primary)] leading-relaxed">{report.summary}</p>
-                </div>
-
-                {report.weatherAnalysis && (
-                  <div>
-                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Analyse météorologique</h3>
-                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.weatherAnalysis}</p>
-                  </div>
-                )}
-
-                {report.soilAnalysis && (
-                  <div>
-                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Analyse du sol</h3>
-                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.soilAnalysis}</p>
-                  </div>
-                )}
-
-                {report.irrigationAdvice && (
-                  <div>
-                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Conseils d'irrigation</h3>
-                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.irrigationAdvice}</p>
-                  </div>
-                )}
-
-                {report.weeklyForecast && (
-                  <div>
-                    <h3 className="font-semibold text-lg text-[var(--text-primary)] mb-2">Prévisions hebdomadaires</h3>
-                    <p className="text-[var(--text-primary)] leading-relaxed whitespace-pre-wrap">{report.weeklyForecast}</p>
-                  </div>
-                )}
-
-                {/* Fallback for old reports with content field */}
-                {!report.summary && report.content && (
-                  <div className="whitespace-pre-wrap text-[var(--text-primary)] leading-relaxed">
-                    {report.content}
-                  </div>
-                )}
+                <p className="font-display font-bold text-xl" style={{ color: "var(--text-primary)" }}>{m.value}</p>
+                <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>{m.label}</p>
               </div>
-            </CardContent>
-          </Card>
+            ))}
+          </div>
+        )}
 
-          {/* Recommendations */}
-          {report.recommendations && report.recommendations.length > 0 && (
-            <Card className="shadow-xl animate-fade-in-up" style={{ animationDelay: '300ms' }}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-3 font-display text-2xl">
-                  <div className="p-2 rounded-[var(--radius-lg)] bg-[var(--accent-mint-light)]">
-                    <CheckCircle className="h-6 w-6 text-[var(--accent-mint-dark)]" />
-                  </div>
-                  Recommandations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {report.recommendations.map((recommendation, index) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-3 p-4 rounded-[var(--radius-lg)] bg-[var(--bg-muted)] border border-[var(--border-light)]"
+        {/* ── Disease Risk ──────────────────────────────── */}
+        {report.diseaseRisk && (
+          <div
+            className="rounded-xl border p-4 sm:p-5 animate-fade-in-up"
+            style={{ animationDelay: "100ms", ...cardStyle, borderColor: diseaseRiskColor }}
+          >
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: diseaseRiskBg }}>
+                <ShieldAlert className="h-5 w-5" style={{ color: diseaseRiskColor }} />
+              </div>
+              <div>
+                <p className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                  Risque phytosanitaire
+                </p>
+                <span
+                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: diseaseRiskBg, color: diseaseRiskColor }}
+                >
+                  {diseaseRiskLabel}
+                </span>
+              </div>
+            </div>
+
+            {report.diseaseRisk.diseases && report.diseaseRisk.diseases.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>
+                  Maladies détectées
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {report.diseaseRisk.diseases.map((d, i) => (
+                    <span
+                      key={i}
+                      className="text-sm px-2.5 py-1 rounded-lg border"
+                      style={{ background: diseaseRiskBg, borderColor: diseaseRiskColor, color: diseaseRiskColor }}
                     >
-                      <div className="p-1.5 rounded-full bg-[var(--accent-mint)] mt-0.5 shrink-0">
-                        <CheckCircle className="h-4 w-4 text-white" />
-                      </div>
-                      <span className="text-[var(--text-primary)] flex-1">{recommendation}</span>
+                      {d}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {report.diseaseRisk.preventiveActions && report.diseaseRisk.preventiveActions.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>
+                  Actions préventives
+                </p>
+                <ul className="space-y-1.5">
+                  {report.diseaseRisk.preventiveActions.map((a, i) => (
+                    <li key={i} className="flex items-start gap-2 text-sm" style={{ color: "var(--text-primary)" }}>
+                      <ArrowRight className="h-3.5 w-3.5 mt-0.5 shrink-0" style={{ color: diseaseRiskColor }} />
+                      {a}
                     </li>
                   ))}
                 </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* WhatsApp Info */}
-          <Card className="shadow-xl animate-fade-in-up bg-gradient-to-br from-[var(--accent-mint-light)] to-[var(--accent-yellow-light)]" style={{ animationDelay: '400ms' }}>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-full bg-[#25D366]">
-                  <svg className="h-8 w-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <p className="font-display font-semibold text-lg text-[var(--text-primary)] mb-1">
-                    Rapport envoyé par WhatsApp
-                  </p>
-                  <p className="text-sm text-[var(--text-primary)]/80">
-                    Ce rapport vous a été automatiquement envoyé sur WhatsApp. Configurez vos préférences de notification dans les réglages.
-                  </p>
-                </div>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
+        )}
+
+        {/* ── Recommendations ───────────────────────────── */}
+        {report.recommendations && report.recommendations.length > 0 && (
+          <div className="rounded-xl border p-4 sm:p-5 animate-fade-in-up" style={{ animationDelay: "140ms", ...cardStyle }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent-green-light)" }}>
+                <CheckCircle className="h-5 w-5" style={{ color: "var(--accent-green)" }} />
+              </div>
+              <p className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                Recommandations IA
+              </p>
+            </div>
+            <ul className="space-y-2.5">
+              {report.recommendations.map((rec, i) => (
+                <li key={i} className="flex items-start gap-3">
+                  <span
+                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
+                    style={{ background: "var(--accent-green-light)", color: "var(--accent-green)" }}
+                  >
+                    {i + 1}
+                  </span>
+                  <span className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>{rec}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* ── Next Actions ──────────────────────────────── */}
+        {report.nextActions && report.nextActions.length > 0 && (
+          <div className="rounded-xl border p-4 sm:p-5 animate-fade-in-up" style={{ animationDelay: "170ms", ...cardStyle }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent-gold-light)" }}>
+                <Zap className="h-5 w-5" style={{ color: "var(--accent-gold)" }} />
+              </div>
+              <p className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                Actions à planifier
+              </p>
+            </div>
+            <div className="space-y-2">
+              {report.nextActions.map((action, i) => {
+                const priorityColor =
+                  action.priority === "high" ? "var(--accent-coral)" :
+                  action.priority === "medium" ? "var(--accent-gold)" :
+                  "var(--accent-green)";
+                const priorityBg =
+                  action.priority === "high" ? "var(--accent-coral-light)" :
+                  action.priority === "medium" ? "var(--accent-gold-light)" :
+                  "var(--accent-green-light)";
+                const priorityLabel =
+                  action.priority === "high" ? "Urgent" :
+                  action.priority === "medium" ? "Moyen" : "Faible";
+                return (
+                  <div
+                    key={i}
+                    className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg border"
+                    style={{ borderColor: "var(--border-light)" }}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span
+                        className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                        style={{ background: priorityBg, color: priorityColor }}
+                      >
+                        {priorityLabel}
+                      </span>
+                      <span className="text-sm" style={{ color: "var(--text-primary)" }}>{action.action}</span>
+                    </div>
+                    {action.timing && (
+                      <span className="text-xs sm:shrink-0 pl-0 sm:pl-2" style={{ color: "var(--text-muted)" }}>{action.timing}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── Detailed Analysis ─────────────────────────── */}
+        {(report.weatherAnalysis || report.soilAnalysis || report.irrigationAdvice || report.weeklyForecast) && (
+          <div className="rounded-xl border animate-fade-in-up" style={{ animationDelay: "200ms", ...cardStyle }}>
+            <details className="group">
+              <summary className="cursor-pointer list-none p-5 flex items-center justify-between">
+                <p className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
+                  Analyse détaillée
+                </p>
+                <svg className="h-4 w-4 transition-transform group-open:rotate-180" style={{ color: "var(--text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </summary>
+              <div className="px-5 pb-5 space-y-5 border-t" style={{ borderColor: "var(--border-light)" }}>
+                {report.weatherAnalysis && (
+                  <div className="pt-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>Analyse météo</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>{report.weatherAnalysis}</p>
+                  </div>
+                )}
+                {report.soilAnalysis && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>Analyse du sol</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>{report.soilAnalysis}</p>
+                  </div>
+                )}
+                {report.irrigationAdvice && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>Conseils d'irrigation</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>{report.irrigationAdvice}</p>
+                  </div>
+                )}
+                {report.weeklyForecast && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)" }}>Prévisions hebdomadaires</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap" style={{ color: "var(--text-primary)" }}>{report.weeklyForecast}</p>
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        )}
+
+        {/* ── Audio ─────────────────────────────────────── */}
+        <div className="rounded-xl border p-4 sm:p-5 animate-fade-in-up" data-print-hide="" style={{ animationDelay: "230ms", ...cardStyle }}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: "var(--accent-green-light)" }}>
+              <Volume2 className="h-5 w-5" style={{ color: "var(--accent-green)" }} />
+            </div>
+            <p className="font-display font-bold text-base" style={{ color: "var(--text-primary)" }}>
+              Résumé audio en darija
+            </p>
+          </div>
+
+          {report.audioUrl ? (
+            <div className="space-y-3">
+              <audio controls className="w-full rounded-lg">
+                <source src={report.audioUrl} type="audio/mpeg" />
+                Votre navigateur ne supporte pas la lecture audio.
+              </audio>
+              {report.darijaScript && (
+                <details className="group">
+                  <summary className="cursor-pointer list-none flex items-center justify-between p-3 rounded-lg border text-sm font-medium transition-colors hover:bg-[var(--bg-muted)]" style={{ borderColor: "var(--border-light)", color: "var(--text-primary)" }}>
+                    Voir le script en darija
+                    <svg className="h-4 w-4 transition-transform group-open:rotate-180" style={{ color: "var(--text-muted)" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-2 p-4 rounded-lg border" style={{ borderColor: "var(--border-light)" }}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap text-right" dir="rtl" style={{ color: "var(--text-primary)", fontFamily: "var(--font-arabic)" }}>
+                      {report.darijaScript}
+                    </p>
+                  </div>
+                </details>
+              )}
+            </div>
+          ) : isGeneratingAudio ? (
+            <div className="space-y-2">
+              {AUDIO_STEPS.map((step, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-500"
+                  style={{
+                    background: i < audioStep ? "var(--accent-green-light)" : i === audioStep ? "var(--bg-muted)" : "transparent",
+                    borderColor: i < audioStep ? "var(--accent-green)" : i === audioStep ? "var(--border-light)" : "var(--border-light)",
+                    opacity: i > audioStep ? 0.4 : 1,
+                  }}
+                >
+                  {i < audioStep ? (
+                    <CheckCircle className="h-4 w-4 shrink-0" style={{ color: "var(--accent-green)" }} />
+                  ) : i === audioStep ? (
+                    <Loader2 className="h-4 w-4 animate-spin shrink-0" style={{ color: "var(--text-secondary)" }} />
+                  ) : (
+                    <div className="h-4 w-4 rounded-full border-2 shrink-0" style={{ borderColor: "var(--border-light)" }} />
+                  )}
+                  <p className="text-sm" style={{ color: i === audioStep ? "var(--text-primary)" : "var(--text-secondary)", fontWeight: i === audioStep ? 500 : 400 }}>
+                    {step.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                Obtenez un résumé audio narré en darija marocain (~20 secondes).
+              </p>
+              <button
+                onClick={handleGenerateAudio}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90 active:scale-[0.98]"
+                style={{ background: "var(--accent-green)" }}
+              >
+                <Volume2 className="h-4 w-4" />
+                Générer l'audio en darija
+              </button>
+              {audioError && (
+                <div className="flex items-start gap-2 p-3 rounded-lg border text-sm" style={{ background: "var(--accent-coral-light)", borderColor: "rgba(220,38,38,0.2)", color: "var(--accent-coral)" }}>
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  {audioError}
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* ── WhatsApp info ─────────────────────────────── */}
+        <div
+          data-print-hide=""
+          className="rounded-xl border p-4 flex items-center gap-4 animate-fade-in-up"
+          style={{ animationDelay: "260ms", ...cardStyle }}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "#25D366" }}>
+            <svg className="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+            </svg>
+          </div>
+          <div>
+            <p className="font-semibold text-sm" style={{ color: "var(--text-primary)" }}>Rapport envoyé par WhatsApp</p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              Configurez vos préférences dans les réglages.
+            </p>
+          </div>
+        </div>
+
       </div>
     </>
   );

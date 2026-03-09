@@ -25,6 +25,8 @@ export interface UserSettings {
   whatsappVerified: boolean;
   notificationFrequency: "daily" | "weekly" | "none";
   language: "fr" | "ar";
+  emailNotifications?: boolean;
+  notificationEmail?: string | null; // if different from auth email
 }
 
 // Parcelle (Field) model

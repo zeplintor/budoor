@@ -106,6 +106,32 @@ export default function ReportsPage() {
       setGenerationStep(GENERATION_STEPS[3]);
       const firestoreDocId = await saveReport(firebaseUser.uid, report);
 
+      // Send email notification (fire-and-forget, doesn't block navigation)
+      const userEmail = firebaseUser.email;
+      if (userEmail) {
+        const reportUrl = `${window.location.origin}/dashboard/reports/${firestoreDocId}`;
+        fetch("/api/send-report-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            to: userEmail,
+            parcelleName: report.parcelleName,
+            status: report.status,
+            summary: report.summary,
+            recommendations: report.recommendations || [],
+            nextActions: report.nextActions || [],
+            diseaseRisk: report.diseaseRisk,
+            weather: data.weather ? {
+              temperature: data.weather.current.temperature,
+              humidity: data.weather.current.humidity,
+              precipitation: data.weather.current.precipitation,
+              windSpeed: data.weather.current.windSpeed,
+            } : undefined,
+            reportUrl,
+          }),
+        }).catch((e) => console.warn("Email send failed (non-blocking):", e));
+      }
+
       const reports = await getReports(firebaseUser.uid);
       setSavedReports(reports);
 

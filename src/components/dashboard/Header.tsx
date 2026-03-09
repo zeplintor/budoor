@@ -20,8 +20,8 @@ export function Header({ title, searchValue, onSearchChange, showSearch = true }
   const setSearch = onSearchChange || setLocalSearch;
 
   return (
-    <header className="flex h-16 items-center justify-between border-b border-gray-200 bg-white px-6">
-      <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
+    <header className="flex h-16 items-center justify-between px-6" style={{ background: "var(--bg-secondary)", borderBottom: "1px solid var(--border-light)" }}>
+      <h1 className="font-display font-bold text-xl" style={{ color: "var(--text-primary)" }}>{title}</h1>
 
       {/* Search */}
       {showSearch && (

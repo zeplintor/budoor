@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateDarijaScript } from "@/lib/audio/darijaGenerator";
 import { generateAudioFromText } from "@/lib/audio/audioGenerator";
-import { adminFirestore } from "@/lib/firebase-admin";
 
 interface AudioRequest {
   userId: string;
@@ -41,23 +40,11 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Audio generated:", audioUrl);
 
-    // Update report in Firestore with audio (using Admin SDK for server-side reliability)
-    const reportRef = adminFirestore
-      .collection("users")
-      .doc(data.userId)
-      .collection("reports")
-      .doc(data.reportId);
-    await reportRef.update({
-      audioUrl,
-      darijaScript,
-    });
-
-    console.log("✅ Report updated with audio in Firestore");
-
+    // Return audioUrl and darijaScript — client will write to Firestore with its own auth token
     return NextResponse.json({
       success: true,
       audioUrl,
-      darijaScript: darijaScript.substring(0, 150) + "...",
+      darijaScript,
     });
   } catch (error: any) {
     console.error("❌ Failed to generate audio:", error);
