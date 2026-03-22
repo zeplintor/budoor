@@ -7,9 +7,9 @@ export interface User {
   displayName: string;
   phone?: string;
   phoneVerified: boolean;
-  language: "fr" | "en" | "ar";
+  language: "fr" | "en" | "ar" | "es";
   notificationFrequency: "daily" | "weekly" | "alerts_only" | "none";
-  subscription: "free" | "pro";
+  subscription: "free" | "pro" | "expert";
   subscriptionId?: string;
   subscriptionStatus?: "active" | "cancelled" | "paused" | "expired" | "refunded";
   onboardingCompleted?: boolean;
@@ -27,6 +27,34 @@ export interface UserSettings {
   language: "fr" | "ar";
   emailNotifications?: boolean;
   notificationEmail?: string | null; // if different from auth email
+}
+
+// Parcelle profile — agronomic parameters entered by the farmer
+export interface ParcelleProfile {
+  /**
+   * KILLER FEATURE: exact planting/plantation date.
+   * The system auto-calculates age in years + infers phenological stage from this.
+   */
+  plantingDate?: Timestamp;
+  /** Height of trees / plants in metres (for perennial crops: olive, vine, fruits) */
+  treeHeight?: number;
+  /** Overall health/condition of the trees or crop as observed by the farmer */
+  treeCondition?: "excellent" | "good" | "average" | "poor";
+  /** Plants or trees per hectare */
+  plantingDensity?: number;
+  /** Irrigation system in use */
+  irrigationType?: "drip" | "sprinkler" | "gravity" | "rainfed";
+  /** Farmer-declared soil type (complements SoilGrids satellite data) */
+  soilType?: "clay" | "loam" | "sandy" | "calcareous" | "silty";
+  /** Date of last phytosanitary treatment */
+  lastTreatmentDate?: Timestamp;
+  /** Target yield in tonnes per hectare */
+  yieldTarget?: number;
+  /**
+   * Phenological stage — auto-inferred from plantingDate + culture if not set manually.
+   * Farmer can override this.
+   */
+  phenologicalStage?: "germination" | "growth" | "flowering" | "fruiting" | "maturation" | "dormancy";
 }
 
 // Parcelle (Field) model
@@ -48,6 +76,7 @@ export interface Parcelle {
     dateSeeding?: Timestamp;
     currentStage?: string;
   };
+  profile?: ParcelleProfile;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

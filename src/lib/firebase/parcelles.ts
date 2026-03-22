@@ -32,6 +32,16 @@ export interface CreateParcelleData {
   areaHectares: number;
   cultureType: string;
   dateSeeding?: Date;
+  // Agronomic profile
+  plantingDate?: Date;
+  treeHeight?: number;
+  treeCondition?: "excellent" | "good" | "average" | "poor";
+  plantingDensity?: number;
+  irrigationType?: "drip" | "sprinkler" | "gravity" | "rainfed";
+  soilType?: "clay" | "loam" | "sandy" | "calcareous" | "silty";
+  lastTreatmentDate?: Date;
+  yieldTarget?: number;
+  phenologicalStage?: "germination" | "growth" | "flowering" | "fruiting" | "maturation" | "dormancy";
 }
 
 export async function createParcelle(data: CreateParcelleData): Promise<string> {
@@ -39,6 +49,17 @@ export async function createParcelle(data: CreateParcelleData): Promise<string> 
   const parcellesRef = collection(dbInstance, "users", data.userId, "parcelles");
 
   // Serialize geometry coordinates to JSON string (Firestore doesn't support nested arrays)
+  const profile: Record<string, unknown> = {};
+  if (data.plantingDate) profile.plantingDate = Timestamp.fromDate(data.plantingDate);
+  if (data.treeHeight !== undefined) profile.treeHeight = data.treeHeight;
+  if (data.treeCondition) profile.treeCondition = data.treeCondition;
+  if (data.plantingDensity !== undefined) profile.plantingDensity = data.plantingDensity;
+  if (data.irrigationType) profile.irrigationType = data.irrigationType;
+  if (data.soilType) profile.soilType = data.soilType;
+  if (data.lastTreatmentDate) profile.lastTreatmentDate = Timestamp.fromDate(data.lastTreatmentDate);
+  if (data.yieldTarget !== undefined) profile.yieldTarget = data.yieldTarget;
+  if (data.phenologicalStage) profile.phenologicalStage = data.phenologicalStage;
+
   const parcelleData = {
     userId: data.userId,
     name: data.name,
@@ -51,6 +72,7 @@ export async function createParcelle(data: CreateParcelleData): Promise<string> 
       dateSeeding: data.dateSeeding ? Timestamp.fromDate(data.dateSeeding) : null,
       currentStage: null,
     },
+    profile: Object.keys(profile).length > 0 ? profile : null,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   };
@@ -79,6 +101,7 @@ export async function getParcelles(userId: string): Promise<Parcelle[]> {
       centroid: data.centroid,
       areaHectares: data.areaHectares,
       culture: data.culture,
+      profile: data.profile ?? undefined,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
     } as Parcelle;

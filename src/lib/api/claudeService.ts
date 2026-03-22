@@ -101,6 +101,88 @@ REGLES ABSOLUES:
 - Si les donnees sol sont estimees, le mentionner explicitement et recommander une analyse pedologique en laboratoire
 - Les nextActions doivent etre dans l'ordre de priorite decroissante et couvrir differentes echelles de temps`;
 
+// ---------------------------------------------------------------------------
+// Killer feature helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Calculate exact age in years + months from a planting date.
+ */
+function calcAge(plantingDate: { seconds: number }): { years: number; months: number; label: string } {
+  const planted = new Date(plantingDate.seconds * 1000);
+  const now = new Date();
+  let years = now.getFullYear() - planted.getFullYear();
+  let months = now.getMonth() - planted.getMonth();
+  if (months < 0) { years--; months += 12; }
+  const label = years === 0
+    ? `${months} mois`
+    : months === 0
+      ? `${years} an${years > 1 ? "s" : ""}`
+      : `${years} an${years > 1 ? "s" : ""} et ${months} mois`;
+  return { years, months, label };
+}
+
+/**
+ * Infer the most likely phenological stage from crop type + current month.
+ * Returns null if no rule matches (Claude will infer from context).
+ */
+function inferPhenologicalStage(
+  cultureType: string,
+  now: Date
+): string | null {
+  const month = now.getMonth() + 1; // 1-12
+  const c = cultureType.toLowerCase();
+
+  if (c.includes("ble") || c.includes("blé") || c.includes("orge") || c.includes("cereale")) {
+    if ([10, 11].includes(month)) return "Semis / Germination";
+    if ([12, 1, 2].includes(month)) return "Tallage / Croissance vegetative";
+    if ([3, 4].includes(month)) return "Montaison / Epiaison";
+    if ([5].includes(month)) return "Floraison / Remplissage du grain";
+    if ([6, 7].includes(month)) return "Maturation / Recolte";
+  }
+
+  if (c.includes("olivier") || c.includes("olive")) {
+    if ([1, 2].includes(month)) return "Dormance hivernale";
+    if ([3, 4].includes(month)) return "Debourrement / Croissance vegetative";
+    if ([5, 6].includes(month)) return "Floraison";
+    if ([7, 8].includes(month)) return "Nouaison / Croissance des fruits (veraison)";
+    if ([9, 10].includes(month)) return "Maturation des olives";
+    if ([11, 12].includes(month)) return "Recolte / Post-recolte";
+  }
+
+  if (c.includes("vigne") || c.includes("raisin")) {
+    if ([11, 12, 1, 2].includes(month)) return "Dormance / Taille hivernale";
+    if ([3, 4].includes(month)) return "Debourrement / Croissance des rameaux";
+    if ([5, 6].includes(month)) return "Floraison / Nouaison";
+    if ([7, 8].includes(month)) return "Veraison / Maturation du raisin";
+    if ([9, 10].includes(month)) return "Vendanges / Post-recolte";
+  }
+
+  if (c.includes("agrume") || c.includes("citron") || c.includes("orange")) {
+    if ([12, 1, 2].includes(month)) return "Recolte des agrumes d'hiver";
+    if ([3, 4].includes(month)) return "Floraison / Croissance vegetative";
+    if ([5, 6].includes(month)) return "Nouaison / Developpement des fruits";
+    if ([7, 8, 9].includes(month)) return "Croissance des fruits / Ete";
+    if ([10, 11].includes(month)) return "Maturation";
+  }
+
+  if (c.includes("mais") || c.includes("maïs")) {
+    if ([4, 5].includes(month)) return "Semis / Levee";
+    if ([6, 7].includes(month)) return "Croissance vegetative / Montaison";
+    if ([8].includes(month)) return "Floraison / Pollinisation";
+    if ([9, 10].includes(month)) return "Maturation / Recolte";
+  }
+
+  if (c.includes("tomate") || c.includes("poivron") || c.includes("legume")) {
+    if ([1, 2, 3].includes(month)) return "Pepiniere / Plantation";
+    if ([4, 5, 6].includes(month)) return "Croissance vegetative";
+    if ([7, 8].includes(month)) return "Floraison / Fructification";
+    if ([9, 10, 11].includes(month)) return "Maturation / Recolte";
+  }
+
+  return null;
+}
+
 export function buildReportPrompt(data: ReportRequest): string {
   const { parcelle, weather, soil, elevation } = data;
 
@@ -136,15 +218,57 @@ export function buildReportPrompt(data: ReportRequest): string {
     dataSource: soil.isEstimated ? "ESTIMATION_REGIONALE — donnees non mesurées sur place" : "SoilGrids_ISRIC — donnees satellitaires validees",
   };
 
+  const profileLines: string[] = [];
+  if (parcelle.profile) {
+    const p = parcelle.profile;
+
+    // --- KILLER FEATURE: auto-calculate from plantingDate ---
+    if (p.plantingDate) {
+      const age = calcAge(p.plantingDate as unknown as { seconds: number });
+      profileLines.push(`- Date de plantation: ${new Date((p.plantingDate as any).seconds * 1000).toLocaleDateString("fr-FR")}`);
+      profileLines.push(`- Age exact: ${age.label} (${age.years} ans complets)`);
+      // Auto-infer stage unless farmer overrode it
+      if (!p.phenologicalStage) {
+        const inferred = inferPhenologicalStage(parcelle.culture.type, new Date());
+        if (inferred) profileLines.push(`- Stade phenologique (calcule automatiquement): ${inferred}`);
+      }
+    }
+
+    if (p.treeHeight !== undefined) profileLines.push(`- Hauteur des arbres/plants: ${p.treeHeight} m`);
+    if (p.treeCondition) {
+      const condMap = { excellent: "Excellent (vigoureux, sans symptomes)", good: "Bon (quelques signes mineurs)", average: "Moyen (stress visible ou carences)", poor: "Mauvais (stress severe, symptomes importants)" };
+      profileLines.push(`- Etat general des cultures: ${condMap[p.treeCondition]}`);
+    }
+    if (p.plantingDensity) profileLines.push(`- Densite de plantation: ${p.plantingDensity} plants/ha`);
+    if (p.irrigationType) {
+      const irrMap = { drip: "Goutte-a-goutte", sprinkler: "Aspersion", gravity: "Gravitaire", rainfed: "Pluvial (sans irrigation)" };
+      profileLines.push(`- Systeme d'irrigation: ${irrMap[p.irrigationType]}`);
+    }
+    if (p.soilType) {
+      const soilMap = { clay: "Argileux", loam: "Limoneux", sandy: "Sableux", calcareous: "Calcaire", silty: "Limoneux-Silteux" };
+      profileLines.push(`- Type de sol declare: ${soilMap[p.soilType]}`);
+    }
+    if (p.lastTreatmentDate) profileLines.push(`- Dernier traitement phytosanitaire: ${new Date((p.lastTreatmentDate as any).seconds * 1000).toLocaleDateString("fr-FR")}`);
+    if (p.yieldTarget) profileLines.push(`- Objectif rendement: ${p.yieldTarget} t/ha`);
+    if (p.phenologicalStage) {
+      const stageMap = { germination: "Germination", growth: "Croissance vegetative", flowering: "Floraison", fruiting: "Fructification", maturation: "Maturation", dormancy: "Dormance" };
+      profileLines.push(`- Stade phenologique (declare par l'agriculteur): ${stageMap[p.phenologicalStage]}`);
+    }
+  }
+  const profileSection = profileLines.length > 0
+    ? `\nPROFIL EXPLOITATION (donnees declarees par l'agriculteur + calculs automatiques):\n${profileLines.join("\n")}`
+    : "";
+
   return `Analyse cette parcelle agricole et genere un rapport agronomique COMPLET, DETAILLE et PROFESSIONNEL.
 Chaque section doit etre exhaustive — c'est un rapport critique pour un agriculteur qui depend de tes conseils.
 Ne genere PAS de contenu generique: chaque phrase doit etre ancree dans les donnees reelles fournies ci-dessous.
+Si un profil exploitation est fourni, utilise OBLIGATOIREMENT ces donnees pour personnaliser chaque section (stade phenologique, systeme d'irrigation, age des arbres, etc.).
 
 PARCELLE:
 - Nom: ${parcelle.name}
 - Culture: ${parcelle.culture.type}
 - Surface: ${parcelle.areaHectares} hectares
-- Coordonnees GPS: ${parcelle.centroid.lat.toFixed(4)}°N, ${parcelle.centroid.lng.toFixed(4)}°E
+- Coordonnees GPS: ${parcelle.centroid.lat.toFixed(4)}°N, ${parcelle.centroid.lng.toFixed(4)}°E${profileSection}
 
 METEO ACTUELLE ET PREVISIONS 7 JOURS (Open-Meteo):
 ${JSON.stringify(weatherDetail, null, 2)}

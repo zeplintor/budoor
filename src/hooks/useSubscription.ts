@@ -5,7 +5,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type SubscriptionPlan = "free" | "pro";
+export type SubscriptionPlan = "free" | "pro" | "expert";
 export type SubscriptionStatus = "active" | "cancelled" | "paused" | "expired" | "refunded" | null;
 
 interface SubscriptionState {
@@ -18,9 +18,12 @@ interface SubscriptionState {
 
 interface UseSubscriptionReturn extends SubscriptionState {
   isPro: boolean;
+  isExpert: boolean;
   isFree: boolean;
   isActive: boolean;
+  isPaidPlan: boolean;
   upgradeToPro: () => Promise<void>;
+  upgradeToExpert: () => Promise<void>;
   cancelSubscription: () => Promise<void>;
   refreshSubscription: () => void;
 }
@@ -32,12 +35,27 @@ export const PLAN_LIMITS = {
     maxReportsPerMonth: 5,
     whatsappFrequency: "weekly" as const,
     dataHistoryDays: 30,
+    multiExploitation: false,
+    pdfExport: false,
+    apiAccess: false,
   },
   pro: {
     maxParcelles: Infinity,
     maxReportsPerMonth: Infinity,
     whatsappFrequency: "daily" as const,
     dataHistoryDays: 365,
+    multiExploitation: false,
+    pdfExport: false,
+    apiAccess: false,
+  },
+  expert: {
+    maxParcelles: Infinity,
+    maxReportsPerMonth: Infinity,
+    whatsappFrequency: "daily" as const,
+    dataHistoryDays: 730,
+    multiExploitation: true,
+    pdfExport: true,
+    apiAccess: true,
   },
 };
 
@@ -93,45 +111,29 @@ export function useSubscription(): UseSubscriptionReturn {
     return () => unsubscribe();
   }, [firebaseUser?.uid]);
 
-  // Upgrade to Pro
-  const upgradeToPro = useCallback(async () => {
+  // Generic checkout redirect
+  const createCheckout = useCallback(async (targetPlan: "pro" | "expert") => {
     if (!firebaseUser?.uid || !firebaseUser?.email) {
       throw new Error("User not authenticated");
     }
-
     setState((prev) => ({ ...prev, loading: true, error: null }));
-
     try {
       const response = await fetch("/api/payments/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: firebaseUser.uid,
-          email: firebaseUser.email,
-          plan: "pro",
-        }),
+        body: JSON.stringify({ userId: firebaseUser.uid, email: firebaseUser.email, plan: targetPlan }),
       });
-
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to create checkout session");
-      }
-
-      // Redirect to DODO Payments checkout
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-      }
+      if (!response.ok) throw new Error(data.error || "Failed to create checkout session");
+      if (data.checkoutUrl) window.location.href = data.checkoutUrl;
     } catch (error) {
-      console.error("Error upgrading to Pro:", error);
-      setState((prev) => ({
-        ...prev,
-        loading: false,
-        error: error instanceof Error ? error.message : "Failed to upgrade",
-      }));
+      setState((prev) => ({ ...prev, loading: false, error: error instanceof Error ? error.message : "Failed to upgrade" }));
       throw error;
     }
   }, [firebaseUser?.uid, firebaseUser?.email]);
+
+  const upgradeToPro = useCallback(() => createCheckout("pro"), [createCheckout]);
+  const upgradeToExpert = useCallback(() => createCheckout("expert"), [createCheckout]);
 
   // Cancel subscription
   const cancelSubscription = useCallback(async () => {
@@ -174,9 +176,12 @@ export function useSubscription(): UseSubscriptionReturn {
   return {
     ...state,
     isPro: state.plan === "pro",
+    isExpert: state.plan === "expert",
     isFree: state.plan === "free",
-    isActive: state.status === "active" || state.plan === "pro",
+    isPaidPlan: state.plan === "pro" || state.plan === "expert",
+    isActive: state.status === "active" || state.plan === "pro" || state.plan === "expert",
     upgradeToPro,
+    upgradeToExpert,
     cancelSubscription,
     refreshSubscription,
   };
