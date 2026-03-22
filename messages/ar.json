@@ -284,7 +284,73 @@
       "namePlaceholder": "مثال: الحقل الشمالي، القطعة 12...",
       "culture": "ما هي الزراعة في هذا الحقل؟",
       "customCulturePlaceholder": "أدخل اسم الزراعة...",
-      "save": "حفظ"
+      "save": "حفظ",
+      "step1": "المعلومات",
+      "step2": "الملف الزراعي",
+      "next": "التالي",
+      "skip": "تخطي",
+      "profileBadge": "اختياري — يحسّن دقة التقارير",
+      "plantingDate": "تاريخ الزراعة",
+      "treeHeight": "ارتفاع الأشجار / النباتات (م)",
+      "treeHeightPlaceholder": "مثال: 3.5",
+      "treeCondition": "الحالة العامة للمحاصيل",
+      "treeConditionPlaceholder": "اختر الحالة",
+      "irrigationType": "نظام الري",
+      "irrigationPlaceholder": "اختر",
+      "plantingDensity": "كثافة الزراعة (نبات/هكتار)",
+      "plantingDensityPlaceholder": "مثال: 400",
+      "yieldTarget": "هدف الإنتاجية (طن/هكتار)",
+      "yieldTargetPlaceholder": "مثال: 5"
+    },
+    "profile": {
+      "title": "الملف الزراعي",
+      "plantingDate": "تاريخ الزراعة",
+      "ageCalculated": "العمر المحسوب",
+      "years": "{years} سنة",
+      "yearsMonths": "{years} سنة و {months} شهر",
+      "months": "{months} شهر",
+      "treeHeight": "ارتفاع الأشجار",
+      "treeHeightUnit": "{value} م",
+      "treeCondition": "الحالة العامة",
+      "irrigationType": "الري",
+      "soilType": "نوع التربة (معلَن)",
+      "yieldTarget": "هدف الإنتاجية",
+      "yieldTargetUnit": "{value} طن/هكتار",
+      "plantingDensity": "الكثافة",
+      "plantingDensityUnit": "{value} نبات/هكتار",
+      "phenologicalStage": "المرحلة الفينولوجية",
+      "autoCalculated": "محسوب تلقائياً",
+      "manualOverride": "محدد يدوياً",
+      "noProfile": "لا يوجد ملف زراعي",
+      "noProfileDesc": "أضف بيانات مزرعتك للحصول على تقارير ذكاء اصطناعي أكثر دقة.",
+      "addProfile": "إضافة ملف",
+      "editProfile": "تعديل الملف",
+      "saveProfile": "حفظ الملف",
+      "conditions": {
+        "excellent": "ممتاز — نشيط، بدون أعراض",
+        "good": "جيد — بعض العلامات البسيطة",
+        "average": "متوسط — إجهاد مرئي أو نقص",
+        "poor": "ضعيف — إجهاد شديد، أعراض واضحة"
+      },
+      "conditionsShort": {
+        "excellent": "ممتاز",
+        "good": "جيد",
+        "average": "متوسط",
+        "poor": "ضعيف"
+      },
+      "irrigation": {
+        "drip": "بالتنقيط",
+        "sprinkler": "بالرش",
+        "gravity": "بالجاذبية",
+        "rainfed": "بعلي (بدون ري)"
+      },
+      "soil": {
+        "clay": "طيني",
+        "loam": "طمي",
+        "sandy": "رملي",
+        "calcareous": "كلسي",
+        "silty": "غريني"
+      }
     },
     "delete": {
       "confirm": "حذف الحقل \"{name}\"؟"
@@ -425,11 +491,14 @@
     "currentPlan": {
       "free": "الخطة المجانية",
       "pro": "الخطة الاحترافية",
+      "expert": "الخطة الخبيرة",
       "freeDescription": "أنت تستخدم حالياً الخطة المجانية",
       "proDescription": "استمتع بجميع الميزات الاحترافية",
+      "expertDescription": "استمتع بجميع الميزات الخبيرة",
       "badge": "خطتك الحالية"
     },
     "cancelSubscription": "إلغاء الاشتراك",
+    "upgradeToExpert": "الترقية للخبير",
     "plans": {
       "free": {
         "name": "مجاني",
@@ -453,6 +522,19 @@
           "support": "دعم ذو أولوية",
           "export": "تصدير البيانات (PDF، CSV)",
           "api": "الوصول لـ API (قريباً)"
+        }
+      },
+      "expert": {
+        "name": "خبير",
+        "description": "للتعاونيات والمزارع المتعددة",
+        "features": {
+          "everything": "كل ما هو مدرج في الاحترافي",
+          "multiExploitation": "استغلال متعدد (مواقع متعددة)",
+          "pdf": "تصدير PDF وCSV متقدم",
+          "api": "وصول كامل لـ API",
+          "history2y": "سجل لمدة سنتين",
+          "support": "دعم مخصص 24/7",
+          "customReports": "تقارير مخصصة لكل تعاونية"
         }
       }
     },

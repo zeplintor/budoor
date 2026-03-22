@@ -284,7 +284,73 @@
       "namePlaceholder": "Ex: Champ Nord, Parcelle 12...",
       "culture": "Quelle culture sur cette parcelle ?",
       "customCulturePlaceholder": "Entrez le nom de la culture...",
-      "save": "Enregistrer"
+      "save": "Enregistrer",
+      "step1": "Informations",
+      "step2": "Profil agronomique",
+      "next": "Suivant",
+      "skip": "Passer",
+      "profileBadge": "Optionnel — améliore la précision des rapports",
+      "plantingDate": "Date de plantation",
+      "treeHeight": "Hauteur des arbres / plants (m)",
+      "treeHeightPlaceholder": "Ex: 3.5",
+      "treeCondition": "État général des cultures",
+      "treeConditionPlaceholder": "Choisissez l'état",
+      "irrigationType": "Système d'irrigation",
+      "irrigationPlaceholder": "Choisissez",
+      "plantingDensity": "Densité de plantation (plants/ha)",
+      "plantingDensityPlaceholder": "Ex: 400",
+      "yieldTarget": "Objectif de rendement (t/ha)",
+      "yieldTargetPlaceholder": "Ex: 5"
+    },
+    "profile": {
+      "title": "Profil de l'exploitation",
+      "plantingDate": "Date de plantation",
+      "ageCalculated": "Âge calculé",
+      "years": "{years} ans",
+      "yearsMonths": "{years} ans, {months} mois",
+      "months": "{months} mois",
+      "treeHeight": "Hauteur des arbres",
+      "treeHeightUnit": "{value} m",
+      "treeCondition": "État général",
+      "irrigationType": "Irrigation",
+      "soilType": "Type de sol (déclaré)",
+      "yieldTarget": "Objectif rendement",
+      "yieldTargetUnit": "{value} t/ha",
+      "plantingDensity": "Densité",
+      "plantingDensityUnit": "{value} plants/ha",
+      "phenologicalStage": "Stade phénologique",
+      "autoCalculated": "calculé automatiquement",
+      "manualOverride": "défini manuellement",
+      "noProfile": "Aucun profil agronomique renseigné",
+      "noProfileDesc": "Ajoutez les données de votre exploitation pour des rapports IA plus précis.",
+      "addProfile": "Ajouter un profil",
+      "editProfile": "Modifier le profil",
+      "saveProfile": "Enregistrer le profil",
+      "conditions": {
+        "excellent": "Excellent — vigoureux, sans symptômes",
+        "good": "Bon — quelques signes mineurs",
+        "average": "Moyen — stress visible ou carences",
+        "poor": "Mauvais — stress sévère, symptômes importants"
+      },
+      "conditionsShort": {
+        "excellent": "Excellent",
+        "good": "Bon",
+        "average": "Moyen",
+        "poor": "Mauvais"
+      },
+      "irrigation": {
+        "drip": "Goutte-à-goutte",
+        "sprinkler": "Aspersion",
+        "gravity": "Gravitaire",
+        "rainfed": "Pluvial (sans irrigation)"
+      },
+      "soil": {
+        "clay": "Argileux",
+        "loam": "Limoneux",
+        "sandy": "Sableux",
+        "calcareous": "Calcaire",
+        "silty": "Silteux"
+      }
     },
     "delete": {
       "confirm": "Supprimer la parcelle \"{name}\" ?"
@@ -425,11 +491,14 @@
     "currentPlan": {
       "free": "Plan Gratuit",
       "pro": "Plan Pro",
+      "expert": "Plan Expert",
       "freeDescription": "Vous utilisez actuellement le plan gratuit",
       "proDescription": "Profitez de toutes les fonctionnalités Pro",
+      "expertDescription": "Profitez de toutes les fonctionnalités Expert",
       "badge": "Plan actuel"
     },
     "cancelSubscription": "Annuler l'abonnement",
+    "upgradeToExpert": "Passer à Expert",
     "plans": {
       "free": {
         "name": "Gratuit",
@@ -453,6 +522,19 @@
           "support": "Support prioritaire",
           "export": "Export des données (PDF, CSV)",
           "api": "Accès API (bientôt)"
+        }
+      },
+      "expert": {
+        "name": "Expert",
+        "description": "Pour coopératives et exploitations multiples",
+        "features": {
+          "everything": "Tout ce qui est inclus dans Pro",
+          "multiExploitation": "Multi-exploitation (plusieurs sites)",
+          "pdf": "Export PDF & CSV avancé",
+          "api": "Accès API complet",
+          "history2y": "Historique 2 ans",
+          "support": "Support dédié 24/7",
+          "customReports": "Rapports personnalisés par coopérative"
         }
       }
     },

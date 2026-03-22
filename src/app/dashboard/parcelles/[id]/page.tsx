@@ -42,9 +42,12 @@ import {
   FileText,
   MapPin,
   Calendar,
+  Leaf,
+  Plus,
 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { Timestamp } from "firebase/firestore";
 import { getParcelles, updateParcelle, deleteParcelle } from "@/lib/firebase/parcelles";
 import { getReportsByParcelle, type SavedReport } from "@/lib/firebase/reports";
 import {
@@ -154,6 +157,16 @@ export default function ParcelleDetailPage() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Profile edit state
+  const [isProfileEditOpen, setIsProfileEditOpen] = useState(false);
+  const [profilePlantingDate, setProfilePlantingDate] = useState("");
+  const [profileTreeHeight, setProfileTreeHeight] = useState("");
+  const [profileTreeCondition, setProfileTreeCondition] = useState<"" | "excellent" | "good" | "average" | "poor">("");
+  const [profileIrrigationType, setProfileIrrigationType] = useState<"" | "drip" | "sprinkler" | "gravity" | "rainfed">("");
+  const [profilePlantingDensity, setProfilePlantingDensity] = useState("");
+  const [profileYieldTarget, setProfileYieldTarget] = useState("");
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
   // Auto-hide notification
   useEffect(() => {
     if (notification) {
@@ -255,6 +268,56 @@ export default function ParcelleDetailPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Open profile edit dialog pre-filled with existing data
+  const openProfileEdit = () => {
+    const p = parcelle?.profile;
+    setProfilePlantingDate(
+      p?.plantingDate ? new Date((p.plantingDate as Timestamp).seconds * 1000).toISOString().split("T")[0] : ""
+    );
+    setProfileTreeHeight(p?.treeHeight !== undefined ? String(p.treeHeight) : "");
+    setProfileTreeCondition((p?.treeCondition as typeof profileTreeCondition) ?? "");
+    setProfileIrrigationType((p?.irrigationType as typeof profileIrrigationType) ?? "");
+    setProfilePlantingDensity(p?.plantingDensity !== undefined ? String(p.plantingDensity) : "");
+    setProfileYieldTarget(p?.yieldTarget !== undefined ? String(p.yieldTarget) : "");
+    setIsProfileEditOpen(true);
+  };
+
+  // Save agronomic profile
+  const handleSaveProfile = async () => {
+    if (!firebaseUser || !parcelle) return;
+    setIsSavingProfile(true);
+    try {
+      const profile = {
+        ...(profilePlantingDate && { plantingDate: Timestamp.fromDate(new Date(profilePlantingDate)) }),
+        ...(profileTreeHeight && { treeHeight: parseFloat(profileTreeHeight) }),
+        ...(profileTreeCondition && { treeCondition: profileTreeCondition }),
+        ...(profileIrrigationType && { irrigationType: profileIrrigationType }),
+        ...(profilePlantingDensity && { plantingDensity: parseInt(profilePlantingDensity) }),
+        ...(profileYieldTarget && { yieldTarget: parseFloat(profileYieldTarget) }),
+      };
+      await updateParcelle(firebaseUser.uid, parcelle.id, { profile });
+      setParcelle({ ...parcelle, profile });
+      setIsProfileEditOpen(false);
+      setNotification({ type: "success", message: "Profil agronomique mis à jour" });
+    } catch {
+      setNotification({ type: "error", message: "Impossible de mettre à jour le profil" });
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  // Compute age label from a Firestore Timestamp
+  const getAgeLabel = (ts: Timestamp): string => {
+    const planted = ts.toDate();
+    const now = new Date();
+    let years = now.getFullYear() - planted.getFullYear();
+    let months = now.getMonth() - planted.getMonth();
+    if (months < 0) { years--; months += 12; }
+    if (years === 0) return `${months} mois`;
+    if (months === 0) return `${years} an${years > 1 ? "s" : ""}`;
+    return `${years} an${years > 1 ? "s" : ""} et ${months} mois`;
   };
 
   // Handle delete
@@ -486,6 +549,94 @@ export default function ParcelleDetailPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Agronomic Profile Card */}
+        <Card>
+          <CardHeader className="pb-2 px-4 md:px-6">
+            <div className="flex items-center justify-between gap-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Leaf className="h-5 w-5 text-green-600" />
+                Profil de l&apos;exploitation
+              </CardTitle>
+              <Button variant="outline" size="sm" className="h-9 shrink-0" onClick={openProfileEdit}>
+                {parcelle.profile && Object.keys(parcelle.profile).length > 0 ? (
+                  <><Pencil className="h-3.5 w-3.5" /><span className="ml-1.5">Modifier</span></>
+                ) : (
+                  <><Plus className="h-3.5 w-3.5" /><span className="ml-1.5">Ajouter</span></>
+                )}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="px-4 md:px-6">
+            {parcelle.profile && Object.keys(parcelle.profile).length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {/* Date plantation + âge auto-calculé — KILLER FEATURE */}
+                {parcelle.profile.plantingDate && (
+                  <div className="bg-green-50 border border-green-100 rounded-lg p-3 col-span-2 sm:col-span-1">
+                    <p className="text-xs text-green-700 mb-1 font-medium">Date de plantation</p>
+                    <p className="text-sm font-semibold text-gray-900">
+                      {new Date((parcelle.profile.plantingDate as Timestamp).seconds * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                    </p>
+                    <p className="text-xs text-green-600 mt-0.5 font-medium">
+                      🌱 {getAgeLabel(parcelle.profile.plantingDate as Timestamp)}
+                    </p>
+                  </div>
+                )}
+                {parcelle.profile.treeCondition && (
+                  <div className={`rounded-lg p-3 border ${
+                    parcelle.profile.treeCondition === "excellent" ? "bg-green-50 border-green-100" :
+                    parcelle.profile.treeCondition === "good" ? "bg-blue-50 border-blue-100" :
+                    parcelle.profile.treeCondition === "average" ? "bg-yellow-50 border-yellow-100" :
+                    "bg-red-50 border-red-100"
+                  }`}>
+                    <p className="text-xs text-gray-500 mb-1">État général</p>
+                    <p className="text-sm font-semibold text-gray-900 capitalize">{
+                      { excellent: "Excellent", good: "Bon", average: "Moyen", poor: "Mauvais" }[parcelle.profile.treeCondition]
+                    }</p>
+                  </div>
+                )}
+                {parcelle.profile.treeHeight !== undefined && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Hauteur</p>
+                    <p className="text-sm font-semibold text-gray-900">{parcelle.profile.treeHeight} m</p>
+                  </div>
+                )}
+                {parcelle.profile.irrigationType && (
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                    <p className="text-xs text-blue-700 mb-1">Irrigation</p>
+                    <p className="text-sm font-semibold text-gray-900">{
+                      { drip: "Goutte-à-goutte", sprinkler: "Aspersion", gravity: "Gravitaire", rainfed: "Pluvial" }[parcelle.profile.irrigationType]
+                    }</p>
+                  </div>
+                )}
+                {parcelle.profile.plantingDensity !== undefined && (
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <p className="text-xs text-gray-500 mb-1">Densité</p>
+                    <p className="text-sm font-semibold text-gray-900">{parcelle.profile.plantingDensity} pl/ha</p>
+                  </div>
+                )}
+                {parcelle.profile.yieldTarget !== undefined && (
+                  <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                    <p className="text-xs text-amber-700 mb-1">Objectif rendement</p>
+                    <p className="text-sm font-semibold text-gray-900">{parcelle.profile.yieldTarget} t/ha</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-center py-6">
+                <Sprout className="h-10 w-10 mx-auto mb-3 text-gray-200" />
+                <p className="text-sm text-gray-500">Aucun profil agronomique renseigné</p>
+                <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">
+                  Ajoutez la date de plantation, l&apos;état des arbres et le système d&apos;irrigation pour des rapports IA plus précis.
+                </p>
+                <Button variant="outline" size="sm" className="mt-3 h-9" onClick={openProfileEdit}>
+                  <Plus className="h-3.5 w-3.5" />
+                  <span className="ml-1.5">Ajouter un profil</span>
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Status summary */}
         {conditionSummary && (
@@ -971,6 +1122,109 @@ export default function ParcelleDetailPage() {
             </Button>
             <Button onClick={handleSaveEdit} disabled={isSaving}>
               {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Profile Edit Dialog */}
+      <Dialog open={isProfileEditOpen} onOpenChange={setIsProfileEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Leaf className="h-5 w-5 text-green-600" />
+              Profil agronomique
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="p-plantingDate">Date de plantation</Label>
+              <Input
+                id="p-plantingDate"
+                type="date"
+                value={profilePlantingDate}
+                onChange={(e) => setProfilePlantingDate(e.target.value)}
+                max={new Date().toISOString().split("T")[0]}
+              />
+              {profilePlantingDate && (
+                <p className="text-xs text-green-600 font-medium">
+                  🌱 Âge : {getAgeLabel(Timestamp.fromDate(new Date(profilePlantingDate)))}
+                </p>
+              )}
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="p-height">Hauteur des arbres (m)</Label>
+                <Input
+                  id="p-height"
+                  type="number"
+                  min="0"
+                  step="0.1"
+                  placeholder="Ex: 3.5"
+                  value={profileTreeHeight}
+                  onChange={(e) => setProfileTreeHeight(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>État général</Label>
+                <select
+                  value={profileTreeCondition}
+                  onChange={(e) => setProfileTreeCondition(e.target.value as typeof profileTreeCondition)}
+                  className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">Choisir...</option>
+                  <option value="excellent">Excellent</option>
+                  <option value="good">Bon</option>
+                  <option value="average">Moyen</option>
+                  <option value="poor">Mauvais</option>
+                </select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Système d&apos;irrigation</Label>
+              <select
+                value={profileIrrigationType}
+                onChange={(e) => setProfileIrrigationType(e.target.value as typeof profileIrrigationType)}
+                className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">Choisir...</option>
+                <option value="drip">Goutte-à-goutte</option>
+                <option value="sprinkler">Aspersion</option>
+                <option value="gravity">Gravitaire</option>
+                <option value="rainfed">Pluvial (sans irrigation)</option>
+              </select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="p-density">Densité (plants/ha)</Label>
+                <Input
+                  id="p-density"
+                  type="number"
+                  min="0"
+                  placeholder="Ex: 400"
+                  value={profilePlantingDensity}
+                  onChange={(e) => setProfilePlantingDensity(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="p-yield">Objectif rendement (t/ha)</Label>
+                <Input
+                  id="p-yield"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  placeholder="Ex: 5"
+                  value={profileYieldTarget}
+                  onChange={(e) => setProfileYieldTarget(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsProfileEditOpen(false)}>Annuler</Button>
+            <Button onClick={handleSaveProfile} disabled={isSavingProfile}>
+              {isSavingProfile && <Loader2 className="h-4 w-4 animate-spin" />}
               Enregistrer
             </Button>
           </DialogFooter>

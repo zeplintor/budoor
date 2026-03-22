@@ -32,7 +32,7 @@ import {
 export default function PricingPage() {
   const t = useTranslations();
   const searchParams = useSearchParams();
-  const { status, isPro, loading, upgradeToPro, cancelSubscription } =
+  const { status, plan, isPro, isExpert, loading, upgradeToPro, upgradeToExpert, cancelSubscription } =
     useSubscription();
 
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -56,6 +56,16 @@ export default function PricingPage() {
     setIsUpgrading(true);
     try {
       await upgradeToPro();
+    } catch {
+      setNotification({ type: "error", message: t("pricing.error") });
+      setIsUpgrading(false);
+    }
+  };
+
+  const handleUpgradeToExpert = async () => {
+    setIsUpgrading(true);
+    try {
+      await upgradeToExpert();
     } catch {
       setNotification({ type: "error", message: t("pricing.error") });
       setIsUpgrading(false);
@@ -90,9 +100,8 @@ export default function PricingPage() {
         { text: t("pricing.plans.pro.features.unlimited"), included: false },
         { text: t("pricing.plans.pro.features.daily"), included: false },
         { text: t("pricing.plans.pro.features.history"), included: false },
-        { text: t("pricing.plans.pro.features.support"), included: false },
       ],
-      current: !isPro,
+      current: plan === "free",
     },
     {
       id: "pro",
@@ -103,15 +112,30 @@ export default function PricingPage() {
       features: [
         { text: t("pricing.plans.pro.features.unlimited"), included: true },
         { text: t("pricing.plans.pro.features.reports"), included: true },
-        { text: t("pricing.plans.free.features.weather"), included: true },
-        { text: t("pricing.plans.free.features.soil"), included: true },
         { text: t("pricing.plans.pro.features.daily"), included: true },
         { text: t("pricing.plans.pro.features.history"), included: true },
         { text: t("pricing.plans.pro.features.support"), included: true },
         { text: t("pricing.plans.pro.features.export"), included: true },
-        { text: t("pricing.plans.pro.features.api"), included: true },
+        { text: t("pricing.plans.expert.features.multiExploitation"), included: false },
+        { text: t("pricing.plans.expert.features.api"), included: false },
       ],
-      current: isPro,
+      current: plan === "pro",
+    },
+    {
+      id: "expert",
+      name: t("pricing.plans.expert.name"),
+      price: "79",
+      description: t("pricing.plans.expert.description"),
+      features: [
+        { text: t("pricing.plans.expert.features.everything"), included: true },
+        { text: t("pricing.plans.expert.features.multiExploitation"), included: true },
+        { text: t("pricing.plans.expert.features.pdf"), included: true },
+        { text: t("pricing.plans.expert.features.api"), included: true },
+        { text: t("pricing.plans.expert.features.history2y"), included: true },
+        { text: t("pricing.plans.expert.features.support"), included: true },
+        { text: t("pricing.plans.expert.features.customReports"), included: true },
+      ],
+      current: plan === "expert",
     },
   ];
 
@@ -174,31 +198,33 @@ export default function PricingPage() {
             <div
               className="p-3 rounded-xl"
               style={{
-                background: isPro ? "rgba(255,255,255,0.15)" : "var(--accent-green-light)",
+                background: isPro || isExpert ? "rgba(255,255,255,0.15)" : "var(--accent-green-light)",
               }}
             >
-              {isPro ? (
+              {isExpert ? (
+                <Sparkles className="h-6 w-6 text-white" />
+              ) : isPro ? (
                 <Crown className="h-6 w-6 text-white" />
               ) : (
-                <Sparkles className="h-6 w-6" style={{ color: "var(--accent-green)" }} />
+                <Zap className="h-6 w-6" style={{ color: "var(--accent-green)" }} />
               )}
             </div>
             <div>
               <h2
                 className="font-display font-bold text-xl"
-                style={{ color: isPro ? "white" : "var(--text-primary)" }}
+                style={{ color: isPro || isExpert ? "white" : "var(--text-primary)" }}
               >
-                {isPro ? t("pricing.currentPlan.pro") : t("pricing.currentPlan.free")}
+                {isExpert ? t("pricing.currentPlan.expert") : isPro ? t("pricing.currentPlan.pro") : t("pricing.currentPlan.free")}
               </h2>
               <p
                 className="text-sm"
-                style={{ color: isPro ? "rgba(255,255,255,0.7)" : "var(--text-secondary)" }}
+                style={{ color: isPro || isExpert ? "rgba(255,255,255,0.7)" : "var(--text-secondary)" }}
               >
-                {isPro ? t("pricing.currentPlan.proDescription") : t("pricing.currentPlan.freeDescription")}
+                {isExpert ? t("pricing.currentPlan.expertDescription") : isPro ? t("pricing.currentPlan.proDescription") : t("pricing.currentPlan.freeDescription")}
               </p>
             </div>
           </div>
-          {isPro && status === "active" && (
+          {(isPro || isExpert) && status === "active" && (
             <button
               onClick={() => setShowCancelDialog(true)}
               className="text-sm font-medium px-4 py-2 rounded-lg border transition-all hover:opacity-80"
@@ -210,7 +236,7 @@ export default function PricingPage() {
         </div>
 
         {/* Plans */}
-        <div className="grid md:grid-cols-2 gap-5">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
           {plans.map((plan) => (
             <div
               key={plan.id}
@@ -302,7 +328,7 @@ export default function PricingPage() {
                 </ul>
 
                 {/* CTA */}
-                {plan.id === "pro" && !isPro && (
+                {plan.id === "pro" && !isPro && !isExpert && (
                   <button
                     onClick={handleUpgrade}
                     disabled={isUpgrading}
@@ -316,7 +342,21 @@ export default function PricingPage() {
                     )}
                   </button>
                 )}
-                {plan.id === "free" && isPro && (
+                {plan.id === "expert" && !isExpert && (
+                  <button
+                    onClick={handleUpgradeToExpert}
+                    disabled={isUpgrading}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-semibold text-sm transition-all hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
+                    style={{ background: "var(--accent-gold)", color: "white" }}
+                  >
+                    {isUpgrading ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" />{t("pricing.processing")}</>
+                    ) : (
+                      <><Sparkles className="h-4 w-4" />{t("pricing.upgradeToExpert")}</>
+                    )}
+                  </button>
+                )}
+                {plan.id === "free" && (isPro || isExpert) && (
                   <button
                     disabled
                     className="w-full px-5 py-3.5 rounded-xl font-semibold text-sm border opacity-50 cursor-not-allowed"

@@ -16,7 +16,7 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui";
-import { Trash2, Loader2, Map, PenTool, Eye, CheckCircle, AlertCircle, Plus, List, MapIcon } from "lucide-react";
+import { Trash2, Loader2, Map, PenTool, Eye, CheckCircle, AlertCircle, Plus, List, MapIcon, ChevronRight, Sprout } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -75,6 +75,7 @@ export default function ParcellesPage() {
 
   // New parcelle dialog state
   const [showDialog, setShowDialog] = useState(false);
+  const [dialogStep, setDialogStep] = useState<1 | 2>(1);
   const [newParcelleData, setNewParcelleData] = useState<{
     geometry: { type: "Polygon"; coordinates: number[][][] };
     centroid: { lat: number; lng: number };
@@ -84,6 +85,14 @@ export default function ParcellesPage() {
   const [newParcelleCulture, setNewParcelleCulture] = useState("ble");
   const [customCulture, setCustomCulture] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Agronomic profile state
+  const [profilePlantingDate, setProfilePlantingDate] = useState("");
+  const [profileTreeHeight, setProfileTreeHeight] = useState("");
+  const [profileTreeCondition, setProfileTreeCondition] = useState<"" | "excellent" | "good" | "average" | "poor">("");
+  const [profileIrrigationType, setProfileIrrigationType] = useState<"" | "drip" | "sprinkler" | "gravity" | "rainfed">("");
+  const [profilePlantingDensity, setProfilePlantingDensity] = useState("");
+  const [profileYieldTarget, setProfileYieldTarget] = useState("");
 
   // Load parcelles
   useEffect(() => {
@@ -115,6 +124,13 @@ export default function ParcellesPage() {
       setNewParcelleName("");
       setNewParcelleCulture("ble");
       setCustomCulture("");
+      setDialogStep(1);
+      setProfilePlantingDate("");
+      setProfileTreeHeight("");
+      setProfileTreeCondition("");
+      setProfileIrrigationType("");
+      setProfilePlantingDensity("");
+      setProfileYieldTarget("");
       setShowDialog(true);
       setIsDrawing(false);
     },
@@ -148,6 +164,12 @@ export default function ParcellesPage() {
         centroid: newParcelleData.centroid,
         areaHectares: newParcelleData.areaHectares,
         cultureType,
+        ...(profilePlantingDate && { plantingDate: new Date(profilePlantingDate) }),
+        ...(profileTreeHeight && { treeHeight: parseFloat(profileTreeHeight) }),
+        ...(profileTreeCondition && { treeCondition: profileTreeCondition }),
+        ...(profileIrrigationType && { irrigationType: profileIrrigationType }),
+        ...(profilePlantingDensity && { plantingDensity: parseInt(profilePlantingDensity) }),
+        ...(profileYieldTarget && { yieldTarget: parseFloat(profileYieldTarget) }),
       });
 
       // Reload parcelles
@@ -403,84 +425,194 @@ export default function ParcellesPage() {
         <DialogHeader>
           <DialogTitle>{t("parcelles.dialog.title")}</DialogTitle>
           <DialogDescription>
-            {newParcelleData && (
-              <span className="text-lg font-semibold text-green-600">
-                {newParcelleData.areaHectares} {t("common.hectares")}
-              </span>
-            )}
+            <div className="flex items-center gap-3 mt-1">
+              {newParcelleData && (
+                <span className="text-base font-semibold text-green-600">
+                  {newParcelleData.areaHectares} {t("common.hectares")}
+                </span>
+              )}
+              {/* Step indicator */}
+              <div className="flex items-center gap-1.5 ms-auto">
+                <div className={`h-2 w-6 rounded-full transition-colors ${dialogStep === 1 ? "bg-green-500" : "bg-gray-200"}`} />
+                <div className={`h-2 w-6 rounded-full transition-colors ${dialogStep === 2 ? "bg-green-500" : "bg-gray-200"}`} />
+              </div>
+            </div>
           </DialogDescription>
         </DialogHeader>
-        <DialogContent className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="name">{t("parcelles.dialog.name")}</Label>
-            <Input
-              id="name"
-              placeholder={t("parcelles.dialog.namePlaceholder")}
-              value={newParcelleName}
-              onChange={(e) => setNewParcelleName(e.target.value)}
-              autoFocus
-            />
-          </div>
 
-          <div className="space-y-3">
-            <Label>{t("parcelles.dialog.culture")}</Label>
-            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
-              {CULTURES.map((culture) => (
-                <button
-                  key={culture.id}
-                  type="button"
-                  onClick={() => {
-                    setNewParcelleCulture(culture.id);
-                    setCustomCulture("");
-                  }}
-                  className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
-                    newParcelleCulture === culture.id
-                      ? "border-green-500 bg-green-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <span className="text-xl md:text-2xl">{culture.emoji}</span>
-                  <span className="text-[10px] md:text-xs mt-1 text-gray-600 truncate w-full text-center">{culture.label}</span>
-                </button>
-              ))}
-              {/* Option "Autre" */}
-              <button
-                type="button"
-                onClick={() => setNewParcelleCulture("autre")}
-                className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
-                  newParcelleCulture === "autre"
-                    ? "border-green-500 bg-green-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
+        {dialogStep === 1 ? (
+          <>
+            <DialogContent className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="name">{t("parcelles.dialog.name")}</Label>
+                <Input
+                  id="name"
+                  placeholder={t("parcelles.dialog.namePlaceholder")}
+                  value={newParcelleName}
+                  onChange={(e) => setNewParcelleName(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-3">
+                <Label>{t("parcelles.dialog.culture")}</Label>
+                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                  {CULTURES.map((culture) => (
+                    <button
+                      key={culture.id}
+                      type="button"
+                      onClick={() => { setNewParcelleCulture(culture.id); setCustomCulture(""); }}
+                      className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
+                        newParcelleCulture === culture.id ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <span className="text-xl md:text-2xl">{culture.emoji}</span>
+                      <span className="text-[10px] md:text-xs mt-1 text-gray-600 truncate w-full text-center">{culture.label}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => setNewParcelleCulture("autre")}
+                    className={`flex flex-col items-center p-2 md:p-3 rounded-lg border-2 transition-all touch-target ${
+                      newParcelleCulture === "autre" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <Plus className="h-5 w-5 md:h-6 md:w-6 text-gray-500" />
+                    <span className="text-[10px] md:text-xs mt-1 text-gray-600">{t("parcelles.cultures.autre")}</span>
+                  </button>
+                </div>
+                {newParcelleCulture === "autre" && (
+                  <Input
+                    placeholder={t("parcelles.dialog.customCulturePlaceholder")}
+                    value={customCulture}
+                    onChange={(e) => setCustomCulture(e.target.value)}
+                    className="mt-2"
+                    autoFocus
+                  />
+                )}
+              </div>
+            </DialogContent>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowDialog(false)}>
+                {t("common.cancel")}
+              </Button>
+              <Button
+                onClick={() => setDialogStep(2)}
+                disabled={!newParcelleName.trim() || !newParcelleCulture || (newParcelleCulture === "autre" && !customCulture.trim())}
               >
-                <Plus className="h-5 w-5 md:h-6 md:w-6 text-gray-500" />
-                <span className="text-[10px] md:text-xs mt-1 text-gray-600">{t("parcelles.cultures.autre")}</span>
-              </button>
-            </div>
-            {/* Custom culture input */}
-            {newParcelleCulture === "autre" && (
-              <Input
-                placeholder={t("parcelles.dialog.customCulturePlaceholder")}
-                value={customCulture}
-                onChange={(e) => setCustomCulture(e.target.value)}
-                className="mt-2"
-                autoFocus
-              />
-            )}
-          </div>
-        </DialogContent>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setShowDialog(false)}>
-            {t("common.cancel")}
-          </Button>
-          <Button
-            onClick={handleSaveParcelle}
-            disabled={!newParcelleName.trim() || !newParcelleCulture || (newParcelleCulture === "autre" && !customCulture.trim()) || isSaving}
-          >
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {t("parcelles.dialog.save")}
-          </Button>
-        </DialogFooter>
+                {t("parcelles.dialog.next")}
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </DialogFooter>
+          </>
+        ) : (
+          <>
+            <DialogContent className="space-y-4">
+              {/* Badge */}
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-100">
+                <Sprout className="h-4 w-4 text-green-600 shrink-0" />
+                <p className="text-xs text-green-700">{t("parcelles.dialog.profileBadge")}</p>
+              </div>
+
+              {/* Date de plantation — KILLER FEATURE */}
+              <div className="space-y-1.5">
+                <Label htmlFor="plantingDate">{t("parcelles.dialog.plantingDate")}</Label>
+                <Input
+                  id="plantingDate"
+                  type="date"
+                  value={profilePlantingDate}
+                  onChange={(e) => setProfilePlantingDate(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]}
+                />
+              </div>
+
+              {/* Hauteur + État sur 2 colonnes */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="treeHeight">{t("parcelles.dialog.treeHeight")}</Label>
+                  <Input
+                    id="treeHeight"
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    placeholder={t("parcelles.dialog.treeHeightPlaceholder")}
+                    value={profileTreeHeight}
+                    onChange={(e) => setProfileTreeHeight(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>{t("parcelles.dialog.treeCondition")}</Label>
+                  <select
+                    value={profileTreeCondition}
+                    onChange={(e) => setProfileTreeCondition(e.target.value as typeof profileTreeCondition)}
+                    className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                  >
+                    <option value="">{t("parcelles.dialog.treeConditionPlaceholder")}</option>
+                    <option value="excellent">{t("parcelles.profile.conditionsShort.excellent")}</option>
+                    <option value="good">{t("parcelles.profile.conditionsShort.good")}</option>
+                    <option value="average">{t("parcelles.profile.conditionsShort.average")}</option>
+                    <option value="poor">{t("parcelles.profile.conditionsShort.poor")}</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Irrigation */}
+              <div className="space-y-1.5">
+                <Label>{t("parcelles.dialog.irrigationType")}</Label>
+                <select
+                  value={profileIrrigationType}
+                  onChange={(e) => setProfileIrrigationType(e.target.value as typeof profileIrrigationType)}
+                  className="w-full h-10 px-3 rounded-md border border-gray-200 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-500"
+                >
+                  <option value="">{t("parcelles.dialog.irrigationPlaceholder")}</option>
+                  <option value="drip">{t("parcelles.profile.irrigation.drip")}</option>
+                  <option value="sprinkler">{t("parcelles.profile.irrigation.sprinkler")}</option>
+                  <option value="gravity">{t("parcelles.profile.irrigation.gravity")}</option>
+                  <option value="rainfed">{t("parcelles.profile.irrigation.rainfed")}</option>
+                </select>
+              </div>
+
+              {/* Densité + Rendement */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="density">{t("parcelles.dialog.plantingDensity")}</Label>
+                  <Input
+                    id="density"
+                    type="number"
+                    min="0"
+                    placeholder={t("parcelles.dialog.plantingDensityPlaceholder")}
+                    value={profilePlantingDensity}
+                    onChange={(e) => setProfilePlantingDensity(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="yield">{t("parcelles.dialog.yieldTarget")}</Label>
+                  <Input
+                    id="yield"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    placeholder={t("parcelles.dialog.yieldTargetPlaceholder")}
+                    value={profileYieldTarget}
+                    onChange={(e) => setProfileYieldTarget(e.target.value)}
+                  />
+                </div>
+              </div>
+            </DialogContent>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogStep(1)}>
+                ← {t("parcelles.dialog.step1")}
+              </Button>
+              <Button variant="ghost" onClick={handleSaveParcelle} disabled={isSaving} className="text-gray-500">
+                {t("parcelles.dialog.skip")}
+              </Button>
+              <Button onClick={handleSaveParcelle} disabled={isSaving}>
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                {t("parcelles.dialog.save")}
+              </Button>
+            </DialogFooter>
+          </>
+        )}
       </Dialog>
     </>
   );
